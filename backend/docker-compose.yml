@@ -1,0 +1,44 @@
+services:
+    chroma:
+        image: chromadb/chroma:latest
+        ports:
+            - '8000:8000'
+        environment:
+            - CHROMA_SERVER_AUTHN_CREDENTIALS=${CHROMA_SERVER_AUTHN_CREDENTIALS}
+            - CHROMA_SERVER_AUTHN_PROVIDER=${CHROMA_SERVER_AUTHN_PROVIDER}
+        networks:
+            - schedulrai
+        container_name: chroma
+    mongo:
+        image: mongodb/mongodb-community-server:latest
+        ports:
+            - '27017:27017'
+        volumes:
+            - mongo_volume:/data/db
+        environment:
+            - MONGODB_INITDB_ROOT_USERNAME=${MONGODB_INITDB_ROOT_USERNAME_FILE}
+            - MONGODB_INITDB_ROOT_PASSWORD=${MONGODB_INITDB_ROOT_PASSWORD_FILE}
+            - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+        networks:
+            - schedulrai
+        container_name: mongo
+    ollama:
+        build:
+            context: .
+            dockerfile: Dockerfile.ollama
+        ports:
+            - '11434:11434'
+        volumes:
+            - ollama_volume:/root/.ollama
+        container_name: ollama
+        pull_policy: always
+        tty: true
+        restart: always
+        networks:
+            - schedulrai
+networks:
+    schedulrai:
+        driver: bridge
+volumes:
+    mongo_volume:
+    ollama_volume:

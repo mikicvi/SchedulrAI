@@ -41,20 +41,20 @@ const storeEmbeddings = async (documents: { name: string; chunks: string[] }[]):
 		model: process.env.LLM_EMBED_MODEL,
 	});
 
-	for (const document of documents) {
-		try {
-			const collection = await chromaClient.createCollection({
-				name: document.name,
-				embeddingFunction: embedder,
-			});
+	try {
+		const collection = await chromaClient.createCollection({
+			name: 'SchedulrAI-KB',
+			embeddingFunction: embedder,
+		});
 
+		for (const document of documents) {
 			await collection.add({
 				documents: document.chunks,
 				ids: document.chunks.map((_, index) => `${document.name}-${index}`),
 			});
-		} catch (error) {
-			console.error(`Failed to store embeddings for document ${document.name}:`, error);
 		}
+	} catch (error) {
+		console.error('Failed to store embeddings:', error);
 	}
 };
 

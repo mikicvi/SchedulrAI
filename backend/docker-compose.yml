@@ -9,12 +9,14 @@ services:
         networks:
             - schedulrai
         container_name: chroma
+        volumes:
+            - .chroma_volume:/root/.chroma
     mongo:
         image: mongodb/mongodb-community-server:latest
         ports:
             - '27017:27017'
         volumes:
-            - mongo_volume:/data/db
+            - .mongo_volume:/data/db
         environment:
             - MONGODB_INITDB_ROOT_USERNAME=${MONGODB_INITDB_ROOT_USERNAME_FILE}
             - MONGODB_INITDB_ROOT_PASSWORD=${MONGODB_INITDB_ROOT_PASSWORD_FILE}
@@ -29,7 +31,7 @@ services:
         ports:
             - '11434:11434'
         volumes:
-            - ollama_volume:/root/.ollama
+            - .ollama_volume:/root/.ollama
         container_name: ollama
         pull_policy: always
         tty: true

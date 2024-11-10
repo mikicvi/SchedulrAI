@@ -2,6 +2,7 @@
 FROM ollama/ollama:latest
 
 # Copy the entrypoint script into the container
+COPY ollama.env /ollama.env
 COPY ollama_entrypoint.sh /ollama_entrypoint.sh
 
 # Make the script executable

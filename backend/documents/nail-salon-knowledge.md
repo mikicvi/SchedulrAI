@@ -10,6 +10,7 @@
 -   French Tip Style with Ombre Pink Base: This design can take an additional 30-45 minutes.
 -   Adding Rhinestones: Adding small rhinestones can take about 10-15 minutes.
 -   Pedicure: A basic pedicure usually takes about 30-45 minutes.
+-   Time: 4 hours
 
 ---
 
@@ -23,6 +24,7 @@
 -   Refill: 45 minutes
 -   Shape change: 15 minutes
 -   Nail art with glitter accents: 30 minutes
+-   Time: 1.30 hours
 
 ---
 
@@ -36,6 +38,7 @@
 -   Gel manicure: 1 hour
 -   Color selection and consultation: 10 minutes
 -   Matte finish application: 10 minutes
+-   Time: 1.20 hours
 
 ---
 
@@ -50,6 +53,7 @@
 -   Pedicure with color: 1 hour
 -   Nail art consultation: 15 minutes
 -   Aftercare consultation: 10 minutes
+-   Total Time: 1.25 hours
 
 ---
 
@@ -63,6 +67,7 @@
 -   Acrylic extensions with French tip: 1 hour 30 minutes
 -   Topcoat application: 10 minutes
 -   Aftercare consultation: 5 minutes
+-   Time: 1.45 hours
 
 ---
 
@@ -76,6 +81,7 @@
 -   Basic manicure with gel polish: 45 minutes
 -   Color selection consultation: 10 minutes
 -   Aftercare advice: 5 minutes
+-   Time: 1 hour
 
 ---
 
@@ -89,6 +95,7 @@ I’d need an appointment on a Friday afternoon if available. I’d also like ad
 -   Pedicure with nail art: 1 hour 15 minutes
 -   Nail art consultation with photo reference: 10 minutes
 -   Topcoat application for durability: 5 minutes
+-   Time: 1.30 hours
 
 ---
 
@@ -102,6 +109,7 @@ I’d need an appointment on a Friday afternoon if available. I’d also like ad
 -   Acrylic set with stiletto shape: 1 hour 30 minutes
 -   Marble nail art design: 30 minutes
 -   Aftercare tips for longer nails: 5 minutes
+-   Time: 2.05 hours
 
 ---
 
@@ -115,6 +123,7 @@ I’d need an appointment on a Friday afternoon if available. I’d also like ad
 -   Adult mani-pedi with floral accents: 1 hour 30 minutes
 -   Kid-friendly mani-pedi with matching colors: 1 hour
 -   Quick-dry polish application: 5 minutes
+-   Time: 2.35 hours
 
 ---
 
@@ -128,6 +137,9 @@ I’d need an appointment on a Friday afternoon if available. I’d also like ad
 -   Acrylic refill: 45 minutes
 -   Chrome finish application: 20 minutes
 -   Chrome polish maintenance tips: 5 minutes
+-   Time: 1.10 hours
+
+---
 
 # Request
 
@@ -139,6 +151,7 @@ I’d need an appointment on a Friday afternoon if available. I’d also like ad
 -   Gel extension with colored French tip: 1 hour 15 minutes
 -   Shorter-length consultation: 5 minutes
 -   Topcoat recommendation: 5 minutes
+-   Time: 1.25 hours
 
 ---
 
@@ -154,6 +167,7 @@ I’d need an appointment on a Friday afternoon if available. I’d also like ad
 -   Gel manicure: 1 hour
 -   Accent nail design: 15 minutes
 -   Aftercare tips for durability: 5 minutes
+-   Time: 1.20 hours
 
 ---
 
@@ -167,6 +181,7 @@ I’d need an appointment on a Friday afternoon if available. I’d also like ad
 -   Pedicure with autumn-inspired color: 1 hour
 -   Nail art consultation for seasonal design: 10 minutes
 -   Leaf pattern design: 10 minutes
+-   Time: 1.20 hours
 
 ---
 
@@ -180,6 +195,7 @@ I’d need an appointment on a Friday afternoon if available. I’d also like ad
 -   Acrylics with square shape: 1 hour 15 minutes
 -   Matte finish application: 10 minutes
 -   Maintenance tips for matte finish: 5 minutes
+-   Time: 1.30 hours
 
 ---
 
@@ -193,6 +209,7 @@ I’d need an appointment on a Friday afternoon if available. I’d also like ad
 -   Gel manicure with foil accents (per person): 1 hour
 -   Short nail shape consultation: 5 minutes
 -   Group booking or promotion inquiry: 5 minutes
+-   Time: 2.10 hours
 
 ---
 
@@ -207,6 +224,7 @@ I’d need an appointment on a Friday afternoon if available. I’d also like ad
 -   Color selection consultation: 10 minutes
 -   Glossy topcoat: 5 minutes
 -   Maintenance advice for hard gel: 5 minutes
+-   Time: 1.20 hours
 
 ---
 
@@ -221,6 +239,7 @@ I’d need an appointment on a Friday afternoon if available. I’d also like ad
 -   Color consultation for French tip variation: 10 minutes
 -   Foot massage or scrub: 20 minutes
 -   Add-on pricing inquiry: 5 minutes
+-   Time: 1.35 hours
 
 ---
 
@@ -235,6 +254,7 @@ I’d need an appointment on a Friday afternoon if available. I’d also like ad
 -   Gradient/ombre nail art: 30 minutes
 -   Sparkle accents: 10 minutes
 -   Maintenance tips for gradient design: 5 minutes
+-   Time: 1.30 hours
 
 ---
 
@@ -248,6 +268,7 @@ I’d need an appointment on a Friday afternoon if available. I’d also like ad
 -   Gel manicure with reverse French tip: 1 hour
 -   Color consultation for reverse French tip: 10 minutes
 -   Care tips for cuticle area: 5 minutes
+-   Time: 1.15 hours
 
 ---
 
@@ -262,6 +283,7 @@ I’d need an appointment on a Friday afternoon if available. I’d also like ad
 -   Custom butterfly/floral nail art: 45 minutes
 -   Aftercare advice for extended wear: 5 minutes
 -   Artist consultation for detailed design: 10 minutes
+-   Time: 2.35 hours
 
 ---
 
@@ -276,3 +298,4 @@ I’d need an appointment on a Friday afternoon if available. I’d also like ad
 -   Color selection: 10 minutes
 -   Quick-dry polish application: 5 minutes
 -   Group booking inquiry: 5 minutes
+-   Time: 1.50 hours

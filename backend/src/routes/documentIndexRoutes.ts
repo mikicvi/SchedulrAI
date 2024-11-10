@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { indexDocuments } from '../services/documentIndexServices';
+import { indexDocuments } from '../services/documentServices';
 
 const router = Router();
 

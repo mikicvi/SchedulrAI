@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
-import { MarkdownTextSplitter } from 'langchain/text_splitter';
+import { MarkdownTextSplitter, CharacterTextSplitter } from 'langchain/text_splitter';
 
 const documentsPath = path.join(__dirname, '../../documents');
 
@@ -17,7 +17,12 @@ const loadDocuments = async (): Promise<{ name: string; content: string }[]> => 
 const splitDocuments = async (
 	documents: { name: string; content: string }[]
 ): Promise<{ name: string; chunks: string[] }[]> => {
-	const splitter = new MarkdownTextSplitter({ chunkSize: 1000, chunkOverlap: 10 });
+	//const splitter = new MarkdownTextSplitter({ chunkSize: 250, chunkOverlap: 40 });
+	const splitter = new CharacterTextSplitter({
+		separator: '---',
+		chunkSize: 1000,
+		chunkOverlap: 50,
+	});
 	const chunks = await Promise.all(
 		documents.map(async (document) => ({
 			name: document.name,
@@ -42,6 +47,9 @@ const storeEmbeddings = async (documents: { name: string; chunks: string[] }[]):
 	});
 
 	try {
+		// delete existing collection
+		await chromaClient.deleteCollection({ name: 'SchedulrAI-KB' });
+
 		const collection = await chromaClient.createCollection({
 			name: 'SchedulrAI-KB',
 			embeddingFunction: embedder,

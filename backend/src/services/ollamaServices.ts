@@ -39,3 +39,12 @@ export const getOllamaStatus = async (modelType: ModelType): Promise<string | nu
 
 	throw new Error('Unexpected response from Ollama');
 };
+
+export async function getOllamaEmbeddings(text: string, config: OllamaConfig): Promise<number[][]> {
+	const response = await ollama.embed({
+		model: config.embedModel,
+		input: text,
+	});
+
+	return response.embeddings;
+}

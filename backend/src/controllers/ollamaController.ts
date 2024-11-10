@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { getOllamaStatus } from '../services/ollamaServices';
 import logger from '../utils/logger';
 
-import { ModelType } from '../types';
+import { ModelType } from '../types/ollama';
 
 const handleOllamaStatus = (modelType: ModelType) => {
 	return (req: Request, res: Response): void => {

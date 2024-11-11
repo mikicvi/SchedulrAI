@@ -34,7 +34,7 @@ const splitDocuments = async (
 
 const storeEmbeddings = async (documents: { name: string; chunks: string[] }[]): Promise<void> => {
 	const chromaClient = new ChromaClient({
-		path: `http://${process.env.CHROMA_SERVER_HOST}:8000`,
+		path: `${process.env.PROTOCOL}://${process.env.CHROMA_SERVER_HOST}:8000`,
 		auth: {
 			provider: 'basic',
 			credentials: process.env.CHROMA_CLIENT_AUTH_CREDENTIALS,
@@ -42,7 +42,7 @@ const storeEmbeddings = async (documents: { name: string; chunks: string[] }[]):
 	});
 
 	const embedder = new OllamaEmbeddingFunction({
-		url: `http://${process.env.OLLAMA_API_BASE}:${process.env.OLLAMA_PORT}/api/embeddings`,
+		url: `${process.env.PROTOCOL}://${process.env.OLLAMA_API_BASE}:${process.env.OLLAMA_PORT}/api/embeddings`,
 		model: process.env.LLM_EMBED_MODEL,
 	});
 

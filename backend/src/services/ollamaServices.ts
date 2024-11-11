@@ -10,7 +10,7 @@ export const getOllamaStatus = async (modelType: ModelType): Promise<string | nu
 		embedModel: process.env.LLM_EMBED_MODEL || 'nomic-embed-text',
 	};
 
-	const ollamaUrl = `http://${config.apiBase}:${config.port}`;
+	const ollamaUrl = `${process.env.PROTOCOL}://${config.apiBase}:${config.port}`;
 	const appStatus = await axios.get(ollamaUrl);
 
 	if (appStatus.data === 'Ollama is running') {

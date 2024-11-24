@@ -1,7 +1,7 @@
 # Dockerfile.ollama
 FROM ollama/ollama:latest
 
-# Copy the entrypoint script into the container
+# Copy the entrypoint script and environment file into the container
 COPY ollama.env /ollama.env
 COPY ollama_entrypoint.sh /ollama_entrypoint.sh
 

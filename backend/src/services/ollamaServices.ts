@@ -1,6 +1,7 @@
 import axios from 'axios';
-import ollama, { ChatResponse, EmbedResponse } from 'ollama';
+import { Ollama, ChatResponse, EmbedResponse } from 'ollama';
 import { ModelType, OllamaConfig } from '../types/ollama';
+import logger from '../utils/logger';
 
 export const getOllamaStatus = async (modelType: ModelType): Promise<string | number[][]> => {
 	const config: OllamaConfig = {
@@ -9,42 +10,44 @@ export const getOllamaStatus = async (modelType: ModelType): Promise<string | nu
 		chatModel: process.env.LLM_MODEL || 'llama3.2',
 		embedModel: process.env.LLM_EMBED_MODEL || 'nomic-embed-text',
 	};
+	logger.debug(`info  | inference: ${config.chatModel} | embeddings: ${config.embedModel}`);
 
 	const ollamaUrl = `${process.env.PROTOCOL}://${config.apiBase}:${config.port}`;
+	const ollama = new Ollama({
+		host: ollamaUrl,
+	});
 	const appStatus = await axios.get(ollamaUrl);
+
+	logger.debug(`info  | ollamaStatus  |: ${appStatus.data}`);
 
 	if (appStatus.data === 'Ollama is running') {
 		let modelStatus: EmbedResponse | ChatResponse;
 		let returnMessage: string | number[][];
-
-		if (modelType === 'chat') {
-			modelStatus = await ollama.chat({
-				model: config.chatModel,
-				messages: [{ role: 'user', content: 'Are you ready?' }],
-				stream: false,
-			});
-			returnMessage = modelStatus.message.content;
-		} else if (modelType === 'embedding') {
-			modelStatus = await ollama.embed({
-				model: config.embedModel,
-				input: 'Status sentence',
-			});
-			returnMessage = modelStatus.embeddings;
-		} else {
-			throw new Error('Invalid model type');
+		try {
+			if (modelType === 'chat') {
+				modelStatus = await ollama.chat({
+					model: config.chatModel,
+					messages: [{ role: 'user', content: 'Are you ready?' }],
+					stream: false,
+				});
+				logger.debug(`info  | ollamaStatus-modelStatus-${modelType}  |: ${modelStatus.message.content}`);
+				returnMessage = modelStatus.message.content;
+			} else if (modelType === 'embedding') {
+				modelStatus = await ollama.embed({
+					model: config.embedModel,
+					input: 'Status sentence',
+				});
+				logger.debug(`info  | ollamaStatus-modelStatus-${modelType}  |: ${modelStatus.embeddings}`);
+				returnMessage = modelStatus.embeddings;
+			} else {
+				throw new Error('Invalid model type');
+			}
+		} catch (error) {
+			logger.error(`Error with ollama.chat/embed call: ${error}`);
+			throw new Error(error);
 		}
-
 		return returnMessage;
 	}
 
 	throw new Error('Unexpected response from Ollama');
 };
-
-export async function getOllamaEmbeddings(text: string, config: OllamaConfig): Promise<number[][]> {
-	const response = await ollama.embed({
-		model: config.embedModel,
-		input: text,
-	});
-
-	return response.embeddings;
-}

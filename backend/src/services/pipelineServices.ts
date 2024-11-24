@@ -31,6 +31,7 @@ class RAGPipeline {
 			model: this.llmSettings.model,
 			temperature: this.llmSettings.temperature,
 			topP: this.llmSettings.topP,
+			topK: this.llmSettings.topK,
 		});
 
 		this.vectorStoreParams = vectorStoreParams;
@@ -40,23 +41,6 @@ class RAGPipeline {
 	// Step 2: Search Chroma for closest embeddings
 	// Step 3: Make a request to LLM with the closest embeddings as context
 	// Step 4: Show the results
-
-	// For CLI: Check the the status of the entire pipeline, directly via Services, not via Controllers
-	private async _checkPipelineStatus() {
-		const chromaStatusResponse = await getChromaStatus();
-		console.log('Chroma Status:', chromaStatusResponse);
-		const mongoStatusResponse = await getMongoStatus();
-		console.log('Mongo Status:', mongoStatusResponse);
-		await getOllamaStatus('embedding');
-		console.log('Ollama Status:', 'working');
-
-		// log the status of the pipeline
-		logger.info('Pipeline Status:', {
-			chroma: chromaStatusResponse,
-			mongo: mongoStatusResponse,
-			ollama: 'Working',
-		});
-	}
 
 	private async _requestLLM(userInput): Promise<string> {
 		const ollamaLlm = this.chatOllama;
@@ -70,12 +54,7 @@ class RAGPipeline {
 					const retrieverAndFormatter = retriever.pipe(formatDocumentsAsString);
 					const context = await retrieverAndFormatter.invoke(input.question, callbacks);
 					//console.log('Retrieved and formatted context:', context);
-					const maxLength = 500; // Adjust this value as needed
-					const limitedContext = context.length > maxLength ? context.substring(0, maxLength) : context;
-					console.log('----------------------------------------------------------------');
-					console.log('Limited context:', limitedContext);
-					return limitedContext;
-					//return context;
+					return context;
 				},
 				question: new RunnablePassthrough(),
 			},
@@ -92,8 +71,10 @@ class RAGPipeline {
 		// Check if the response is in the correct format
 		const timeFormat = /^Time: \d{1}\.\d{2}$/;
 		let retry = 3;
+		// if (!timeFormat.test(result) && retry > 0 && parseFloat(time) > maxTime) {
 		if (!timeFormat.test(result) && retry > 0) {
 			retry--;
+			logger.debug(`|_requestLLM  |: Invalid response format: ${result}, retrying... ${retry} attempts left`);
 			return await this._requestLLM(userInput);
 		}
 		return result;
@@ -104,10 +85,26 @@ class RAGPipeline {
 	}
 
 	public async runPipeline(userInput: string): Promise<string> {
-		await this._checkPipelineStatus();
 		const result = await this._requestLLM(userInput);
 		await this._showResults(result);
 		return result;
+	}
+
+	public async isPipelineReady(): Promise<boolean> {
+		const chromaStatusResponse = await getChromaStatus();
+		const ollamaEmbedStatus = await getOllamaStatus('embedding');
+		let pipelineStatus = false;
+		// if ollamaEmbedStatus and chromastaus are successful(have values)
+		if (chromaStatusResponse && ollamaEmbedStatus) {
+			logger.info('Pipeline Status:', {
+				chroma: chromaStatusResponse,
+				ollama: 'Working',
+			});
+			pipelineStatus = true;
+		} else {
+			logger.warn('Pipeline has issues');
+		}
+		return pipelineStatus;
 	}
 }
 

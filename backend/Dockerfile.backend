@@ -1,0 +1,41 @@
+# Multi-stage build to avoid pulling in typescript dependencies for final image
+
+FROM node:20-slim AS build
+
+WORKDIR /app
+
+COPY package.json /app/package.json
+COPY package-lock.json /app/package-lock.json
+COPY tsconfig.json /app/tsconfig.json
+
+COPY .env /app/.env
+COPY documents /app/documents
+COPY src /app/src
+
+RUN npm install && npm run build
+
+
+
+
+
+FROM node:20-slim
+
+WORKDIR /app
+
+# Copy only the package.json and lockfile and envfile
+COPY .env /app/.env
+COPY package.json /app/package.json
+COPY package-lock.json /app/package-lock.json
+# COPY src /app/src
+
+# Install only production dependencies
+RUN npm install --omit=dev
+
+COPY --from=build /app/dist /app/dist
+COPY --from=build /app/documents /app/documents
+
+# Expose the app's port
+EXPOSE 3000
+
+# Start the application
+CMD ["node", "dist/server.js"]

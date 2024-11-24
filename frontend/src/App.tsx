@@ -1,5 +1,5 @@
-import { ThemeProvider } from "@/components/theme-provider";
-import { ModeToggle } from "@/components/ui/mode-toggle";
+import { ThemeProvider } from '@/components/theme-provider';
+import { ModeToggle } from '@/components/ui/mode-toggle';
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -7,7 +7,7 @@ import {
 	BreadcrumbList,
 	BreadcrumbPage,
 	BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from '@/components/ui/breadcrumb';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -15,11 +15,42 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import DynamicTextarea from "./components/ui/textarea-prompt";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import DynamicTextarea from './components/ui/textarea-prompt';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+
+import { useEffect, useState } from 'react';
+
+// Hook to check the status of the backend, which is exposed via REST API at /api/checkPipelineStatus
+function useBackendStatus() {
+	const [status, setStatus] = useState('Not Ready');
+
+	useEffect(() => {
+		async function fetchStatus() {
+			try {
+				const response = await fetch('http://localhost:3000/api/checkPipelineStatus');
+				if (response.ok) {
+					const data = await response.json();
+					// check if data has ready: true
+					if (!data.ready) {
+						setStatus('🟡 Loading: Backend is still initializing');
+						return;
+					}
+					setStatus('🟢 Ready: All systems reporting healthy');
+				} else {
+					setStatus('🔴 Error in backend');
+				}
+			} catch (error) {
+				setStatus('🔴 Error in backend');
+			}
+		}
+		fetchStatus();
+	}, []);
+
+	return status;
+}
 
 function App() {
 	return (
@@ -68,7 +99,7 @@ function App() {
 				</div>
 				<div className="flex justify-center items-center h-screen">
 					<DynamicTextarea
-						label="Status: Ready"
+						label={useBackendStatus()}
 						placeholder="Type/paste customer requirements here"
 						id="message"
 					/>

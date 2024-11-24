@@ -9,12 +9,12 @@ const handleOllamaStatus = (modelType: ModelType) => {
 		getOllamaStatus(modelType)
 			.then((content) => {
 				res.status(200).json({ status: 'OK', content });
-				logger.info(`|ollamaStatus-${modelType}  |: ${req.method} ${res.statusCode}`);
 			})
 			.catch((error) => {
-				logger.error('Error connecting to Ollama instance:', error);
+				logger.error(`Error connecting to Ollama instance: ${error}`);
 				res.sendStatus(500);
 			});
+		logger.info(`|ollamaControllerStatus-${modelType}  |: ${req.method} ${res.statusCode}`);
 	};
 };
 

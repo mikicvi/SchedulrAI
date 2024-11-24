@@ -48,7 +48,9 @@ const storeEmbeddings = async (documents: { name: string; chunks: string[] }[]):
 
 	try {
 		// delete existing collection
-		await chromaClient.deleteCollection({ name: 'SchedulrAI-KB' });
+		if (await chromaClient.getOrCreateCollection({ name: 'SchedulrAI-KB' })) {
+			await chromaClient.deleteCollection({ name: 'SchedulrAI-KB' });
+		}
 
 		const collection = await chromaClient.createCollection({
 			name: 'SchedulrAI-KB',

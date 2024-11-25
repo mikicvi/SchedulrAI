@@ -18,7 +18,6 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(cors());
 
 // Define the base API route for all routes
 const baseApiRoute = '/api';

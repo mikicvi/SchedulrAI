@@ -3,6 +3,14 @@ import { Ollama, ChatResponse, EmbedResponse } from 'ollama';
 import { ModelType, OllamaConfig } from '../types/ollama';
 import logger from '../utils/logger';
 
+/**
+ * Retrieves the status of the Ollama service based on the specified model type.
+ *
+ * @param {ModelType} modelType - The type of model to check the status for. Can be 'chat' or 'embedding'.
+ * @returns {Promise<string | number[][]>} - A promise that resolves to a string message if the model type is 'chat',
+ *                                           or an array of number arrays if the model type is 'embedding'.
+ * @throws {Error} - Throws an error if the Ollama service is not running or if there is an issue with the chat/embed call.
+ */
 export const getOllamaStatus = async (modelType: ModelType): Promise<string | number[][]> => {
 	const config: OllamaConfig = {
 		apiBase: process.env.OLLAMA_API_BASE || '127.0.0.1',
@@ -37,7 +45,6 @@ export const getOllamaStatus = async (modelType: ModelType): Promise<string | nu
 					model: config.embedModel,
 					input: 'Status sentence',
 				});
-				logger.debug(`info  | ollamaStatus-modelStatus-${modelType}  |: ${modelStatus.embeddings}`);
 				returnMessage = modelStatus.embeddings;
 			} else {
 				throw new Error('Invalid model type');

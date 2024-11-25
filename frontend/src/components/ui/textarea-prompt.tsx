@@ -1,14 +1,22 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import React, { useState, useRef, useEffect } from 'react';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
-const DynamicTextarea = ({ label, placeholder, id }: { label: string; placeholder: string; id: string }) => {
-	const [textareaHeight, setTextareaHeight] = useState("auto");
+interface DynamicTextareaProps {
+	label: string;
+	placeholder: string;
+	id: string;
+	value: string;
+	onChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+}
+
+const DynamicTextarea: React.FC<DynamicTextareaProps> = ({ label, placeholder, id, value, onChange }) => {
+	const [textareaHeight, setTextareaHeight] = useState('auto');
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	const handleInput = () => {
 		if (textareaRef.current) {
-			textareaRef.current.style.height = "auto";
+			textareaRef.current.style.height = 'auto';
 			const newHeight = Math.min(textareaRef.current.scrollHeight, window.innerHeight * 0.7);
 			textareaRef.current.style.height = `${newHeight}px`;
 			setTextareaHeight(`${newHeight}px`);
@@ -17,7 +25,7 @@ const DynamicTextarea = ({ label, placeholder, id }: { label: string; placeholde
 
 	useEffect(() => {
 		handleInput(); // Adjust height on initial render
-	}, []);
+	}, [value]);
 
 	return (
 		<div className="w-1/2">
@@ -26,9 +34,11 @@ const DynamicTextarea = ({ label, placeholder, id }: { label: string; placeholde
 				ref={textareaRef}
 				placeholder={placeholder}
 				id={id}
-				style={{ height: textareaHeight }}
+				value={value}
+				onChange={onChange}
 				onInput={handleInput}
 				className="resize-none overflow-auto max-h-[70vh]"
+				style={{ height: textareaHeight }}
 			/>
 		</div>
 	);

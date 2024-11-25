@@ -12,5 +12,6 @@ const logger = createLogger({
 	),
 	transports: [new transports.Console(), new transports.File({ filename: 'logs.log' })],
 });
+// @todo: Add log rotation, log file size limit, and log file count limit. Maybe log to DB?
 
 export default logger;

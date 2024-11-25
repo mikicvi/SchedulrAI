@@ -6,15 +6,19 @@ services:
         environment:
             - CHROMA_SERVER_AUTHN_CREDENTIALS=${CHROMA_SERVER_AUTHN_CREDENTIALS}
             - CHROMA_SERVER_AUTHN_PROVIDER=${CHROMA_SERVER_AUTHN_PROVIDER}
+            - IS_PERSISTENT=TRUE
         networks:
             - schedulrai
         container_name: chroma
+        volumes:
+            - .chroma_volume:/chroma/chroma
+
     mongo:
         image: mongodb/mongodb-community-server:latest
         ports:
             - '27017:27017'
         volumes:
-            - mongo_volume:/data/db
+            - .mongo_volume:/data/db
         environment:
             - MONGODB_INITDB_ROOT_USERNAME=${MONGODB_INITDB_ROOT_USERNAME_FILE}
             - MONGODB_INITDB_ROOT_PASSWORD=${MONGODB_INITDB_ROOT_PASSWORD_FILE}
@@ -29,16 +33,40 @@ services:
         ports:
             - '11434:11434'
         volumes:
-            - ollama_volume:/root/.ollama
+            - .ollama_volume:/root/.ollama
         container_name: ollama
         pull_policy: always
         tty: true
         restart: always
         networks:
             - schedulrai
+
+    backend:
+        build:
+            context: .
+            dockerfile: Dockerfile.backend
+        ports:
+            - '3000:3000'
+        container_name: backend
+        pull_policy: always
+        tty: true
+        restart: always
+        networks:
+            - schedulrai
+        environment:
+            - CHROMA_SERVER_HOST=chroma
+            - CHROMA_SERVER_PORT=${CHROMA_SERVER_PORT}
+            - OLLAMA_API_BASE=ollama
+            - OLLAMA_PORT=${OLLAMA_PORT}
+            - LLM_MODEL=${LLM_MODEL}
+            - LLM_EMBED_MODEL=${LLM_EMBED_MODEL}
+            - LOG_LEVEL=${LOG_LEVEL}
+            - PROTOCOL=${PROTOCOL}
+
 networks:
     schedulrai:
         driver: bridge
 volumes:
     mongo_volume:
     ollama_volume:
+    chroma_volume:

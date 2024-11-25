@@ -13,7 +13,7 @@ dotenv.config();
 const app = express();
 // allow requests from localhost
 const corsOptions = {
-	origin: 'http://localhost:*',
+	origin: 'http://localhost:5173',
 	optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));

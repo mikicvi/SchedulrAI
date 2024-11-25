@@ -1,14 +1,14 @@
 // src/components/Layout.tsx
-import { ThemeProvider } from "@/components/theme-provider";
-import { ModeToggle } from "@/components/ui/mode-toggle";
-import {
-	Breadcrumb,
-	BreadcrumbItem,
-	BreadcrumbLink,
-	BreadcrumbList,
-	BreadcrumbPage,
-	BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { ThemeProvider } from '@/components/theme-provider';
+import { ModeToggle } from '@/components/ui/mode-toggle';
+// import {
+// 	Breadcrumb,
+// 	BreadcrumbItem,
+// 	BreadcrumbLink,
+// 	BreadcrumbList,
+// 	BreadcrumbPage,
+// 	BreadcrumbSeparator,
+// } from "@/components/ui/breadcrumb";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -16,13 +16,13 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link } from "react-router-dom";
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Link } from 'react-router-dom';
 
 const Layout = ({ children, breadcrumb }: { children: React.ReactNode; breadcrumb: React.ReactNode }) => {
 	return (
-		<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+		<ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
 			<div className="flex flex-col h-full">
 				<div className="flex justify-between items-start p-4">
 					<DropdownMenu>

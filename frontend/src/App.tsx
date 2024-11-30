@@ -93,9 +93,11 @@ function App() {
 								<CardDescription>Estimated time required to complete the task</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<Button variant="destructive">
-									<pre>{response}</pre>
-								</Button>
+								<div className="flex justify-center items-center">
+									<Button variant="destructive">
+										<pre>{response}</pre>
+									</Button>
+								</div>
 							</CardContent>
 						</Card>
 					)}

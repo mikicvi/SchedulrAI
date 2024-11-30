@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+// Hook to handle the pipeline logic - call the REST API at /api/runPipeline and update the state accordingly -
 const usePipeline = () => {
 	const [userInput, setUserInput] = useState('');
 	const [loading, setLoading] = useState(false);

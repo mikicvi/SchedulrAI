@@ -12,6 +12,7 @@ interface DynamicTextareaProps {
 
 const DynamicTextarea: React.FC<DynamicTextareaProps> = ({ label, placeholder, id, value, onChange }) => {
 	const [textareaHeight, setTextareaHeight] = useState('auto');
+	const [overflow, setOverflow] = useState('hidden');
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	const handleInput = () => {
@@ -20,6 +21,7 @@ const DynamicTextarea: React.FC<DynamicTextareaProps> = ({ label, placeholder, i
 			const newHeight = Math.min(textareaRef.current.scrollHeight, window.innerHeight * 0.7);
 			textareaRef.current.style.height = `${newHeight}px`;
 			setTextareaHeight(`${newHeight}px`);
+			setOverflow(textareaRef.current.scrollHeight > newHeight ? 'auto' : 'hidden');
 		}
 	};
 
@@ -37,8 +39,8 @@ const DynamicTextarea: React.FC<DynamicTextareaProps> = ({ label, placeholder, i
 				value={value}
 				onChange={onChange}
 				onInput={handleInput}
-				className="resize-none overflow-auto max-h-[70vh]"
-				style={{ height: textareaHeight }}
+				className="resize-none max-h-[70vh]"
+				style={{ height: textareaHeight, overflow: overflow }}
 			/>
 		</div>
 	);

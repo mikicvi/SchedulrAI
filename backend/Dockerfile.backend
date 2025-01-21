@@ -7,6 +7,7 @@ WORKDIR /app
 COPY package.json /app/package.json
 COPY package-lock.json /app/package-lock.json
 COPY tsconfig.json /app/tsconfig.json
+COPY esbuild.config.js /app/esbuild.config.js
 
 COPY .env /app/.env
 COPY documents /app/documents
@@ -33,6 +34,9 @@ RUN npm install --omit=dev
 
 COPY --from=build /app/dist /app/dist
 COPY --from=build /app/documents /app/documents
+
+# Set the DOCUMENTS_PATH environment variable
+ENV DOCUMENTS_PATH=/app/documents
 
 # Expose the app's port
 EXPOSE 3000

@@ -3,17 +3,24 @@ import path from 'path';
 import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
 import { MarkdownTextSplitter, CharacterTextSplitter } from 'langchain/text_splitter';
 import logger from '../utils/logger';
+import { getDirname } from '../utils/pathUtils';
 
-const documentsPath = path.join(__dirname, '../../documents');
+const __dirname = getDirname(import.meta.url);
+const documentsPath = process.env.DOCUMENTS_PATH || path.join(__dirname, '../../documents');
 
 async function loadDocuments(docsPath: string): Promise<{ name: string; content: string }[]> {
-	const files = fs.readdirSync(docsPath);
-	const documents = files.map((file) => ({
-		name: path.parse(file).name,
-		content: fs.readFileSync(path.join(docsPath, file), 'utf-8'),
-	}));
-	logger.info(`Documents loaded from ${docsPath}`);
-	return documents;
+	try {
+		const files = fs.readdirSync(docsPath);
+		const documents = files.map((file) => ({
+			name: path.parse(file).name,
+			content: fs.readFileSync(path.join(docsPath, file), 'utf-8'),
+		}));
+		logger.info(`Documents loaded from ${docsPath}`);
+		return documents;
+	} catch (error) {
+		logger.error(`Failed to load documents from ${docsPath}:`, error);
+		throw error;
+	}
 }
 
 async function splitDocuments(

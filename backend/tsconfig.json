@@ -15,6 +15,6 @@
 		"forceConsistentCasingInFileNames": true
 	},
 	"lib": ["es2020"],
-	"include": ["src", "tests"],
+	"include": ["src", "src/tests"],
 	"exclude": ["node_modules", "dist"]
 }

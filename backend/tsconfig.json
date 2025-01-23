@@ -10,11 +10,11 @@
 		"typeRoots": ["./node_modules/@types", "./types"],
 		"skipLibCheck": true,
 		"preserveConstEnums": true,
-		"types": ["node"],
+		"types": ["node", "jest"],
 		"strict": false,
 		"forceConsistentCasingInFileNames": true
 	},
 	"lib": ["es2020"],
-	"include": ["src"],
+	"include": ["src", "tests"],
 	"exclude": ["node_modules", "dist"]
 }

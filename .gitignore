@@ -31,3 +31,7 @@ dist-ssr
 .mongo_volume/*
 .ollama_volume
 .ollama_volume/*
+*.sqlite3
+
+# Unit test coverage
+coverage/

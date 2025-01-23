@@ -53,7 +53,7 @@ class RAGPipeline {
 				context: async (input: { question: string }, callbacks) => {
 					const retrieverAndFormatter = retriever.pipe(formatDocumentsAsString);
 					const context = await retrieverAndFormatter.invoke(input.question, callbacks);
-					//console.log('Retrieved and formatted context:', context);
+					//logger.info('Retrieved and formatted context:', context);
 					return context;
 				},
 				question: new RunnablePassthrough(),

@@ -13,19 +13,6 @@ services:
         volumes:
             - .chroma_volume:/chroma/chroma
 
-    # mongo:
-    #     image: mongodb/mongodb-community-server:latest
-    #     ports:
-    #         - '27017:27017'
-    #     volumes:
-    #         - .mongo_volume:/data/db
-    #     environment:
-    #         - MONGODB_INITDB_ROOT_USERNAME=${MONGODB_INITDB_ROOT_USERNAME_FILE}
-    #         - MONGODB_INITDB_ROOT_PASSWORD=${MONGODB_INITDB_ROOT_PASSWORD_FILE}
-    #         - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
-    #     networks:
-    #         - schedulrai
-    #     container_name: mongo
     ollama:
         build:
             context: .

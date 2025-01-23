@@ -1,6 +1,6 @@
 import 'jest';
 
-import { initializeDatabase, sequelize } from '../../src/middlewares/db';
+import { initializeDatabase, sequelize } from '../../middlewares/db';
 import {
 	createUser,
 	getUserByUsername,
@@ -15,10 +15,10 @@ import {
 	getEventById,
 	updateEvent,
 	deleteEvent,
-} from '../../src/services/dbServices';
-import logger from '../../src/utils/logger';
+} from '../../services/dbServices';
+import logger from '../../utils/logger';
 
-jest.mock('../../src/utils/logger'); // Mock the logger
+jest.mock('../../utils/logger'); // Mock the logger
 
 beforeAll(async () => {
 	await initializeDatabase();

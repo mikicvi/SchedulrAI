@@ -85,7 +85,7 @@ export async function indexDocuments(): Promise<void> {
 		const chunks = await splitDocuments(documents);
 		await storeEmbeddings(chunks);
 	} catch (error) {
-		console.error('Indexing failed:', error);
+		logger.error('Indexing failed:', error);
 		throw error;
 	}
 }

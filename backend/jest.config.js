@@ -14,4 +14,5 @@ export default {
   coverageDirectory: 'coverage',
   coverageReporters: ['json', 'lcov', 'text', 'clover'],
   coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/tests/'],
+  maxWorkers: 1, // Disable parallel running
 };

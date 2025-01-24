@@ -2,7 +2,6 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import chromaRoutes from './routes/chromaRoutes';
-import mongoRoutes from './routes/mongoRoutes';
 import ollamaRoutes from './routes/ollamaRoutes';
 import documentIndexRoutes from './routes/documentIndexRoutes';
 import pipelineRoutes from './routes/pipelineRoutes';
@@ -36,7 +35,6 @@ const initializeApp = async () => {
 	// Define the base API route for all routes
 	const baseApiRoute = '/api';
 	app.use(baseApiRoute, chromaRoutes);
-	app.use(baseApiRoute, mongoRoutes);
 	app.use(baseApiRoute, ollamaRoutes);
 	app.use(baseApiRoute, documentIndexRoutes);
 	app.use(baseApiRoute, pipelineRoutes);

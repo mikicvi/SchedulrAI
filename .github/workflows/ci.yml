@@ -49,6 +49,7 @@ jobs:
                   args: >
                       -Dsonar.sources=backend/src
                       -Dsonar.tests=backend/src/tests
+                      -Dsonar.exclusions=backend/src/tests/**
                       -Dsonar.typescript.lcov.reportPaths=backend/coverage/lcov.info
                       -Dsonar.organization=mikicvi
                       -Dsonar.projectKey=mikicvi_SchedulrAI

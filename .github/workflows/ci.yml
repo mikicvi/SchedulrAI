@@ -41,7 +41,7 @@ jobs:
             #   run: npm test
 
             - name: SonarCloud Scan
-              uses: sonarsource/sonarqube-scan-action@master
+              uses: sonarsource/sonarcloud-github-action@master
               env:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
               with:
@@ -52,3 +52,4 @@ jobs:
                       -Dsonar.typescript.lcov.reportPaths=backend/coverage/lcov.info
                       -Dsonar.organization=mikicvi
                       -Dsonar.projectKey=mikicvi_SchedulrAI
+                      -Dsonar.qualitygate.wait=true

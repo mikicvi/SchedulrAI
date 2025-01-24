@@ -1,0 +1,53 @@
+name: CI/CD Pipeline
+
+on:
+    pull_request:
+        branches: [main]
+    push:
+        branches: [main]
+
+jobs:
+    build-and-test:
+        name: Build, Test, and Analyze
+        # runs-on: ubuntu-latest
+        runs-on: self-hosted
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Use Node.js 20
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+                  cache: 'npm'
+
+            - name: Install Backend Dependencies
+              working-directory: ./backend
+              run: npm ci
+
+            # - name: Install Frontend Dependencies
+            #   working-directory: ./frontend
+            #   run: npm ci
+
+            - name: Backend Tests
+              working-directory: ./backend
+              run: npm test
+
+            # - name: Frontend Tests
+            #   working-directory: ./frontend
+            #   run: npm test
+
+            - name: SonarCloud Scan
+              uses: sonarsource/sonarcloud-github-action@master
+              env:
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+              with:
+                  projectBaseDir: .
+                  args: >
+                      -Dsonar.sources=backend/src
+                      -Dsonar.tests=backend/src/tests
+                      -Dsonar.typescript.lcov.reportPaths=backend/coverage/lcov.info
+                      -Dsonar.organization=mikicvi
+                      -Dsonar.projectKey=mikicvi_{{ github.repository }}

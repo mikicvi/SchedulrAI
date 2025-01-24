@@ -19,7 +19,6 @@ jobs:
 
             - name: Use Node.js 20
               uses: actions/setup-node@v4
-              working-directory: ./backend
               with:
                   node-version: '20'
                   cache: 'npm'

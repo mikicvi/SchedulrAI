@@ -18,11 +18,12 @@ jobs:
                   fetch-depth: 0
 
             - name: Use Node.js 20
-              working-directory: ./backend
               uses: actions/setup-node@v4
+              working-directory: ./backend
               with:
                   node-version: '20'
                   cache: 'npm'
+                  cache-dependency-path: backend/package-lock.json
 
             - name: Install Backend Dependencies
               working-directory: ./backend

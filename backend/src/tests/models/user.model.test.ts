@@ -1,8 +1,8 @@
 import 'jest';
 
-import { initializeDatabase, sequelize } from '../../src/middlewares/db';
-import User from '../../src/models/user.model';
-import Calendar from '../../src/models/calendar.model';
+import { initializeDatabase, sequelize } from '../../middlewares/db';
+import User from '../../models/user.model';
+import Calendar from '../../models/calendar.model';
 
 beforeAll(async () => {
 	await initializeDatabase();

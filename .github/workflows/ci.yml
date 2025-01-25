@@ -9,8 +9,7 @@ on:
 jobs:
     build-and-test:
         name: Build, Test, and Analyze
-        # runs-on: ubuntu-latest
-        runs-on: self-hosted
+        runs-on: ubuntu-latest
 
         steps:
             - uses: actions/checkout@v4
@@ -50,7 +49,7 @@ jobs:
                       -Dsonar.sources=backend/src
                       -Dsonar.tests=backend/src/tests
                       -Dsonar.exclusions=backend/src/tests/**
-                      -Dsonar.typescript.lcov.reportPaths=backend/coverage/lcov.info
+                      -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
                       -Dsonar.organization=mikicvi
                       -Dsonar.projectKey=mikicvi_SchedulrAI
                       -Dsonar.qualitygate.wait=true

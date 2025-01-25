@@ -1,6 +1,5 @@
 import { getOllamaStatus } from './ollamaServices';
 import { getChromaStatus } from './chromaServices';
-import { getMongoStatus } from './mongoServices';
 import logger from '../utils/logger';
 import { systemPromptMessage, systemPromptMessage2, humanPromptMessage } from '../constants';
 
@@ -42,7 +41,7 @@ class RAGPipeline {
 	// Step 3: Make a request to LLM with the closest embeddings as context
 	// Step 4: Show the results
 
-	private async _requestLLM(userInput): Promise<string> {
+	private async _requestLLM(userInput, retry = 3): Promise<string> {
 		const ollamaLlm = this.chatOllama;
 		const chromaVectorStore = new Chroma(this.embeddings, this.vectorStoreParams);
 
@@ -69,13 +68,17 @@ class RAGPipeline {
 		const result = await qaChain.invoke({ question: userInput });
 
 		// Check if the response is in the correct format
-		const timeFormat = /^Time: \d{1}\.\d{2}$/;
-		let retry = 3;
-		// if (!timeFormat.test(result) && retry > 0 && parseFloat(time) > maxTime) {
-		if (!timeFormat.test(result) && retry > 0) {
-			retry--;
-			logger.debug(`|_requestLLM  |: Invalid response format: ${result}, retrying... ${retry} attempts left`);
-			return await this._requestLLM(userInput);
+		const timeFormat = /^Time: \d\.\d{2}$/;
+
+		if (!timeFormat.test(result)) {
+			if (retry > 0) {
+				retry--;
+				logger.debug(`|_requestLLM  |: Invalid response format: ${result}, retrying... ${retry} attempts left`);
+				return await this._requestLLM(userInput, retry);
+			} else {
+				logger.error(`|_requestLLM  |: Max retries reached. Invalid response format: ${result}`);
+				throw new Error('Max retries reached. Invalid response format.');
+			}
 		}
 		return result;
 	}

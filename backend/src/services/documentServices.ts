@@ -3,9 +3,7 @@ import path from 'path';
 import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
 import { MarkdownTextSplitter, CharacterTextSplitter } from 'langchain/text_splitter';
 import logger from '../utils/logger';
-import { getDirname } from '../utils/pathUtils';
 
-const __dirname = getDirname(import.meta.url);
 const documentsPath = process.env.DOCUMENTS_PATH || path.join(__dirname, '../../documents');
 
 async function loadDocuments(docsPath: string): Promise<{ name: string; content: string }[]> {
@@ -75,6 +73,7 @@ async function storeEmbeddings(documents: { name: string; chunks: string[] }[]):
 		}
 	} catch (error) {
 		logger.error('Failed to store embeddings:', error);
+		throw error;
 	}
 	logger.info('Embeddings stored successfully');
 }

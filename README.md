@@ -1,3 +1,5 @@
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mikicvi_SchedulrAI&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=mikicvi_SchedulrAI) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=mikicvi_SchedulrAI&metric=coverage)](https://sonarcloud.io/summary/new_code?id=mikicvi_SchedulrAI) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=mikicvi_SchedulrAI&metric=bugs)](https://sonarcloud.io/summary/new_code?id=mikicvi_SchedulrAI) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=mikicvi_SchedulrAI&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=mikicvi_SchedulrAI) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=mikicvi_SchedulrAI&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=mikicvi_SchedulrAI)
+
 # SchedulrAI
 
 SchedulrAI is a booking/scheduling management system for small business owners that aims to improve and speed up the organization of operations while reducing costs.

@@ -12,6 +12,22 @@ describe('PipelineController', () => {
 	let mockRequest: Partial<Request>;
 	let mockResponse: Partial<Response>;
 	let mockJsonFn: jest.Mock;
+	let originalEnv: NodeJS.ProcessEnv;
+
+	beforeAll(() => {
+		// Store original env variables
+		originalEnv = { ...process.env };
+
+		// Mock environment variables
+		process.env.PROTOCOL = 'http';
+		process.env.OLLAMA_API_BASE = 'localhost';
+		process.env.OLLAMA_PORT = '11434';
+		process.env.CHROMA_SERVER_HOST = 'localhost';
+		process.env.CHROMA_SERVER_PORT = '8000';
+		process.env.LLM_MODEL = 'llama2';
+		process.env.LLM_EMBED_MODEL = 'llama2';
+		process.env.CHROMA_CLIENT_AUTH_CREDENTIALS = 'test-credentials';
+	});
 
 	beforeEach(() => {
 		// Reset all mocks before each test
@@ -115,26 +131,44 @@ describe('PipelineController', () => {
 		it('should initialize with correct configuration', () => {
 			// Assert
 			expect(controller).toBeInstanceOf(PipelineController);
+
+			// Construct expected URLs
+			const expectedBaseUrl = 'http://localhost:11434';
+			const expectedChromaUrl = 'http://localhost:8000';
+
 			// Verify RAGPipeline was initialized with correct params
 			expect(RAGPipeline).toHaveBeenCalledWith(
-				expect.objectContaining({
-					baseUrl: expect.any(String),
-					model: expect.any(String),
-					embeddingModel: expect.any(String),
+				{
+					baseUrl: expectedBaseUrl,
+					model: 'llama2',
+					embeddingModel: 'llama2',
 					temperature: 0.5,
 					topP: 0.9,
-				}),
-				expect.objectContaining({
+				},
+				{
 					collectionName: 'SchedulrAI-KB',
-					url: expect.any(String),
-					clientParams: expect.objectContaining({
-						auth: expect.objectContaining({
+					url: expectedChromaUrl,
+					clientParams: {
+						auth: {
 							provider: 'basic',
-							credentials: expect.any(String),
-						}),
-					}),
-				})
+							credentials: 'test-credentials',
+						},
+					},
+				}
 			);
+		});
+
+		it('should handle missing environment variables gracefully', () => {
+			// Temporarily clear environment variables
+			const tempEnv = { ...process.env };
+			process.env = {};
+
+			// Initialize controller with missing env vars
+			const controllerWithMissingEnv = new PipelineController();
+			expect(controllerWithMissingEnv).toBeInstanceOf(PipelineController);
+
+			// Restore environment variables
+			process.env = tempEnv;
 		});
 	});
 });

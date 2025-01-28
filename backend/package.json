@@ -54,6 +54,7 @@
     "nodemon": "^3.1.9",
     "npm-check-updates": "^17.1.14",
     "rimraf": "^6.0.1",
+    "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
     "ts-jest-mock-import-meta": "^1.2.1",
     "tsx": "^4.19.2",

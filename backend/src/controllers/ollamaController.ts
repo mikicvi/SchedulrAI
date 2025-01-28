@@ -5,15 +5,14 @@ import logger from '../utils/logger';
 import { ModelType } from '../types/ollama';
 
 const handleOllamaStatus = (modelType: ModelType) => {
-	return (req: Request, res: Response): void => {
-		getOllamaStatus(modelType)
-			.then((content) => {
-				res.status(200).json({ status: 'OK', content });
-			})
-			.catch((error) => {
-				logger.error(`Error connecting to Ollama instance: ${error}`);
-				res.sendStatus(500);
-			});
+	return async (req: Request, res: Response): Promise<void> => {
+		try {
+			const content = await getOllamaStatus(modelType);
+			res.status(200).json({ status: 'OK', content });
+		} catch (error) {
+			res.sendStatus(500);
+			logger.error(`Error connecting to Ollama instance: ${error}`);
+		}
 		logger.info(`|ollamaControllerStatus-${modelType}  |: ${req.method} ${res.statusCode}`);
 	};
 };

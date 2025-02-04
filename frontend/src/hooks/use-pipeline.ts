@@ -18,6 +18,7 @@ const usePipeline = () => {
 				headers: {
 					'Content-Type': 'application/json',
 				},
+				credentials: 'include',
 				body: JSON.stringify({ userInput: userInput }),
 			});
 			const data = await response.json();

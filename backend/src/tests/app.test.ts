@@ -87,6 +87,15 @@ jest.mock('sequelize', () => ({
 	},
 }));
 
+jest.mock('@langchain/ollama', () => ({
+	OllamaEmbeddings: jest.fn().mockImplementation(() => ({
+		embed: jest.fn().mockResolvedValue([]),
+	})),
+	ChatOllama: jest.fn().mockImplementation(() => ({
+		chat: jest.fn().mockResolvedValue([]),
+	})),
+}));
+
 describe('initializeApp', () => {
 	let app: any;
 

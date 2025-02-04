@@ -15,6 +15,6 @@
 		"forceConsistentCasingInFileNames": true
 	},
 	"lib": ["es2020"],
-	"include": ["src", "src/tests"],
+	"include": ["src", "src/tests", "jest.setup.ts"],
 	"exclude": ["node_modules", "dist"]
 }

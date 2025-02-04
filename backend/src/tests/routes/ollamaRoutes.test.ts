@@ -13,6 +13,7 @@ const mockedOllamaStatus = ollamaStatus as jest.MockedFunction<typeof ollamaStat
 const mockedOllamaEmbeddingStatus = ollamaEmbeddingStatus as jest.MockedFunction<typeof ollamaEmbeddingStatus>;
 
 const app = express();
+app.use(global.mockAuthMiddleware); // Apply mock auth before routes
 app.use(ollamaRoutes);
 
 describe('Ollama Routes', () => {

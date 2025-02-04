@@ -15,6 +15,7 @@ const mockedChromaCollections = chromaCollections as jest.MockedFunction<typeof 
 
 // Create Express app and use the router
 const app = express();
+app.use(global.mockAuthMiddleware); // Apply mock auth before routes
 app.use(chromaRoutes);
 
 describe('Chroma Routes', () => {

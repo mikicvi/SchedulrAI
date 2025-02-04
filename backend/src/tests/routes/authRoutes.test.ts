@@ -1,0 +1,240 @@
+import request from 'supertest';
+import express from 'express';
+import session from 'express-session';
+import passport from '../../middlewares/passport';
+import authRoutes from '../../routes/authRoutes';
+import { createUser, getUserByUsername, getUserById } from '../../services/dbServices';
+import User from '../../models/user.model';
+
+// Mock dependencies
+jest.mock('../../services/dbServices');
+jest.mock('../../utils/logger', () => ({
+	info: jest.fn(),
+	error: jest.fn(),
+	debug: jest.fn(),
+}));
+
+const app = express();
+app.use(express.json());
+app.use(
+	session({
+		secret: 'test-secret',
+		resave: false,
+		saveUninitialized: false,
+	})
+);
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(global.mockAuthMiddleware); // Apply mock auth before routes
+app.use('/auth', authRoutes);
+
+describe('Authentication Routes', () => {
+	const mockUser = {
+		id: 1,
+		username: 'testuser',
+		email: 'test@example.com',
+		password: 'hashedpassword',
+		validPassword: jest.fn().mockResolvedValue(true),
+	} as unknown as User;
+
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
+	describe('POST /auth/register', () => {
+		it('should successfully register a new user', async () => {
+			(createUser as jest.Mock).mockResolvedValue(mockUser);
+
+			const response = await request(app).post('/auth/register').send({
+				username: 'testuser',
+				password: 'password123',
+				email: 'test@example.com',
+				firstName: 'Test',
+				lastName: 'User',
+			});
+
+			expect(response.status).toBe(200);
+			expect(response.body.message).toBe('User registered successfully');
+			expect(response.body.user).toBeTruthy();
+		});
+
+		it('should handle duplicate username', async () => {
+			const error = new Error('Duplicate username');
+			error.name = 'SequelizeUniqueConstraintError';
+			(createUser as jest.Mock).mockRejectedValue(error);
+
+			const response = await request(app).post('/auth/register').send({
+				username: 'testuser',
+				password: 'password123',
+				email: 'test@example.com',
+			});
+
+			expect(response.status).toBe(400);
+			expect(response.body.message).toBe('Username already exists');
+		});
+	});
+
+	describe('POST /auth/login', () => {
+		beforeEach(() => {
+			(getUserByUsername as jest.Mock).mockResolvedValue(mockUser);
+		});
+
+		it('should successfully log in a user', async () => {
+			const response = await request(app).post('/auth/login').send({
+				username: 'testuser',
+				password: 'password123',
+			});
+
+			expect(response.status).toBe(200);
+			expect(response.body.message).toBe('Logged in successfully');
+			expect(response.body.user).toEqual({
+				id: mockUser.id,
+				username: mockUser.username,
+				email: mockUser.email,
+			});
+		});
+
+		it('should reject login with missing credentials', async () => {
+			const response = await request(app).post('/auth/login').send({});
+
+			expect(response.status).toBe(400);
+			expect(response.body.message).toBe('Username and password are required');
+		});
+
+		it('should reject login with incorrect username', async () => {
+			(getUserByUsername as jest.Mock).mockResolvedValue(null);
+
+			const response = await request(app).post('/auth/login').send({
+				username: 'nonexistent',
+				password: 'password123',
+			});
+
+			expect(response.status).toBe(401);
+			expect(response.body.message).toBe('Incorrect username.');
+		});
+
+		it('should reject login with incorrect password', async () => {
+			mockUser.validPassword = jest.fn().mockResolvedValue(false);
+			(getUserByUsername as jest.Mock).mockResolvedValue(mockUser);
+
+			const response = await request(app).post('/auth/login').send({
+				username: 'testuser',
+				password: 'wrongpassword',
+			});
+
+			expect(response.status).toBe(401);
+			expect(response.body.message).toBe('Incorrect password.');
+		});
+	});
+
+	describe('POST /auth/logout', () => {
+		it('should successfully log out a user', async () => {
+			const agent = request.agent(app);
+
+			// Simulate logged-in user
+			await agent.post('/auth/login').send({
+				username: 'testuser',
+				password: 'password123',
+			});
+
+			const response = await agent.post('/auth/logout');
+
+			expect(response.status).toBe(200);
+			expect(response.body.message).toBe('Logged out successfully');
+		});
+	});
+
+	describe('Passport Serialization', () => {
+		it('should serialize user by ID', async () => {
+			const done = jest.fn();
+			passport.serializeUser(mockUser, done);
+
+			expect(done).toHaveBeenCalledWith(null, mockUser.id);
+		});
+
+		it('should deserialize user by ID', async () => {
+			(getUserById as jest.Mock).mockResolvedValue(mockUser);
+			const done = jest.fn();
+
+			await new Promise<void>((resolve) => {
+				passport.deserializeUser(mockUser.id, (err, user) => {
+					done(err, user);
+					resolve();
+				});
+			});
+
+			expect(getUserById).toHaveBeenCalledWith(mockUser.id);
+			expect(done).toHaveBeenCalledWith(null, mockUser);
+		});
+
+		it('should handle deserialization of non-existent user', async () => {
+			(getUserById as jest.Mock).mockResolvedValue(null);
+			const done = jest.fn();
+
+			await new Promise<void>((resolve) => {
+				passport.deserializeUser(999, (err, user) => {
+					done(err, user);
+					resolve();
+				});
+			});
+
+			expect(done).toHaveBeenCalledWith(null, false);
+		});
+
+		it('should handle serialization of invalid user object', async () => {
+			const invalidUser = {} as User;
+			const done = jest.fn();
+
+			passport.serializeUser(invalidUser, done);
+
+			expect(done).toHaveBeenCalledWith(new Error('Invalid user object during serialization'), undefined);
+		});
+	});
+	describe('Passport LocalStrategy', () => {
+		it('should handle login with incorrect username', async () => {
+			(getUserByUsername as jest.Mock).mockResolvedValue(null);
+
+			const done = jest.fn();
+			await new Promise<void>((resolve) => {
+				passport._strategies.local._verify({}, 'wrongusername', 'password123', (err, user, info) => {
+					done(err, user, info);
+					resolve();
+				});
+			});
+
+			expect(done).toHaveBeenCalledWith(null, false, { message: 'Incorrect username.' });
+		});
+
+		it('should handle login with incorrect password', async () => {
+			const mockUser = {
+				validPassword: jest.fn().mockResolvedValue(false),
+			};
+			(getUserByUsername as jest.Mock).mockResolvedValue(mockUser);
+
+			const done = jest.fn();
+			await new Promise<void>((resolve) => {
+				passport._strategies.local._verify({}, 'testuser', 'wrongpassword', (err, user, info) => {
+					done(err, user, info);
+					resolve();
+				});
+			});
+
+			expect(done).toHaveBeenCalledWith(null, false, { message: 'Incorrect password.' });
+		});
+
+		it('should handle login error', async () => {
+			const error = new Error('Database error');
+			(getUserByUsername as jest.Mock).mockRejectedValue(error);
+
+			const done = jest.fn();
+			await new Promise<void>((resolve) => {
+				passport._strategies.local._verify({}, 'testuser', 'password123', (err, user, info) => {
+					done(err, user, info);
+					resolve();
+				});
+			});
+
+			expect(done).toHaveBeenCalledWith(error, undefined, undefined);
+		});
+	});
+});

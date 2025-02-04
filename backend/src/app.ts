@@ -11,6 +11,7 @@ import pipelineRoutes from './routes/pipelineRoutes';
 import authRoutes from './routes/authRoutes';
 import { initializeDatabase } from './middlewares/db';
 import SQLiteStore from 'connect-sqlite3';
+import rateLimit from 'express-rate-limit';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -33,13 +34,23 @@ const initializeApp = async () => {
 		optionsSuccessStatus: 200,
 	};
 
+	const baseApiRoute = '/api';
+
+	// Rate limiting middleware
+	const rateLimiter = rateLimit({
+		windowMs: 10 * 60 * 1000, // 10 minutes
+		max: 100, 
+		message: 'Too many requests from this IP, please try again after 15 minutes',
+	});
+	
+	// Create SQLite session store for express-session
+	const SQLiteStoreSession = SQLiteStore(session);
+
 	// Config middleware
 	app.use(cors(corsOptions));
 	app.use(express.json());
 	app.use(cors());
 	app.use(express.urlencoded({ extended: true }));
-
-	const SQLiteStoreSession = SQLiteStore(session);
 
 	app.use(
 		session({
@@ -55,8 +66,9 @@ const initializeApp = async () => {
 	app.use(passport.initialize());
 	app.use(passport.session());
 
+	app.use(rateLimiter);
+
 	// Routes
-	const baseApiRoute = '/api';
 	app.use(baseApiRoute, chromaRoutes);
 	app.use(baseApiRoute, ollamaRoutes);
 	app.use(baseApiRoute, documentIndexRoutes);

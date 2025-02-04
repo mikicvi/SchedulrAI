@@ -7,7 +7,7 @@
 		"moduleResolution": "node",
 		"sourceMap": true,
 		"outDir": "./dist",
-		"typeRoots": ["./node_modules/@types", "./types"],
+		"typeRoots": ["./node_modules/@types", "./src/types"],
 		"skipLibCheck": true,
 		"preserveConstEnums": true,
 		"types": ["node", "jest"],

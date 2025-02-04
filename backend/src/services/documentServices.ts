@@ -4,7 +4,7 @@ import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
 import { MarkdownTextSplitter, CharacterTextSplitter } from 'langchain/text_splitter';
 import logger from '../utils/logger';
 
-const documentsPath = process.env.DOCUMENTS_PATH || path.join(__dirname, '../../documents');
+const documentsPath = process.env.DOCUMENTS_PATH || path.resolve(process.cwd(), 'documents');
 
 async function loadDocuments(docsPath: string): Promise<{ name: string; content: string }[]> {
 	try {

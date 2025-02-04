@@ -7,7 +7,9 @@ function useBackendStatus() {
 	useEffect(() => {
 		async function fetchStatus() {
 			try {
-				const response = await fetch('http://localhost:3000/api/checkPipelineStatus');
+				const response = await fetch('http://localhost:3000/api/checkPipelineStatus', {
+					credentials: 'include',
+				});
 				if (response.ok) {
 					const data = await response.json();
 					// check if data has ready: true

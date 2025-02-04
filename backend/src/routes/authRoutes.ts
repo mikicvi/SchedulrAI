@@ -31,13 +31,13 @@ router.post('/login', (req: Request, res: Response, next: NextFunction): void =>
 				return;
 			}
 
-			logger.info(`User logged in: ${(user as User).username}`);
+			logger.info(`User logged in: ${user.username}`);
 			res.json({
 				message: 'Logged in successfully',
 				user: {
-					id: (user as User).id,
-					username: (user as User).username,
-					email: (user as User).email,
+					id: user.id,
+					username: user.username,
+					email: user.email,
 				},
 			});
 		});

@@ -7,7 +7,7 @@
 		"moduleResolution": "node",
 		"sourceMap": true,
 		"outDir": "./dist",
-		"typeRoots": ["./node_modules/@types", "./types"],
+		"typeRoots": ["./node_modules/@types", "./src/types"],
 		"skipLibCheck": true,
 		"preserveConstEnums": true,
 		"types": ["node", "jest"],
@@ -15,6 +15,6 @@
 		"forceConsistentCasingInFileNames": true
 	},
 	"lib": ["es2020"],
-	"include": ["src", "src/tests"],
+	"include": ["src", "src/tests", "jest.setup.ts"],
 	"exclude": ["node_modules", "dist"]
 }

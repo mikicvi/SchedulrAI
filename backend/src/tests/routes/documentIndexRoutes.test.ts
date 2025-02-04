@@ -7,6 +7,7 @@ jest.mock('../../services/documentServices');
 
 const app = express();
 app.use(express.json());
+app.use(global.mockAuthMiddleware); // Apply mock auth before routes
 app.use(documentIndexRoutes);
 
 describe('POST /api/indexDocuments', () => {

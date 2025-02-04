@@ -1,5 +1,6 @@
 export default {
   preset: 'ts-jest/presets/js-with-ts-esm',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testEnvironment: "node",
   collectCoverage: true,
   coverageDirectory: 'coverage',

@@ -27,11 +27,12 @@ dist-ssr
 # Backend
 .chroma_volume
 .chroma_volume/*
-.mongo_volume
-.mongo_volume/*
 .ollama_volume
 .ollama_volume/*
+.sqlite_volume
+.sqlite_volume/*
 *.sqlite3
+
 
 # Unit test coverage
 coverage/

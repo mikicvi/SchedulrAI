@@ -1,5 +1,5 @@
 import { Label } from '@radix-ui/react-dropdown-menu';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from './ui/button';
 import { Card, CardDescription, CardTitle } from './ui/card';
 import { Input } from './ui/input';

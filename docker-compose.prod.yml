@@ -1,0 +1,62 @@
+services:
+    chroma:
+        image: chromadb/chroma:latest
+        ports:
+            - '8000:8000'
+        env_file: .env
+        environment:
+            - IS_PERSISTENT=TRUE
+        networks:
+            - schedulrai
+        container_name: chroma
+        volumes:
+            - .chroma_volume:/chroma/chroma
+
+    ollama:
+        image: mikicv/schedulrai-ollama:latest
+        ports:
+            - '11434:11434'
+        volumes:
+            - .ollama_volume:/root/.ollama
+        container_name: ollama
+        pull_policy: always
+        tty: true
+        restart: always
+        networks:
+            - schedulrai
+        env_file: ./docker/ollama.env
+
+    backend:
+        image: mikicv/schedulrai-backend:latest
+        ports:
+            - '3000:3000'
+        container_name: backend
+        pull_policy: always
+        tty: true
+        restart: always
+        networks:
+            - schedulrai
+        env_file: .env
+        volumes:
+            - .sqlite_volume:/app/data
+        environment:
+            - CHROMA_SERVER_HOST=chroma
+            - OLLAMA_API_BASE=ollama
+
+    frontend:
+        image: mikicv/schedulrai-frontend:latest
+        ports:
+            - '80:80'
+        container_name: frontend
+        networks:
+            - schedulrai
+        depends_on:
+            - backend
+
+networks:
+    schedulrai:
+        driver: bridge
+volumes:
+    ollama_volume:
+    chroma_volume:
+    sqlite_volume:

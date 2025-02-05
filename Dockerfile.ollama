@@ -2,8 +2,8 @@
 FROM ollama/ollama:latest
 
 # Copy the entrypoint script and environment file into the container
-COPY ollama.env /ollama.env
-COPY ollama_entrypoint.sh /ollama_entrypoint.sh
+COPY docker/ollama.env /ollama.env
+COPY docker/ollama_entrypoint.sh /ollama_entrypoint.sh
 
 # Make the script executable
 RUN chmod +x /ollama_entrypoint.sh

@@ -6,8 +6,8 @@ SchedulrAI is a booking/scheduling management system for small business owners t
 
 ## Pre-requisites
 
--   Docker
--   Node.js (v18.19.1 or later)
+-   Docker - Latest recommended
+-   Node.js - LTS/iron recommended
 -   npm (v9.6.6 or later)
 
 ## Environment Variables
@@ -15,30 +15,29 @@ SchedulrAI is a booking/scheduling management system for small business owners t
 The application requires the following environment variables to be set. You can create a `.env` file in the root directory of the project to set these variables.
 
 -   Chroma Server Authentication Credentials - Basic auth (RFC 7617) - need to be generated with `htpasswd -bc server.htpasswd admin admin` or `docker run --rm --entrypoint htpasswd httpd:2 -Bbn admin admin > server.htpasswd`
-
-| Variable Name                       | Description                                     | Default Value                                                 |
-| ----------------------------------- | ----------------------------------------------- | ------------------------------------------------------------- |
-| `CHROMA_SERVER_AUTHN_CREDENTIALS`   | Authentication credentials for ChromaDB server  | `admin:$2y505<22-character salt >`                            |
-| `CHROMA_SERVER_AUTHN_PROVIDER`      | Authentication provider for ChromaDB server     | `chromadb.auth.basic_authn.BasicAuthenticationServerProvider` |
-| `CHROMA_CLIENT_AUTH_CREDENTIALS`    | Client authentication credentials for ChromaDB  | `admin:dummy_password`                                        |
-| `CHROMA_SERVER_HOST`                | Host for the ChromaDB server                    | `127.0.0.1`                                                   |
-| `CHROMA_SERVER_PORT`                | Port for the ChromaDB server                    | `8000`                                                        |
-| `MONGODB_INITDB_ROOT_USERNAME_FILE` | MongoDB root username                           | `admin`                                                       |
-| `MONGODB_INITDB_ROOT_PASSWORD_FILE` | MongoDB root password                           | `dummy_password`                                              |
-| `MONGO_INITDB_DATABASE`             | MongoDB initial database                        | `test`                                                        |
-| `MONGO_URI`                         | MongoDB URI                                     | `mongodb://127.0.0.1:27017`                                   |
-| `MONGO_PORT`                        | MongoDB port                                    | `27017`                                                       |
-| `OLLAMA_API_BASE`                   | Base URL for the Ollama API                     | `127.0.0.1`                                                   |
-| `OLLAMA_PORT`                       | Port for the Ollama API                         | `11434`                                                       |
-| `LLM_MODEL`                         | Language model to be used                       | `llama3.2:3b-instruct-q5_K_M`                                 |
-| `LLM_EMBED_MODEL`                   | Embedding model to be used                      | `nomic-embed-text`                                            |
-| `LOG_LEVEL`                         | Logging level                                   | `info`                                                        |
-| `PROTOCOL`                          | Protocol used by the server (`http` or `https`) | `http`                                                        |
-| `EXPRESS_PORT`                      | Port on which the Express server runs           | `3000`                                                        |
+-   Auth secret needs to be generated with `openssl rand -base64 32` or `openssl rand -hex 32` in Linux/MacOS or `openssl rand -base64:32` in Windows
+    | Variable Name | Description | Default Value |
+    | --------------------------------- | ---------------------------------------------- | ------------------------------------------------------------- |
+    | `CHROMA_SERVER_AUTHN_CREDENTIALS` | Authentication credentials for ChromaDB server | `admin:REPLACE_WITH_HASHED_PASSWORD` |
+    | `CHROMA_SERVER_AUTHN_PROVIDER` | Authentication provider for ChromaDB server | `chromadb.auth.basic_authn.BasicAuthenticationServerProvider` |
+    | `CHROMA_CLIENT_AUTH_CREDENTIALS` | Client authentication credentials for ChromaDB | `admin:REPLACE_WITH_PASSWORD` |
+    | `CHROMA_SERVER_HOST` | Host for the ChromaDB server | `127.0.0.1` |
+    | `CHROMA_SERVER_PORT` | Port for the ChromaDB server | `8000` |
+    | `COMPOSE_PROJECT_NAME` | Docker compose project name | `schedulrai` |
+    | `OLLAMA_API_BASE` | Base URL for the Ollama API | `127.0.0.1` |
+    | `OLLAMA_PORT` | Port for the Ollama API | `11434` |
+    | `LLM_MODEL` | Language model to be used | `llama3.2:3b-instruct-q5_K_M` |
+    | `LLM_EMBED_MODEL` | Embedding model to be used | `nomic-embed-text` |
+    | `LOG_LEVEL` | Logging level | `debug` |
+    | `PROTOCOL` | Protocol used by the server | `http` |
+    | `EXPRESS_PORT` | Port on which the Express server runs | `3000` |
+    | `AUTH_SECRET` | Authentication secret key | `REPLACE_WITH_GENERATED_SECRET` |
+    | `ALLOWED_ORIGINS` | Allowed CORS origins (comma-separated) | `http://localhost,http://localhost:80,http://localhost:3000,http://frontend,http://localhost:5173` |
+    | `DB_PATH` | SQLite database file path | `/app/data/db.sqlite3` |
 
 ## Ollama Environment Variables
 
-The application also requires the following environment variables for Ollama models. You can create an `ollama.env` file in the root directory of the project to set these variables.
+The application also requires the following environment variables for Ollama models. You can create an `ollama.env` file in the docker directory of the project to set these variables.
 
 -   Note: Llama.3.2 model will be used by default and is the only model supported at the moment.
 
@@ -58,7 +57,7 @@ The application also requires the following environment variables for Ollama mod
 1. Clone the repository:
 
     ```sh
-    git clone https://github.com/yourusername/schedulrai.git
+    git clone https://github.com/mikicvi/schedulrai.git
     cd schedulrai
     ```
 
@@ -68,24 +67,10 @@ The application also requires the following environment variables for Ollama mod
     npm install
     ```
 
-3. Create a `.env` file in the root directory and add the required environment variables:
+3. Rename the `.env.example` file to `.env` and fill it out with the required environment variables as per the instructions:
 
     ```sh
-    touch .env
-    ```
-
-    Example `.env` file:
-
-    ```env
-    EXPRESS_PORT=3000
-    PROTOCOL=http
-    DB_HOST=localhost
-    DB_PORT=5432
-    DB_USER=user
-    DB_PASSWORD=password
-    DB_NAME=schedulrai
-    SESSION_SECRET=secret
-    CORS_ORIGIN=http://localhost:5173
+    mv .env.example .env
     ```
 
 ## Running the Application

@@ -8,6 +8,6 @@ declare global {
 // Define the authentication middleware
 globalThis.mockAuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
 	(req as any).isAuthenticated = () => true; // Always return authenticated
-	(req as any).user = { id: 'test-user', username: 'testuser' }; // Mock user object
+	(req as any).user = { id: 1, username: 'testuser' }; // Mock user object
 	next();
 };

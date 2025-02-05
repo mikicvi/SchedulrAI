@@ -144,6 +144,59 @@ describe('Authentication Routes', () => {
 		});
 	});
 
+	describe('GET /auth/checkAuth', () => {
+		it('should return user data if authenticated', async () => {
+			const agent = request.agent(app);
+
+			// Simulate logged-in user
+			await agent.post('/auth/login').send({
+				username: 'testuser',
+				password: 'password123',
+			});
+
+			const response = await agent.get('/auth/checkAuth');
+
+			expect(response.status).toBe(200);
+			expect(response.body.authenticated).toBe(true);
+			expect(response.body.user).toEqual({
+				id: mockUser.id,
+				username: mockUser.username,
+			});
+		});
+
+		it('should return unauthenticated if not logged in', async () => {
+			// mock auth middleware to simulate unauthenticated user
+			const authMiddleware = (req, res, next) => {
+				req.isAuthenticated = jest.fn().mockReturnValue(false);
+				next();
+			};
+
+			const app2 = express();
+			app2.use(express.json());
+			app2.use(
+				session({
+					secret: 'test-secret',
+					resave: false,
+					saveUninitialized: false,
+				})
+			);
+			app2.use(passport.initialize());
+			app2.use(passport.session());
+			app2.use(authMiddleware);
+			app2.use('/auth', authRoutes);
+
+			const agent = request.agent(app2);
+
+			await agent.post('/auth/logout');
+
+			const response = await request(app2).get('/auth/checkAuth');
+
+			expect(response.status).toBe(401);
+			expect(response.body.authenticated).toBe(false);
+			expect(response.body.user).toBeNull();
+		});
+	});
+
 	describe('Passport Serialization', () => {
 		it('should serialize user by ID', async () => {
 			const done = jest.fn();

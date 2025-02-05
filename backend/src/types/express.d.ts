@@ -8,6 +8,7 @@ declare global {
 			logIn(user: User, done: (err: any) => void): void;
 			logout(done: (err: any) => void): void;
 			user?: User;
+			isAuthenticated(): boolean;
 		}
 	}
 }

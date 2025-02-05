@@ -31,6 +31,7 @@ const initializeApp = async () => {
 				callback(new Error('Not allowed by CORS'));
 			}
 		},
+		credentials: true,
 		optionsSuccessStatus: 200,
 	};
 
@@ -39,17 +40,16 @@ const initializeApp = async () => {
 	// Rate limiting middleware
 	const rateLimiter = rateLimit({
 		windowMs: 10 * 60 * 1000, // 10 minutes
-		max: 100, 
+		max: 100,
 		message: 'Too many requests from this IP, please try again after 15 minutes',
 	});
-	
+
 	// Create SQLite session store for express-session
 	const SQLiteStoreSession = SQLiteStore(session);
 
 	// Config middleware
 	app.use(cors(corsOptions));
 	app.use(express.json());
-	app.use(cors());
 	app.use(express.urlencoded({ extended: true }));
 
 	app.use(

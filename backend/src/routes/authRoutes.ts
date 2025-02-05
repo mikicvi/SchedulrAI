@@ -75,4 +75,12 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 	}
 });
 
+router.get('/checkAuth', (req: Request, res: Response): void => {
+	if (req.isAuthenticated()) {
+		res.json({ authenticated: true, user: req.user });
+	} else {
+		res.status(401).json({ authenticated: false, user: null });
+	}
+});
+
 export default router;

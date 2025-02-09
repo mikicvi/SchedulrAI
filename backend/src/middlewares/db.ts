@@ -4,7 +4,7 @@ import { resolve, dirname } from 'path';
 import logger from '../utils/logger';
 import('../models/associations'); // Relationships for the models
 
-const dbPath = process.env.DB_PATH || resolve('data/db.sqlite3');
+const dbPath = process.env.DB_PATH || resolve('app/data/db.sqlite3');
 
 // Ensure data directory exists
 mkdirSync(dirname(dbPath), { recursive: true });

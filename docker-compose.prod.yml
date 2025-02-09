@@ -24,7 +24,7 @@ services:
         restart: always
         networks:
             - schedulrai
-        env_file: ./docker/ollama.env
+        env_file: .env
 
     backend:
         image: mikicv/schedulrai-backend:latest

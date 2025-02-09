@@ -58,7 +58,7 @@ const initializeApp = async () => {
 			resave: false,
 			saveUninitialized: false,
 			store: new SQLiteStoreSession({
-				db: process.env.DB_PATH || 'data/db.sqlite3',
+				db: process.env.DB_PATH || 'app/data/db.sqlite3',
 				dir: '/',
 				table: 'sessions',
 			}),

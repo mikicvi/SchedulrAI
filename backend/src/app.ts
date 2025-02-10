@@ -12,6 +12,7 @@ import authRoutes from './routes/authRoutes';
 import { initializeDatabase } from './middlewares/db';
 import SQLiteStore from 'connect-sqlite3';
 import rateLimit from 'express-rate-limit';
+import { resolve } from 'path';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -51,15 +52,14 @@ const initializeApp = async () => {
 	app.use(cors(corsOptions));
 	app.use(express.json());
 	app.use(express.urlencoded({ extended: true }));
-
 	app.use(
 		session({
 			secret: process.env.AUTH_SECRET || 'default_secret',
 			resave: false,
 			saveUninitialized: false,
 			store: new SQLiteStoreSession({
-				db: process.env.DB_PATH || 'app/data/db.sqlite3',
-				dir: '/',
+				db: process.env.DB_PATH || resolve('data/db.sqlite3'),
+				dir: '.',
 				table: 'sessions',
 			}),
 		})

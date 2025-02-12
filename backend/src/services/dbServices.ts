@@ -2,6 +2,7 @@ import User, { UserAttributes } from '../models/user.model';
 import Calendar, { CalendarAttributes } from '../models/calendar.model';
 import Event, { EventAttributes } from '../models/event.model';
 import logger from '../utils/logger'; // Assuming you have a logger utility
+import sequelize from 'sequelize';
 
 /**
  * Creates a new user in the database.
@@ -79,6 +80,29 @@ export async function getUserById(id: number): Promise<User | null | void> {
 		return user;
 	} catch (error) {
 		logger.error(`Error retrieving user by id: ${error.message}`);
+	}
+}
+
+/**
+ * Retrieves a user by Google ID or email.
+ *
+ * @param {string} googleId - The Google ID of the user to retrieve.
+ * @param {string} email - The email of the user to retrieve.
+ * @returns {Promise<User | null | void>} A promise that resolves to the retrieved user, null if not found, or void if an error occurs.
+ */
+export async function getUserByGoogleIdOrEmail(googleId: string, email: string): Promise<User | null | void> {
+	try {
+		const user = await User.findOne({
+			where: {
+				[sequelize.Op.or]: [{ googleId }, { email }],
+			},
+		});
+		if (!user) {
+			throw new Error(`User with Google ID ${googleId} or email ${email} not found`);
+		}
+		return user;
+	} catch (error) {
+		logger.error(`Error retrieving user by Google ID or email: ${error.message}`);
 	}
 }
 

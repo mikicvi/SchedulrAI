@@ -1,10 +1,15 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { getUserByUsername, getUserById } from '../services/dbServices';
+import {
+	getUserByUsername,
+	getUserById,
+	getUserByGoogleIdOrEmail,
+	createUser,
+	updateUser,
+} from '../services/dbServices';
 import logger from '../utils/logger';
 import User from '../models/user.model';
-import sequelize from 'sequelize';
 
 passport.use(
 	'local',
@@ -57,36 +62,41 @@ passport.use(
 		},
 		async (accessToken, refreshToken, profile, done) => {
 			try {
-				logger.debug(`Google profile: ${JSON.stringify(profile)}`);
-				logger.debug(`Access Token: ${accessToken}`);
-				logger.debug(`Refresh Token: ${refreshToken || 'Not received'}`);
-
-				let user = await User.findOne({
-					where: {
-						[sequelize.Op.or]: [{ googleId: profile.id }, { email: profile.emails[0].value }],
-					},
-				});
+				// Try to find user by email
+				let user = await getUserByGoogleIdOrEmail(profile.id, profile.emails[0].value);
 
 				if (user) {
-					await user.update({
+					// Update existing user
+					const [_, updatedUsers] = await updateUser(user.id, {
 						googleId: profile.id,
 						googleAccessToken: accessToken,
-						googleRefreshToken: refreshToken || user.googleRefreshToken, // Keep the old refresh token if not received
+						googleRefreshToken: refreshToken || user.googleRefreshToken, // keep the old refresh token if a new one is not provided
 						firstName: profile.name.givenName,
 						lastName: profile.name.familyName,
 					});
-					return done(null, user);
+					logger.debug(`Updated user: ${JSON.stringify(updatedUsers[0])}`);
+					return done(null, updatedUsers[0]);
 				}
 
-				user = await User.create({
-					username: `${profile.name.givenName.toLowerCase()}${Math.floor(Math.random() * 1000)}`,
-					email: profile.emails[0].value,
-					googleId: profile.id,
-					googleAccessToken: accessToken,
-					googleRefreshToken: refreshToken,
-					firstName: profile.name.givenName,
-					lastName: profile.name.familyName,
-				});
+				const constructedUsername = `${profile.name.givenName.toLowerCase()}${profile.name.familyName
+					.charAt(0)
+					.toLowerCase()}${profile.id.slice(-2)}`;
+				// Create new user
+				user = await createUser(
+					constructedUsername,
+					'', // password not needed for Google auth
+					profile.emails[0].value,
+					profile.id,
+					accessToken,
+					refreshToken,
+					profile.name.givenName,
+					profile.name.familyName
+				);
+				logger.debug(`Created user: ${JSON.stringify(user)}`);
+
+				if (!user) {
+					throw new Error('Failed to create user');
+				}
 
 				return done(null, user);
 			} catch (error) {

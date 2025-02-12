@@ -1,8 +1,9 @@
-// backend/src/middlewares/auth.ts
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
+import User from '../models/user.model';
 
 interface AuthenticatedRequest extends Request {
-	isAuthenticated: () => boolean;
+	user: User;
+	isAuthenticated(): this is AuthenticatedRequest;
 }
 
 export function ensureAuthenticated(req: AuthenticatedRequest, res: Response, next: NextFunction) {

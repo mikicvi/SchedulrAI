@@ -5,6 +5,7 @@ import {
 	createUser,
 	getUserByUsername,
 	getUserById,
+	getUserByGoogleIdOrEmail,
 	updateUser,
 	deleteUser,
 	createCalendar,
@@ -53,6 +54,12 @@ describe('Database Services', () => {
 			expect(retrievedUser && retrievedUser?.id).toBe(user.id);
 		});
 
+		it('should retrieve a user by email or Google ID', async () => {
+			const retrievedUser = await getUserByGoogleIdOrEmail('123456789', 'test@email.com');
+			expect(retrievedUser).toBeDefined();
+			expect(retrievedUser && retrievedUser.username).toBe('testuser');
+		});
+
 		it('should update a user', async () => {
 			const result = await updateUser(user.id, { firstName: 'Updated' });
 			console.log(`user: ${user}`);
@@ -94,6 +101,11 @@ describe('Database Services', () => {
 		it('should log an error when fails to delete the user', async () => {
 			const deletedUser = await deleteUser(1234);
 			expect(deletedUser).toBeUndefined();
+			expect(logger.error).toHaveBeenCalled();
+		});
+		it('should log an error when fails to get user by Google ID or email', async () => {
+			const user = await getUserByGoogleIdOrEmail('123456789', 'non-existing-email');
+			expect(user).toBeUndefined();
 			expect(logger.error).toHaveBeenCalled();
 		});
 	});

@@ -9,6 +9,9 @@ export interface UserAttributes {
 	username: string;
 	password: string;
 	email?: string;
+	googleId?: string;
+	googleAccessToken?: string;
+	googleRefreshToken?: string;
 	firstName?: string;
 	lastName?: string;
 	createdAt: Date;
@@ -25,6 +28,9 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
 	public username!: string;
 	public password!: string;
 	public email?: string;
+	public googleId?: string;
+	public googleAccessToken?: string;
+	public googleRefreshToken?: string;
 	public firstName?: string;
 	public lastName?: string;
 	public createdAt!: Date;
@@ -51,9 +57,29 @@ User.init(
 		},
 		password: {
 			type: DataTypes.STRING,
-			allowNull: false,
+			allowNull: true, // Changed from false to true
+			validate: {
+				// Only require password if no googleId
+				customValidator(value: string) {
+					if (!this.googleId && !value) {
+						throw new Error('Password is required for non-Google users');
+					}
+				},
+			},
 		},
 		email: {
+			type: DataTypes.STRING,
+			allowNull: true,
+		},
+		googleId: {
+			type: DataTypes.STRING,
+			allowNull: true,
+		},
+		googleAccessToken: {
+			type: DataTypes.STRING,
+			allowNull: true,
+		},
+		googleRefreshToken: {
 			type: DataTypes.STRING,
 			allowNull: true,
 		},
@@ -88,8 +114,18 @@ User.init(
 		tableName: 'users',
 		hooks: {
 			beforeCreate: async (user: User) => {
-				const salt = await bcrypt.genSalt(10); // Generate salt
-				user.password = await bcrypt.hash(user.password, salt); // Hash password
+				// Only hash password if it exists (for non-Google users)
+				if (user.password) {
+					const salt = await bcrypt.genSalt(10);
+					user.password = await bcrypt.hash(user.password, salt);
+				}
+			},
+			beforeUpdate: async (user: User) => {
+				// Only hash password if it's being updated
+				if (user.changed('password') && user.password) {
+					const salt = await bcrypt.genSalt(10);
+					user.password = await bcrypt.hash(user.password, salt);
+				}
 			},
 		},
 	}

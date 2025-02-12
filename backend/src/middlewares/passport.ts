@@ -1,10 +1,18 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
-import { getUserByUsername, getUserById } from '../services/dbServices';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import {
+	getUserByUsername,
+	getUserById,
+	getUserByGoogleIdOrEmail,
+	createUser,
+	updateUser,
+} from '../services/dbServices';
 import logger from '../utils/logger';
 import User from '../models/user.model';
 
 passport.use(
+	'local',
 	new LocalStrategy(
 		{
 			usernameField: 'username',
@@ -30,6 +38,69 @@ passport.use(
 				return done(null, user);
 			} catch (error) {
 				logger.error(`Login error: ${error.message}`);
+				return done(error);
+			}
+		}
+	)
+);
+
+passport.use(
+	'google',
+	new GoogleStrategy(
+		{
+			clientID: process.env.GOOGLE_CLIENT_ID,
+			clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+			callbackURL: process.env.GOOGLE_CALLBACK_URL,
+			scope: [
+				'profile',
+				'email',
+				'https://www.googleapis.com/auth/calendar',
+				'https://www.googleapis.com/auth/calendar.events',
+				'https://www.googleapis.com/auth/gmail.send',
+				'https://www.googleapis.com/auth/gmail.compose',
+			],
+		},
+		async (accessToken, refreshToken, profile, done) => {
+			try {
+				// Try to find user by email
+				let user = await getUserByGoogleIdOrEmail(profile.id, profile.emails[0].value);
+
+				if (user) {
+					// Update existing user
+					const [_, updatedUsers] = await updateUser(user.id, {
+						googleId: profile.id,
+						googleAccessToken: accessToken,
+						googleRefreshToken: refreshToken || user.googleRefreshToken, // keep the old refresh token if a new one is not provided
+						firstName: profile.name.givenName,
+						lastName: profile.name.familyName,
+					});
+					logger.debug(`Updated user: ${JSON.stringify(updatedUsers[0])}`);
+					return done(null, updatedUsers[0]);
+				}
+
+				const constructedUsername = `${profile.name.givenName.toLowerCase()}${profile.name.familyName
+					.charAt(0)
+					.toLowerCase()}${profile.id.slice(-2)}`;
+				// Create new user
+				user = await createUser(
+					constructedUsername,
+					'', // password not needed for Google auth
+					profile.emails[0].value,
+					profile.id,
+					accessToken,
+					refreshToken,
+					profile.name.givenName,
+					profile.name.familyName
+				);
+				logger.debug(`Created user: ${JSON.stringify(user)}`);
+
+				if (!user) {
+					throw new Error('Failed to create user');
+				}
+
+				return done(null, user);
+			} catch (error) {
+				logger.error(`Google login error: ${error.message}`);
 				return done(error);
 			}
 		}

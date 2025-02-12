@@ -59,6 +59,10 @@ const LoginForm = () => {
 		}
 	};
 
+	const handleGoogleAuth = () => {
+		window.location.href = 'http://localhost:3000/api/google/callback';
+	};
+
 	return (
 		<Card className='max-w-lg w-full h-auto mx-auto mt-10 p-6'>
 			<CardTitle className='text-2xl font-bold mb-5 flex justify-center'>Sign in to SchedulrAI</CardTitle>
@@ -113,7 +117,7 @@ const LoginForm = () => {
 			<p className='flex items-center gap-x-3 text-sm text-muted-foreground before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border p-10'>
 				OR CONTINUE WITH
 			</p>
-			<Button className='w-full' variant='outline'>
+			<Button className='w-full' variant='outline' onClick={handleGoogleAuth}>
 				<Chrome className='mr-2' />
 				Google
 			</Button>

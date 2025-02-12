@@ -2,6 +2,7 @@ import User, { UserAttributes } from '../models/user.model';
 import Calendar, { CalendarAttributes } from '../models/calendar.model';
 import Event, { EventAttributes } from '../models/event.model';
 import logger from '../utils/logger'; // Assuming you have a logger utility
+import sequelize from 'sequelize';
 
 /**
  * Creates a new user in the database.
@@ -9,6 +10,9 @@ import logger from '../utils/logger'; // Assuming you have a logger utility
  * @param {string} username - The username of the new user.
  * @param {string} password - The password for the new user.
  * @param {string} email - The email address of the new user.
+ * @param {string} googleId - The Google ID of the new user.
+ * @param {string} googleAccessToken - The Google access token of the new user.
+ * @param {string} googleRefreshToken - The Google refresh token of the new user.
  * @param {string} [firstName] - The first name of the new user (optional).
  * @param {string} [lastName] - The last name of the new user (optional).
  * @param {any} [userSettings] - Additional settings for the user (optional).
@@ -19,16 +23,28 @@ export async function createUser(
 	username: string,
 	password: string,
 	email: string,
+	googleId?: string,
+	googleAccessToken?: string,
+	googleRefreshToken?: string,
 	firstName?: string,
 	lastName?: string,
 	userSettings?: any,
 	calendarId?: number
 ): Promise<User | void> {
-	return await User.create({ username, password, email, firstName, lastName, userSettings, calendarId }).catch(
-		(error) => {
-			logger.error(`Error creating user: ${error.message}`);
-		}
-	);
+	return await User.create({
+		username,
+		password,
+		email,
+		googleId,
+		googleAccessToken,
+		googleRefreshToken,
+		firstName,
+		lastName,
+		userSettings,
+		calendarId,
+	}).catch((error) => {
+		logger.error(`Error creating user: ${error.message}`);
+	});
 }
 
 /**
@@ -64,6 +80,29 @@ export async function getUserById(id: number): Promise<User | null | void> {
 		return user;
 	} catch (error) {
 		logger.error(`Error retrieving user by id: ${error.message}`);
+	}
+}
+
+/**
+ * Retrieves a user by Google ID or email.
+ *
+ * @param {string} googleId - The Google ID of the user to retrieve.
+ * @param {string} email - The email of the user to retrieve.
+ * @returns {Promise<User | null | void>} A promise that resolves to the retrieved user, null if not found, or void if an error occurs.
+ */
+export async function getUserByGoogleIdOrEmail(googleId: string, email: string): Promise<User | null | void> {
+	try {
+		const user = await User.findOne({
+			where: {
+				[sequelize.Op.or]: [{ googleId }, { email }],
+			},
+		});
+		if (!user) {
+			throw new Error(`User with Google ID ${googleId} or email ${email} not found`);
+		}
+		return user;
+	} catch (error) {
+		logger.error(`Error retrieving user by Google ID or email: ${error.message}`);
 	}
 }
 

@@ -3,7 +3,13 @@ import express from 'express';
 import session from 'express-session';
 import passport from '../../middlewares/passport';
 import authRoutes from '../../routes/authRoutes';
-import { createUser, getUserByUsername, getUserById } from '../../services/dbServices';
+import {
+	createUser,
+	getUserByUsername,
+	getUserById,
+	getUserByGoogleIdOrEmail,
+	updateUser,
+} from '../../services/dbServices';
 import User from '../../models/user.model';
 
 // Mock dependencies
@@ -249,7 +255,7 @@ describe('Authentication Routes', () => {
 
 			const done = jest.fn();
 			await new Promise<void>((resolve) => {
-				passport._strategies.local._verify({}, 'wrongusername', 'password123', (err, user, info) => {
+				(passport as any)._strategies.local._verify({}, 'wrongusername', 'password123', (err, user, info) => {
 					done(err, user, info);
 					resolve();
 				});
@@ -266,7 +272,7 @@ describe('Authentication Routes', () => {
 
 			const done = jest.fn();
 			await new Promise<void>((resolve) => {
-				passport._strategies.local._verify({}, 'testuser', 'wrongpassword', (err, user, info) => {
+				(passport as any)._strategies.local._verify({}, 'testuser', 'wrongpassword', (err, user, info) => {
 					done(err, user, info);
 					resolve();
 				});
@@ -281,13 +287,121 @@ describe('Authentication Routes', () => {
 
 			const done = jest.fn();
 			await new Promise<void>((resolve) => {
-				passport._strategies.local._verify({}, 'testuser', 'password123', (err, user, info) => {
+				(passport as any)._strategies.local._verify({}, 'testuser', 'password123', (err, user, info) => {
 					done(err, user, info);
 					resolve();
 				});
 			});
 
 			expect(done).toHaveBeenCalledWith(error, undefined, undefined);
+		});
+	});
+
+	describe('Google Authentication', () => {
+		const mockGoogleProfile = {
+			id: 'google123',
+			emails: [{ value: 'test@gmail.com' }],
+			name: {
+				givenName: 'Test',
+				familyName: 'User',
+			},
+		};
+
+		const mockGoogleTokens = {
+			accessToken: 'mock-access-token',
+			refreshToken: 'mock-refresh-token',
+		};
+
+		beforeEach(() => {
+			jest.clearAllMocks();
+		});
+
+		it('should handle successful Google authentication for new user', async () => {
+			const newUser = {
+				...mockUser,
+				googleId: mockGoogleProfile.id,
+				googleAccessToken: mockGoogleTokens.accessToken,
+				googleRefreshToken: mockGoogleTokens.refreshToken,
+			};
+
+			(getUserByGoogleIdOrEmail as jest.Mock).mockResolvedValue(null);
+			(createUser as jest.Mock).mockResolvedValue(newUser);
+
+			await new Promise<void>((resolve) => {
+				(passport as any)._strategies.google._verify(
+					mockGoogleTokens.accessToken,
+					mockGoogleTokens.refreshToken,
+					mockGoogleProfile,
+					(err: Error, user: any) => {
+						expect(err).toBeNull();
+						expect(user).toEqual(newUser);
+						resolve();
+					}
+				);
+			});
+		});
+
+		it('should handle successful Google authentication for existing user', async () => {
+			const existingUser = {
+				...mockUser,
+				googleId: mockGoogleProfile.id,
+			};
+
+			const updatedUser = {
+				...existingUser,
+				googleAccessToken: mockGoogleTokens.accessToken,
+				googleRefreshToken: mockGoogleTokens.refreshToken,
+			};
+
+			(getUserByGoogleIdOrEmail as jest.Mock).mockResolvedValue(existingUser);
+			(updateUser as jest.Mock).mockResolvedValue([1, [updatedUser]]);
+
+			await new Promise<void>((resolve) => {
+				(passport as any)._strategies.google._verify(
+					mockGoogleTokens.accessToken,
+					mockGoogleTokens.refreshToken,
+					mockGoogleProfile,
+					(err: Error, user: any) => {
+						expect(err).toBeNull();
+						expect(user).toEqual(updatedUser);
+						resolve();
+					}
+				);
+			});
+		});
+
+		it('should handle Google authentication error', async () => {
+			const error = new Error('Google API Error');
+			(getUserByGoogleIdOrEmail as jest.Mock).mockRejectedValue(error);
+
+			await new Promise<void>((resolve) => {
+				(passport as any)._strategies.google._verify(
+					mockGoogleTokens.accessToken,
+					mockGoogleTokens.refreshToken,
+					mockGoogleProfile,
+					(err: Error) => {
+						expect(err).toEqual(error);
+						resolve();
+					}
+				);
+			});
+		});
+
+		it('should handle user creation failure', async () => {
+			(getUserByGoogleIdOrEmail as jest.Mock).mockResolvedValue(null);
+			(createUser as jest.Mock).mockResolvedValue(null);
+
+			await new Promise<void>((resolve) => {
+				(passport as any)._strategies.google._verify(
+					mockGoogleTokens.accessToken,
+					mockGoogleTokens.refreshToken,
+					mockGoogleProfile,
+					(err: Error) => {
+						expect(err.message).toBe('Failed to create user');
+						resolve();
+					}
+				);
+			});
 		});
 	});
 });

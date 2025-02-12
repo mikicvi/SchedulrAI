@@ -249,7 +249,7 @@ describe('Authentication Routes', () => {
 
 			const done = jest.fn();
 			await new Promise<void>((resolve) => {
-				passport._strategies.local._verify({}, 'wrongusername', 'password123', (err, user, info) => {
+				(passport as any)._strategies.local._verify({}, 'wrongusername', 'password123', (err, user, info) => {
 					done(err, user, info);
 					resolve();
 				});
@@ -266,7 +266,7 @@ describe('Authentication Routes', () => {
 
 			const done = jest.fn();
 			await new Promise<void>((resolve) => {
-				passport._strategies.local._verify({}, 'testuser', 'wrongpassword', (err, user, info) => {
+				(passport as any)._strategies.local._verify({}, 'testuser', 'wrongpassword', (err, user, info) => {
 					done(err, user, info);
 					resolve();
 				});
@@ -281,7 +281,7 @@ describe('Authentication Routes', () => {
 
 			const done = jest.fn();
 			await new Promise<void>((resolve) => {
-				passport._strategies.local._verify({}, 'testuser', 'password123', (err, user, info) => {
+				(passport as any)._strategies.local._verify({}, 'testuser', 'password123', (err, user, info) => {
 					done(err, user, info);
 					resolve();
 				});

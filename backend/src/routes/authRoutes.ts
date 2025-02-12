@@ -75,6 +75,26 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 	}
 });
 
+router.get(
+	'/google/callback',
+	passport.authenticate('google', {
+		failureRedirect: `${process.env.FRONTEND_URL}/login`,
+		accessType: 'offline',
+		prompt: 'consent',
+		scope: [
+			'profile',
+			'email',
+			'https://www.googleapis.com/auth/calendar',
+			'https://www.googleapis.com/auth/calendar.events',
+			'https://www.googleapis.com/auth/gmail.send',
+			'https://www.googleapis.com/auth/gmail.compose',
+		],
+	}),
+	(req: Request, res: Response) => {
+		res.redirect(`${process.env.FRONTEND_URL}/`);
+	}
+);
+
 router.get('/checkAuth', (req: Request, res: Response): void => {
 	if (req.isAuthenticated()) {
 		res.json({ authenticated: true, user: req.user });

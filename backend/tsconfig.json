@@ -1,20 +1,35 @@
 {
 	"compilerOptions": {
-		"rootDir": "./src",
+		"rootDir": "./",
 		"module": "ES2020",
 		"esModuleInterop": true,
 		"target": "ES2020",
 		"moduleResolution": "node",
 		"sourceMap": true,
 		"outDir": "./dist",
-		"typeRoots": ["./node_modules/@types", "./src/types"],
+		"typeRoots": [
+			"./node_modules/@types",
+			"./src/types"
+		],
 		"skipLibCheck": true,
 		"preserveConstEnums": true,
-		"types": ["node", "jest"],
+		"types": [
+			"node",
+			"jest"
+		],
 		"strict": false,
 		"forceConsistentCasingInFileNames": true
 	},
-	"lib": ["es2020"],
-	"include": ["src", "src/tests", "jest.setup.ts"],
-	"exclude": ["node_modules", "dist"]
+	"lib": [
+		"es2020"
+	],
+	"include": [
+		"src",
+		"src/tests",
+		"jest.setup.ts"
+	],
+	"exclude": [
+		"node_modules",
+		"dist"
+	]
 }

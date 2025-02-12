@@ -16,6 +16,7 @@ The application requires the following environment variables to be set. You can 
 
 -   Chroma Server Authentication Credentials - Basic auth (RFC 7617) - need to be generated with `htpasswd -bc server.htpasswd admin admin` or `docker run --rm --entrypoint htpasswd httpd:2 -Bbn admin admin > server.htpasswd`
 -   Auth secret needs to be generated with `openssl rand -base64 32` or `openssl rand -hex 32` in Linux/MacOS or `openssl rand -base64:32` in Windows
+-   Google OAuth client ID and secret can be obtained by creating a project in the Google Cloud Console and enabling the Google+ API. The redirect URI should be set to `http://localhost:3000/api/google/callback` for local use
     | Variable Name | Description | Default Value |
     | --------------------------------- | ---------------------------------------------- | ------------------------------------------------------------- |
     | `CHROMA_SERVER_AUTHN_CREDENTIALS` | Authentication credentials for ChromaDB server | `admin:REPLACE_WITH_HASHED_PASSWORD` |
@@ -33,7 +34,11 @@ The application requires the following environment variables to be set. You can 
     | `EXPRESS_PORT` | Port on which the Express server runs | `3000` |
     | `AUTH_SECRET` | Authentication secret key | `REPLACE_WITH_GENERATED_SECRET` |
     | `ALLOWED_ORIGINS` | Allowed CORS origins (comma-separated) | `http://localhost,http://localhost:80,http://localhost:3000,http://frontend,http://localhost:5173` |
-    | `DB_PATH` | SQLite database file path | `/app/data/db.sqlite3` |
+    | `DB_PATH` | SQLite database file path | `data/db.sqlite3` |
+    | `FRONTEND_URL` | Url for frontend (e.g if on 80) | `http://localhost` |
+    | `GOOGLE_CLIENT_ID` | Google OAuth client ID | `REPLACE_WITH_GOOGLE_CLIENT_ID` |
+    | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | `REPLACE_WITH_GOOGLE_CLIENT_SECRET` |
+    | `GOOGLE_CALLBACK_URL` | Google OAuth redirect URI - port may vary depending on your setup | `http://localhost:3000/api/google/callback` |
 
 ## Ollama Environment Variables
 

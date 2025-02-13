@@ -1,6 +1,6 @@
-import { ThemeProvider } from './components/theme-provider';
-import { ModeToggle } from './components/ui/mode-toggle';
-import RegisterForm from './components/RegisterForm';
+import { ThemeProvider } from '@/components/theme-provider';
+import { ModeToggle } from '@/components/ui/mode-toggle';
+import RegisterForm from '@/components/RegisterForm';
 
 import {
 	Breadcrumb,
@@ -8,7 +8,7 @@ import {
 	BreadcrumbLink,
 	BreadcrumbSeparator,
 	BreadcrumbList,
-} from './components/ui/breadcrumb';
+} from '@/components/ui/breadcrumb';
 
 function Register() {
 	return (

@@ -1,27 +1,8 @@
-import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import { useUser } from '@/contexts/UserContext';
 
 const AuthRoute = ({ children }: { children: JSX.Element }) => {
-	const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
-	useEffect(() => {
-		const checkAuth = async () => {
-			try {
-				const response = await fetch('http://localhost:3000/api/checkAuth', {
-					credentials: 'include',
-				});
-				if (response.ok) {
-					setIsAuthenticated(true);
-				} else {
-					setIsAuthenticated(false);
-				}
-			} catch (error) {
-				setIsAuthenticated(false);
-			}
-		};
-
-		checkAuth();
-	}, []);
+	const { isAuthenticated } = useUser();
 
 	if (isAuthenticated === null) {
 		return <div>Loading...</div>; // Or a loading spinner
@@ -34,4 +15,6 @@ const AuthRoute = ({ children }: { children: JSX.Element }) => {
 	return children;
 };
 
-export default AuthRoute;
+const AuthRouteWrapper = ({ children }: { children: JSX.Element }) => <AuthRoute>{children}</AuthRoute>;
+
+export default AuthRouteWrapper;

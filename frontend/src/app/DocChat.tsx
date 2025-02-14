@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Layout from './Layout';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { BotIcon, InfoIcon, UserCircle2Icon } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';

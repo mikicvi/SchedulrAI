@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
+import { useApi } from './use-Api';
 
 // Hook to check the status of the backend, which is exposed via REST API at /api/checkPipelineStatus
 function useBackendStatus() {
 	const [status, setStatus] = useState('Not Ready');
-
+	const { apiFetch } = useApi();
 	useEffect(() => {
 		async function fetchStatus() {
 			try {
-				const response = await fetch('http://localhost:3000/api/checkPipelineStatus', {
+				const response = await apiFetch('http://localhost:3000/api/checkPipelineStatus', {
 					credentials: 'include',
 				});
 				if (response.ok) {

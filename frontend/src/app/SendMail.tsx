@@ -11,6 +11,7 @@ import { toast } from '@/hooks/use-toast';
 import { ListRestart, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
+import { useApi } from '@/hooks/use-Api';
 
 const emailSchema = z.object({
 	to: z.string().email({ message: 'Invalid email address' }),
@@ -19,6 +20,7 @@ const emailSchema = z.object({
 });
 
 export default function SendMail() {
+	const { apiFetch } = useApi();
 	const { user } = useUser();
 	const navigate = useNavigate();
 	const breadcrumbItems = [
@@ -57,12 +59,8 @@ export default function SendMail() {
 		try {
 			emailSchema.parse({ to, subject, body });
 
-			const response = await fetch('http://localhost:3000/api/email/send', {
+			const response = await apiFetch('http://localhost:3000/api/email/send', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				credentials: 'include',
 				body: JSON.stringify({ to, subject, body }),
 			});
 

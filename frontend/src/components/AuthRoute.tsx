@@ -2,17 +2,18 @@ import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { LoadingSpinner } from './ui/loading-spinner';
 import { useUser } from '@/contexts/UserContext';
-
+import { useApi } from '@/hooks/use-Api';
 const AuthRoute = ({ children }: { children: JSX.Element }) => {
 	const userContext = useUser();
 	const [localAuth, setLocalAuth] = useState<boolean | null>(null);
+	const { apiFetch } = useApi();
 
 	useEffect(() => {
 		// Only check local auth if context auth is null
 		if (userContext.isAuthenticated === null) {
 			const checkAuth = async () => {
 				try {
-					const response = await fetch('http://localhost:3000/api/checkAuth', {
+					const response = await apiFetch('http://localhost:3000/api/checkAuth', {
 						credentials: 'include',
 					});
 					setLocalAuth(response.ok);

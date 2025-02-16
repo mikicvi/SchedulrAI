@@ -7,6 +7,7 @@ import { Chrome, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from './ui/toaster';
 import { useNavigate } from 'react-router-dom';
+import { useApi } from '@/hooks/use-Api';
 
 const Register = () => {
 	const [firstName, setFirstName] = useState('');
@@ -19,6 +20,7 @@ const Register = () => {
 	const [showPassword, setShowPassword] = useState(false);
 	const { toast } = useToast();
 	const navigate = useNavigate();
+	const { apiFetch } = useApi();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -36,11 +38,8 @@ const Register = () => {
 		}
 
 		try {
-			const response = await fetch('http://localhost:3000/api/register', {
+			const response = await apiFetch('http://localhost:3000/api/register', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
 				body: JSON.stringify({
 					firstName,
 					lastName,

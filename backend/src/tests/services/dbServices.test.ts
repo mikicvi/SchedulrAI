@@ -21,6 +21,12 @@ import logger from '../../utils/logger';
 
 jest.mock('../../utils/logger'); // Mock the logger
 
+const mockUserObj = {
+	username: 'testuser',
+	password: 'password123',
+	email: 'test@email.com',
+};
+
 beforeAll(async () => {
 	await initializeDatabase();
 	await sequelize.sync({ force: true });
@@ -35,7 +41,7 @@ describe('Database Services', () => {
 		let user;
 
 		beforeAll(async () => {
-			user = await createUser('testuser', 'password123', 'test@email.com');
+			user = await createUser(mockUserObj);
 		});
 		it('should create a user', async () => {
 			expect(user).toBeDefined();
@@ -88,8 +94,13 @@ describe('Database Services', () => {
 		});
 
 		it('should log an error when failing to create a user - duplicate users', async () => {
-			await createUser('dupeuser', 'dupepswrd', 'test@email.com');
-			await createUser('dupeuser', 'dupepswrd', 'test@email.com');
+			const dupeMockUserObj = {
+				username: 'dupeuser',
+				password: 'dupepswrd',
+				email: 'test@email.com',
+			};
+			await createUser(dupeMockUserObj);
+			await createUser(dupeMockUserObj);
 			expect(logger.error).toHaveBeenCalled();
 		});
 
@@ -115,7 +126,7 @@ describe('Database Services', () => {
 		let calendar;
 
 		beforeAll(async () => {
-			user = await createUser('testuser', 'password123', 'test@email.com');
+			user = await createUser(mockUserObj);
 			calendar = await createCalendar('Test Calendar', 'Description', user.id);
 		});
 
@@ -180,7 +191,7 @@ describe('Database Services', () => {
 			await initializeDatabase();
 			await sequelize.sync({ force: true });
 			try {
-				user = await createUser('testuser', 'password123', 'test@email.com');
+				user = await createUser(mockUserObj);
 				calendar = await createCalendar('Test Calendar', 'Description', user.id);
 				event = await createEvent('Test Event', new Date(), new Date(), calendar.id);
 			} catch (error) {

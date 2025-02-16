@@ -58,7 +58,14 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 	const { username, password, email, firstName, lastName } = req.body;
 
 	try {
-		const user = await createUser(username, password, email, firstName, lastName);
+		const userToCreate = {
+			username,
+			password,
+			email,
+			firstName,
+			lastName,
+		};
+		const user = await createUser(userToCreate);
 
 		if (!user) {
 			res.status(500).json({ message: 'Registration failed' });
@@ -88,6 +95,7 @@ router.get(
 			'https://www.googleapis.com/auth/calendar.events',
 			'https://www.googleapis.com/auth/gmail.send',
 			'https://www.googleapis.com/auth/gmail.compose',
+			'https://www.googleapis.com/auth/gmail.readonly',
 		],
 	}),
 	(req: Request, res: Response) => {

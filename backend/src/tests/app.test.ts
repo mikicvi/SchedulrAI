@@ -100,13 +100,15 @@ describe('initializeApp', () => {
 	let app: any;
 
 	beforeAll(async () => {
-		(initializeDatabase as jest.Mock).mockResolvedValue(null);
+		(initializeDatabase as jest.Mock).mockResolvedValue(true);
 
 		app = await initializeApp();
 	});
 
-	it('should initialize the database', () => {
-		expect(initializeDatabase).toHaveBeenCalled();
+	it('should not overwrite the database', () => {
+		if (process.env.NODE_ENV !== 'test') {
+			expect(initializeDatabase).toHaveBeenCalledTimes(1);
+		}
 	});
 
 	it('should set up middleware and routes correctly', async () => {

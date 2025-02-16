@@ -1,4 +1,3 @@
-// backend/src/app.ts
 import express from 'express';
 import session from 'express-session';
 import passport from './middlewares/passport';
@@ -9,6 +8,8 @@ import ollamaRoutes from './routes/ollamaRoutes';
 import documentIndexRoutes from './routes/documentIndexRoutes';
 import pipelineRoutes from './routes/pipelineRoutes';
 import authRoutes from './routes/authRoutes';
+import emailRoutes from './routes/emailRoutes';
+import { existsSync } from 'fs';
 import { initializeDatabase } from './middlewares/db';
 import SQLiteStore from 'connect-sqlite3';
 import rateLimit from 'express-rate-limit';
@@ -18,7 +19,10 @@ import { resolve } from 'path';
 dotenv.config();
 
 const initializeApp = async () => {
-	await initializeDatabase();
+	const dbPath = process.env.DB_PATH || resolve('data/db.sqlite3');
+	if (!existsSync(dbPath)) {
+		await initializeDatabase();
+	}
 
 	const app = express();
 
@@ -75,6 +79,7 @@ const initializeApp = async () => {
 	app.use(baseApiRoute, documentIndexRoutes);
 	app.use(baseApiRoute, pipelineRoutes);
 	app.use(baseApiRoute, authRoutes);
+	app.use(baseApiRoute, emailRoutes);
 
 	return app;
 };

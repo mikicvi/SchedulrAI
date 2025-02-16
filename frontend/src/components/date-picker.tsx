@@ -12,8 +12,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 const FormSchema = z.object({
-	dob: z.date({
-		required_error: 'A date of birth is required.',
+	workingDate: z.date({
+		required_error: 'A working day is required.',
 	}),
 });
 
@@ -21,20 +21,17 @@ export function DatePickerForm() {
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
-			dob: new Date(),
+			workingDate: new Date(),
 		},
 	});
 
 	function handleDateChange(date: Date | undefined) {
 		if (date) {
-			form.setValue('dob', date);
+			form.setValue('workingDate', date);
+			console.log('Date selected:', date);
 			toast({
 				title: 'Date selected:',
-				description: (
-					<pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-						<code className='text-white'>{format(date, 'PPP')}</code>
-					</pre>
-				),
+				description: `Date selected: ${format(date, 'PPP')}`,
 			});
 		}
 	}
@@ -44,7 +41,7 @@ export function DatePickerForm() {
 			<form className='space-y-8'>
 				<FormField
 					control={form.control}
-					name='dob'
+					name='workingDate'
 					render={({ field }) => (
 						<FormItem className='flex flex-col'>
 							<FormLabel>Schedule a Working Day</FormLabel>

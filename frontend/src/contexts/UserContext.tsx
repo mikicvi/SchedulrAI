@@ -9,6 +9,7 @@ interface User {
 	createdAt: string;
 	updatedAt: string;
 	userSettings: any;
+	googleUser: boolean;
 	calendarId: any;
 	initials: string;
 }
@@ -32,24 +33,31 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 				});
 				if (response.ok) {
 					const data = await response.json();
+					const isGoogleUser = !!data.user.googleId;
 					setIsAuthenticated(true);
-					setUser({
-						id: data.user.id,
-						username: data.user.username,
-						email: data.user.email,
-						firstName: data.user.firstName,
-						lastName: data.user.lastName,
-						createdAt: data.user.createdAt,
-						updatedAt: data.user.updatedAt,
-						userSettings: data.user.userSettings,
-						calendarId: data.user.calendarId,
-						initials: data.user.firstName[0] + data.user.lastName[0],
-					});
+					if (data.user) {
+						setUser({
+							id: data.user.id,
+							username: data.user.username,
+							email: data.user.email,
+							firstName: data.user.firstName,
+							lastName: data.user.lastName,
+							createdAt: data.user.createdAt,
+							updatedAt: data.user.updatedAt,
+							userSettings: data.user.userSettings,
+							googleUser: isGoogleUser,
+							calendarId: data.user.calendarId,
+							initials: data.user.firstName[0] + data.user.lastName[0],
+						});
+					}
 				} else {
 					setIsAuthenticated(false);
+					setUser(null);
 				}
 			} catch (error) {
+				console.error('Auth check error:', error);
 				setIsAuthenticated(false);
+				setUser(null);
 			}
 		};
 

@@ -1,7 +1,8 @@
-import { Calendar, BotIcon, Home, Mail, UserRoundCogIcon, MessageCircleHeart, LifeBuoy } from 'lucide-react';
+import { Calendar, BotIcon, Home, Mail, UserRoundCogIcon, MessageCircleHeart, LifeBuoy, Info } from 'lucide-react';
 import { SchedulrHeader } from './ui/sched-header';
 import { UserProfile } from './ui/user-profile';
 import { useUser } from '@/contexts/UserContext';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
 	Sidebar,
 	SidebarContent,
@@ -58,6 +59,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const { user } = useUser();
 	const location = useLocation();
 
+	const handleDisabledClick = (e: React.MouseEvent) => {
+		if (!user?.googleUser) {
+			e.preventDefault();
+		}
+	};
+
 	return (
 		<Sidebar collapsible='icon' {...props}>
 			<SidebarHeader className='pt-3'>
@@ -70,12 +77,42 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 						<SidebarMenu>
 							{items.map((item) => (
 								<SidebarMenuItem key={item.title}>
-									<SidebarMenuButton asChild isActive={location.pathname === item.url}>
-										<a href={item.url}>
-											<item.icon />
-											<span>{item.title}</span>
-										</a>
-									</SidebarMenuButton>
+									{item.title === 'Send Mail' ? (
+										<div className='flex items-center'>
+											<SidebarMenuButton
+												asChild
+												isActive={location.pathname === item.url}
+												disabled={!user?.googleUser}
+											>
+												<a
+													href={item.url}
+													onClick={handleDisabledClick}
+													className={!user?.googleUser ? 'opacity-50 cursor-not-allowed' : ''}
+													aria-disabled={!user?.googleUser}
+												>
+													<item.icon />
+													<span>{item.title}</span>
+												</a>
+											</SidebarMenuButton>
+											{!user?.googleUser && (
+												<Tooltip>
+													<TooltipTrigger asChild>
+														<Info className='h-4 w-4 ml-2 text-muted-foreground' />
+													</TooltipTrigger>
+													<TooltipContent>
+														<p>Please connect your Google account to use this feature</p>
+													</TooltipContent>
+												</Tooltip>
+											)}
+										</div>
+									) : (
+										<SidebarMenuButton asChild isActive={location.pathname === item.url}>
+											<a href={item.url}>
+												<item.icon />
+												<span>{item.title}</span>
+											</a>
+										</SidebarMenuButton>
+									)}
 								</SidebarMenuItem>
 							))}
 						</SidebarMenu>

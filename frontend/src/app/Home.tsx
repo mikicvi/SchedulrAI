@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import usePipeline from '@/hooks/use-pipeline';
 import Layout from './Layout';
 import { DatePickerForm } from '@/components/date-picker';
+import { Toaster } from '@/components/ui/toaster';
 
 const Home = () => {
 	const { userInput, loading, response, handleInputChange, handleSubmit } = usePipeline();
@@ -54,6 +55,7 @@ const Home = () => {
 					)}
 				</div>
 			</div>
+			<Toaster />
 		</Layout>
 	);
 };

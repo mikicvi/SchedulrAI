@@ -9,6 +9,8 @@ import { z } from 'zod';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from '@/hooks/use-toast';
 import { ListRestart, Send } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Toaster } from '@/components/ui/toaster';
 
 const emailSchema = z.object({
 	to: z.string().email({ message: 'Invalid email address' }),
@@ -18,10 +20,32 @@ const emailSchema = z.object({
 
 export default function SendMail() {
 	const { user } = useUser();
+	const navigate = useNavigate();
 	const breadcrumbItems = [
 		{ title: 'Send Mail', href: '/sendMail' },
 		{ title: 'Send email from your Google Account' },
 	];
+
+	const [to, setTo] = useState('');
+	const [subject, setSubject] = useState('');
+	const [body, setBody] = useState('');
+
+	// Redirect if not Google authenticated
+	if (!user?.googleUser) {
+		return (
+			<Layout breadcrumbItems={breadcrumbItems}>
+				<Card className='p-6'>
+					<div className='text-center'>
+						<h2 className='text-lg font-semibold mb-4'>Google Authentication Required</h2>
+						<p className='mb-4'>You need to authenticate with Google to use the email feature.</p>
+						<Button onClick={() => navigate('/')} variant='secondary'>
+							Return to Home
+						</Button>
+					</div>
+				</Card>
+			</Layout>
+		);
+	}
 
 	const resetFields = () => {
 		setTo('');
@@ -29,18 +53,32 @@ export default function SendMail() {
 		setBody('');
 	};
 
-	const [to, setTo] = useState('');
-	const [subject, setSubject] = useState('');
-	const [body, setBody] = useState('');
-
 	const handleSendEmail = async () => {
 		try {
 			emailSchema.parse({ to, subject, body });
-			// @todo: consume backend API to send email
-			toast({
-				title: 'Success',
-				description: 'Email to ' + to + ' sent successfully',
+
+			const response = await fetch('http://localhost:3000/api/email/send', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				credentials: 'include',
+				body: JSON.stringify({ to, subject, body }),
 			});
+
+			if (response.ok) {
+				toast({
+					title: 'Success',
+					description: 'Email to ' + to + ' sent successfully',
+				});
+			} else {
+				const error = await response.json();
+				toast({
+					title: 'Error',
+					description: error.message,
+					variant: 'destructive',
+				});
+			}
 		} catch (error) {
 			if (error instanceof z.ZodError) {
 				toast({
@@ -108,6 +146,7 @@ export default function SendMail() {
 						</Button>
 					</div>
 				</form>
+				<Toaster />
 			</Card>
 		</Layout>
 	);

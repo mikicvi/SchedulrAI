@@ -9,6 +9,7 @@ declare global {
 			logout(done: (err: any) => void): void;
 			user?: User;
 			isAuthenticated(): boolean;
+			csrfToken?: () => string;
 		}
 	}
 }

@@ -111,4 +111,12 @@ router.get('/checkAuth', (req: Request, res: Response): void => {
 	}
 });
 
+router.get('/csrfToken', (req, res) => {
+	res.cookie('XSRF-TOKEN', req.csrfToken(), {
+		sameSite: 'lax',
+		secure: process.env.NODE_ENV === 'production',
+	});
+	res.json({ csrfToken: req.csrfToken() });
+});
+
 export default router;

@@ -3,6 +3,7 @@ import session from 'express-session';
 import passport from './middlewares/passport';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import lusca from 'lusca';
 import chromaRoutes from './routes/chromaRoutes';
 import ollamaRoutes from './routes/ollamaRoutes';
 import documentIndexRoutes from './routes/documentIndexRoutes';
@@ -45,7 +46,8 @@ const initializeApp = async () => {
 	// Rate limiting middleware
 	const rateLimiter = rateLimit({
 		windowMs: 10 * 60 * 1000, // 10 minutes
-		max: 100,
+		max: 500,
+		skipSuccessfulRequests: true,
 		message: 'Too many requests from this IP, please try again after 15 minutes',
 	});
 
@@ -66,6 +68,18 @@ const initializeApp = async () => {
 				dir: '.',
 				table: 'sessions',
 			}),
+		})
+	);
+
+	app.use(
+		lusca({
+			csrf: {
+				cookie: 'XSRF-TOKEN', // The name of the cookie to send to the client
+				header: '_csrf', // The name of the header to read the token from
+			},
+			xssProtection: true,
+			nosniff: true,
+			referrerPolicy: 'same-origin',
 		})
 	);
 	app.use(passport.initialize());

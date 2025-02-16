@@ -42,22 +42,31 @@ const items = [
 	},
 ];
 
-const helpItems = [
-	{
-		title: 'Support',
-		url: 'mailto:vilim.mikic@gmail.com',
-		icon: LifeBuoy,
-	},
-	{
-		title: 'Feeback',
-		url: 'mailto:vilim.mikic@gmail.com',
-		icon: MessageCircleHeart,
-	},
-];
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const { user } = useUser();
 	const location = useLocation();
+
+	const getHelpItemUrl = (subject: string) => {
+		if (user?.googleUser) {
+			return `/sendMail?subject=${encodeURIComponent(
+				subject
+			)}&to=vilim.mikic@gmail.com&body=Please describe your ${subject.toLowerCase()} here`;
+		}
+		return `mailto:vilim.mikic@gmail.com?subject=${encodeURIComponent(subject)}`;
+	};
+
+	const helpItems = [
+		{
+			title: 'Support',
+			url: getHelpItemUrl('Support Request'),
+			icon: LifeBuoy,
+		},
+		{
+			title: 'Feedback',
+			url: getHelpItemUrl('Feedback'),
+			icon: MessageCircleHeart,
+		},
+	];
 
 	const handleDisabledClick = (e: React.MouseEvent) => {
 		if (!user?.googleUser) {

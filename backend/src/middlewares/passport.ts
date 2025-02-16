@@ -58,6 +58,7 @@ passport.use(
 				'https://www.googleapis.com/auth/calendar.events',
 				'https://www.googleapis.com/auth/gmail.send',
 				'https://www.googleapis.com/auth/gmail.compose',
+				'https://www.googleapis.com/auth/gmail.readonly',
 			],
 		},
 		async (accessToken, refreshToken, profile, done) => {
@@ -82,16 +83,17 @@ passport.use(
 					.charAt(0)
 					.toLowerCase()}${profile.id.slice(-2)}`;
 				// Create new user
-				user = await createUser(
-					constructedUsername,
-					'', // password not needed for Google auth
-					profile.emails[0].value,
-					profile.id,
-					accessToken,
-					refreshToken,
-					profile.name.givenName,
-					profile.name.familyName
-				);
+				const newUserObj = {
+					username: constructedUsername,
+					password: '', // password not needed for Google auth
+					email: profile.emails[0].value,
+					googleId: profile.id,
+					googleAccessToken: accessToken,
+					googleRefreshToken: refreshToken,
+					firstName: profile.name.givenName,
+					lastName: profile.name.familyName,
+				};
+				user = await createUser(newUserObj);
 				logger.debug(`Created user: ${JSON.stringify(user)}`);
 
 				if (!user) {

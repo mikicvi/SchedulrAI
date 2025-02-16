@@ -3,34 +3,39 @@ import Calendar, { CalendarAttributes } from '../models/calendar.model';
 import Event, { EventAttributes } from '../models/event.model';
 import logger from '../utils/logger'; // Assuming you have a logger utility
 import sequelize from 'sequelize';
+export interface CreateUserParams {
+	username: string;
+	password: string;
+	email: string;
+	googleId?: string;
+	googleAccessToken?: string;
+	googleRefreshToken?: string;
+	firstName?: string;
+	lastName?: string;
+	userSettings?: any;
+	calendarId?: number;
+}
 
 /**
  * Creates a new user in the database.
  *
- * @param {string} username - The username of the new user.
- * @param {string} password - The password for the new user.
- * @param {string} email - The email address of the new user.
- * @param {string} googleId - The Google ID of the new user.
- * @param {string} googleAccessToken - The Google access token of the new user.
- * @param {string} googleRefreshToken - The Google refresh token of the new user.
- * @param {string} [firstName] - The first name of the new user (optional).
- * @param {string} [lastName] - The last name of the new user (optional).
- * @param {any} [userSettings] - Additional settings for the user (optional).
- * @param {number} [calendarId] - The ID of the user's calendar (optional).
+ * @param {CreateUserParams} createUserParams - The parameters for creating a new user.
  * @returns {Promise<User | void>} A promise that resolves to the created user or void if an error occurs.
  */
-export async function createUser(
-	username: string,
-	password: string,
-	email: string,
-	googleId?: string,
-	googleAccessToken?: string,
-	googleRefreshToken?: string,
-	firstName?: string,
-	lastName?: string,
-	userSettings?: any,
-	calendarId?: number
-): Promise<User | void> {
+export async function createUser(createUserParams: CreateUserParams): Promise<User | void> {
+	const {
+		username,
+		password,
+		email,
+		googleId,
+		googleAccessToken,
+		googleRefreshToken,
+		firstName,
+		lastName,
+		userSettings,
+		calendarId,
+	} = createUserParams;
+
 	return await User.create({
 		username,
 		password,

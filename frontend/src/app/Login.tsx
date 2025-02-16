@@ -1,6 +1,6 @@
-import { ThemeProvider } from './components/theme-provider';
-import { ModeToggle } from './components/ui/mode-toggle';
-import LoginForm from './components/LoginForm';
+import { ThemeProvider } from '@/components/theme-provider';
+import { ModeToggle } from '@/components/ui/mode-toggle';
+import LoginForm from '@/components/LoginForm';
 
 import {
 	Breadcrumb,
@@ -8,7 +8,7 @@ import {
 	BreadcrumbLink,
 	BreadcrumbSeparator,
 	BreadcrumbList,
-} from './components/ui/breadcrumb';
+} from '@/components/ui/breadcrumb';
 
 function Login() {
 	return (

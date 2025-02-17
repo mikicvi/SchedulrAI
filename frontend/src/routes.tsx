@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import Login from './app/Login';
 import Register from './app/Register';
 import Calendar from './app/Calendar';
@@ -9,69 +9,103 @@ import SendMail from './app/SendMail';
 import DocChat from './app/DocChat';
 import AuthRoute from './components/AuthRoute';
 import Logout from './components/Logout';
+import { AnimatePresence } from 'framer-motion';
+import PageTransition from './components/PageTransition';
 
 const AppRoutes = () => {
+	const location = useLocation();
+
 	return (
-		<Routes>
-			<Route path='/login' element={<Login />} />
-			<Route path='/register' element={<Register />} />
-			<Route
-				path='/'
-				element={
-					<AuthRoute>
-						<Home />
-					</AuthRoute>
-				}
-			/>
-			<Route
-				path='/calendar'
-				element={
-					<AuthRoute>
-						<Calendar />
-					</AuthRoute>
-				}
-			/>
-			<Route
-				path='/sendMail'
-				element={
-					<AuthRoute>
-						<SendMail />
-					</AuthRoute>
-				}
-			/>
-			<Route
-				path='/documentsChat'
-				element={
-					<AuthRoute>
-						<DocChat />
-					</AuthRoute>
-				}
-			/>
-			<Route
-				path='/profile'
-				element={
-					<AuthRoute>
-						<Profile />
-					</AuthRoute>
-				}
-			/>
-			<Route
-				path='/settings'
-				element={
-					<AuthRoute>
-						<Settings />
-					</AuthRoute>
-				}
-			/>
-			<Route
-				path='/logout'
-				element={
-					<AuthRoute>
-						<Logout />
-					</AuthRoute>
-				}
-			/>
-		</Routes>
+		<AnimatePresence mode='wait'>
+			<Routes location={location} key={location.pathname}>
+				<Route
+					path='/login'
+					element={
+						<PageTransition>
+							<Login />
+						</PageTransition>
+					}
+				/>
+				<Route
+					path='/register'
+					element={
+						<PageTransition>
+							<Register />
+						</PageTransition>
+					}
+				/>
+				<Route
+					path='/'
+					element={
+						<AuthRoute>
+							<PageTransition>
+								<Home />
+							</PageTransition>
+						</AuthRoute>
+					}
+				/>
+				<Route
+					path='/calendar'
+					element={
+						<AuthRoute>
+							<PageTransition>
+								<Calendar />
+							</PageTransition>
+						</AuthRoute>
+					}
+				/>
+				<Route
+					path='/sendMail'
+					element={
+						<AuthRoute>
+							<PageTransition>
+								<SendMail />
+							</PageTransition>
+						</AuthRoute>
+					}
+				/>
+				<Route
+					path='/documentsChat'
+					element={
+						<AuthRoute>
+							<PageTransition>
+								<DocChat />
+							</PageTransition>
+						</AuthRoute>
+					}
+				/>
+				<Route
+					path='/profile'
+					element={
+						<AuthRoute>
+							<PageTransition>
+								<Profile />
+							</PageTransition>
+						</AuthRoute>
+					}
+				/>
+				<Route
+					path='/settings'
+					element={
+						<AuthRoute>
+							<PageTransition>
+								<Settings />
+							</PageTransition>
+						</AuthRoute>
+					}
+				/>
+				<Route
+					path='/logout'
+					element={
+						<AuthRoute>
+							<PageTransition>
+								<Logout />
+							</PageTransition>
+						</AuthRoute>
+					}
+				/>
+			</Routes>
+		</AnimatePresence>
 	);
 };
 

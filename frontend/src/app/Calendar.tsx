@@ -1,10 +1,14 @@
 import Layout from './Layout';
+import CalendarComponent from '@/components/calendar/CalendarComponent';
+import { Card } from '@/components/ui/card';
 
 const Calendar = () => {
 	const breadcrumbItems = [{ title: 'Calendar', href: '/calendar' }, { title: 'Task Time Estimation' }];
 	return (
 		<Layout breadcrumbItems={breadcrumbItems}>
-			<h1> Calendar </h1>
+			<Card className='pb-4'>
+				<CalendarComponent />
+			</Card>
 		</Layout>
 	);
 };

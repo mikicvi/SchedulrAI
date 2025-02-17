@@ -43,7 +43,7 @@ async function checkForBouncedEmails(userId: number) {
 
 	const res = await gmailClient.users.messages.list({
 		userId: 'me',
-		q: 'from:mailer-daemon@* OR subject:(Mail Delivery Subsystem) newer_than:30s',
+		q: 'from:mailer-daemon@* OR subject:(Mail Delivery Subsystem) newer_than:1h is:unread',
 		maxResults: 5,
 	});
 

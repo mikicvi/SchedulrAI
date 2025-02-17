@@ -1,5 +1,5 @@
 import Layout from './Layout';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,8 +9,9 @@ import { z } from 'zod';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from '@/hooks/use-toast';
 import { ListRestart, Send } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
+import { useApi } from '@/hooks/use-Api';
 
 const emailSchema = z.object({
 	to: z.string().email({ message: 'Invalid email address' }),
@@ -19,16 +20,24 @@ const emailSchema = z.object({
 });
 
 export default function SendMail() {
+	const { apiFetch } = useApi();
 	const { user } = useUser();
 	const navigate = useNavigate();
+	const [searchParams] = useSearchParams();
 	const breadcrumbItems = [
 		{ title: 'Send Mail', href: '/sendMail' },
 		{ title: 'Send email from your Google Account' },
 	];
 
-	const [to, setTo] = useState('');
-	const [subject, setSubject] = useState('');
-	const [body, setBody] = useState('');
+	const [to, setTo] = useState(searchParams.get('to') || '');
+	const [subject, setSubject] = useState(searchParams.get('subject') || '');
+	const [body, setBody] = useState(searchParams.get('body') || '');
+
+	useEffect(() => {
+		setTo(searchParams.get('to') || '');
+		setSubject(searchParams.get('subject') || '');
+		setBody(searchParams.get('body') || '');
+	}, [searchParams]);
 
 	// Redirect if not Google authenticated
 	if (!user?.googleUser) {
@@ -57,12 +66,8 @@ export default function SendMail() {
 		try {
 			emailSchema.parse({ to, subject, body });
 
-			const response = await fetch('http://localhost:3000/api/email/send', {
+			const response = await apiFetch('http://localhost:3000/api/email/send', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				credentials: 'include',
 				body: JSON.stringify({ to, subject, body }),
 			});
 
@@ -131,6 +136,7 @@ export default function SendMail() {
 					<div className='mb-4'>
 						<Label>Body</Label>
 						<Textarea
+							className='min-h-[250px]'
 							value={body}
 							onChange={(e) => setBody(e.target.value)}
 							required

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useApi } from '@/hooks/use-Api';
 
 interface User {
 	id: number;
@@ -24,11 +25,12 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 	const [user, setUser] = useState<User | null>(null);
 	const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+	const { apiFetch } = useApi();
 
 	useEffect(() => {
 		const checkAuth = async () => {
 			try {
-				const response = await fetch('http://localhost:3000/api/checkAuth', {
+				const response = await apiFetch('http://localhost:3000/api/checkAuth', {
 					credentials: 'include',
 				});
 				if (response.ok) {
@@ -62,7 +64,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 		};
 
 		checkAuth();
-	}, []);
+	}, [apiFetch]);
 
 	return <UserContext.Provider value={{ user, isAuthenticated }}>{children}</UserContext.Provider>;
 };

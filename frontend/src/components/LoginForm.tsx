@@ -4,27 +4,25 @@ import { Button } from './ui/button';
 import { Card, CardDescription, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Chrome, Loader2, Eye, EyeOff } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { Toaster } from './ui/toaster';
+import { useApi } from '@/hooks/use-Api';
 
 const LoginForm = () => {
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
-	const navigate = useNavigate();
+	// const navigate = useNavigate();
+	const { apiFetch } = useApi();
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
 		setIsLoading(true);
 		try {
-			const response = await fetch('http://localhost:3000/api/login', {
+			const response = await apiFetch('http://localhost:3000/api/login', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				credentials: 'include',
 				body: JSON.stringify({ username, password }),
 			});
 
@@ -46,7 +44,7 @@ const LoginForm = () => {
 				description: 'Logged in successfully!',
 			});
 
-			navigate('/');
+			window.location.href = '/';
 		} catch (error) {
 			console.error('Error:', error);
 			toast({

@@ -116,7 +116,7 @@ describe('checkForBouncedEmails', () => {
 		expect(OAuth2Client.prototype.refreshAccessToken).toHaveBeenCalled();
 		expect(gmail('v1').users.messages.list).toHaveBeenCalledWith({
 			userId: 'me',
-			q: 'from:mailer-daemon@* OR subject:(Mail Delivery Subsystem) newer_than:30s',
+			q: 'from:mailer-daemon@* OR subject:(Mail Delivery Subsystem) newer_than:1h is:unread',
 			maxResults: 5,
 		});
 		expect(gmail('v1').users.messages.get).toHaveBeenCalledTimes(2);
@@ -152,7 +152,7 @@ describe('checkForBouncedEmails', () => {
 		expect(OAuth2Client.prototype.refreshAccessToken).toHaveBeenCalled();
 		expect(gmail('v1').users.messages.list).toHaveBeenCalledWith({
 			userId: 'me',
-			q: 'from:mailer-daemon@* OR subject:(Mail Delivery Subsystem) newer_than:30s',
+			q: 'from:mailer-daemon@* OR subject:(Mail Delivery Subsystem) newer_than:1h is:unread',
 			maxResults: 5,
 		});
 		expect(bouncedEmails).toEqual([]);

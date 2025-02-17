@@ -29,7 +29,7 @@ function useBackendStatus() {
 			}
 		}
 		fetchStatus();
-	}, []);
+	}, [apiFetch]);
 
 	return status;
 }

@@ -136,6 +136,7 @@ export default function SendMail() {
 					<div className='mb-4'>
 						<Label>Body</Label>
 						<Textarea
+							className='min-h-[250px]'
 							value={body}
 							onChange={(e) => setBody(e.target.value)}
 							required

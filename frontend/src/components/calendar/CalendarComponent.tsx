@@ -1,17 +1,18 @@
 import { Button } from '@/components/ui/button';
 import { Event, Importance } from '@/types/calendar';
 import { format, getDay, parse, startOfWeek } from 'date-fns';
-import { enUS } from 'date-fns/locale';
+import { enIE } from 'date-fns/locale';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Calendar as BigCalendar, dateFnsLocalizer, SlotInfo, ToolbarProps, View } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './calendar-style.css';
+import '@/index.css';
 import { EventDialog } from './event-dialog';
 import { EventForm } from './event-form';
 
 const locales = {
-	'en-US': enUS,
+	'en-IE': enIE,
 };
 
 const localizer = dateFnsLocalizer({
@@ -146,6 +147,7 @@ export default function CalendarComponent() {
 					eventPropGetter={(event) => ({
 						style: getEventStyle(event),
 					})}
+					culture='en-IE'
 				/>
 			</div>
 

@@ -15,9 +15,8 @@
 }
 
 .rbc-today {
-	background-color: hsl(var(--primary)) !important;
-	opacity: 0.4;
-	border: none !important;
+	background-color: var(--glass-background) !important;
+	backdrop-filter: blur(var(--glass-blur)) !important;
 }
 
 .rbc-day-bg {

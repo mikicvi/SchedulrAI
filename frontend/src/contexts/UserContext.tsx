@@ -64,7 +64,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 		};
 
 		checkAuth();
-	}, []);
+	}, [apiFetch]);
 
 	return <UserContext.Provider value={{ user, isAuthenticated }}>{children}</UserContext.Provider>;
 };

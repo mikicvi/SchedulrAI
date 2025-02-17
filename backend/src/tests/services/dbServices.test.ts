@@ -193,7 +193,13 @@ describe('Database Services', () => {
 			try {
 				user = await createUser(mockUserObj);
 				calendar = await createCalendar('Test Calendar', 'Description', user.id);
-				event = await createEvent('Test Event', new Date(), new Date(), calendar.id);
+				let eventObject = {
+					title: 'Test Event',
+					startTime: new Date(),
+					endTime: new Date(),
+					calendarId: calendar.id,
+				};
+				event = await createEvent(eventObject);
 			} catch (error) {
 				console.error('Error during setup:', error);
 			}
@@ -246,7 +252,13 @@ describe('Database Services', () => {
 		});
 
 		it('should log an error when failing to create an event', async () => {
-			await createEvent('Test Event', new Date(), new Date(), 9999);
+			const testEventObject = {
+				title: 'Test Event',
+				startTime: new Date(),
+				endTime: new Date(),
+				calendarId: 9999,
+			};
+			await createEvent(testEventObject);
 			expect(logger.error).toHaveBeenCalled();
 		});
 	});

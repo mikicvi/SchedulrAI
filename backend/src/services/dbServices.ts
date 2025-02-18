@@ -322,3 +322,17 @@ export async function setupUserCalendar(userId: number): Promise<boolean> {
 		return false;
 	}
 }
+
+export async function getAllEvents(calendarId: number): Promise<Event[]> {
+	try {
+		const events = await Event.findAll({
+			where: { calendarId },
+			order: [['startTime', 'ASC']],
+		});
+		logger.info(`Retrieved ${events.length} events for calendar ${calendarId}`);
+		return events;
+	} catch (error) {
+		logger.error(`Error retrieving events for calendar ${calendarId}: ${error.message}`);
+		return [];
+	}
+}

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import passport from '../middlewares/passport';
-import { createUser, setupUserCalendar, updateUser } from '../services/dbServices';
+import { createUser, setupUserCalendar } from '../services/dbServices';
 import logger from '../utils/logger';
 import User from '../models/user.model';
 

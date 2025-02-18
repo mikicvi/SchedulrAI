@@ -1,6 +1,7 @@
 import { createBaseController } from './baseController';
-import { createEvent, getEventById, updateEvent, deleteEvent } from '../services/dbServices';
+import { createEvent, getEventById, updateEvent, deleteEvent, getAllEvents } from '../services/dbServices';
 import Event from '../models/event.model';
+import logger from '../utils/logger';
 
 export const eventController = createBaseController<Event>(
 	{
@@ -17,6 +18,13 @@ export const eventController = createBaseController<Event>(
 		getById: async (id) => {
 			const result = await getEventById(id);
 			return result || null;
+		},
+		getAll: async (calendarId: number): Promise<Event[]> => {
+			const events = await getAllEvents(calendarId);
+			if (!events) {
+				return [];
+			}
+			return events || [];
 		},
 		update: async (id, updates) => {
 			const result = await updateEvent(id, updates);

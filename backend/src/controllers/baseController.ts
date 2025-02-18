@@ -4,6 +4,7 @@ import logger from '../utils/logger';
 type ServiceFunctions<T> = {
 	create: (data: any) => Promise<T>;
 	getById: (id: number) => Promise<T | null>;
+	getAll?: (id: number) => Promise<T[]>;
 	update: (id: number, data: any) => Promise<[number, T[]] | null | void>;
 	delete: (id: number) => Promise<number | void>;
 };
@@ -50,6 +51,41 @@ export const createBaseController = <T>(serviceFunctions: ServiceFunctions<T>, r
 			}
 		} catch (error) {
 			logger.error(`Error retrieving ${resourceName}: ${error.message}`);
+			res.status(500).json({
+				status: 'error',
+				message: 'Internal server error',
+			});
+		}
+	},
+
+	async getAll(req: Request, res: Response) {
+		// Check if getAll is implemented
+		if (!serviceFunctions.getAll) {
+			logger.warn(`getAll not implemented for ${resourceName}`);
+			res.status(501).json({
+				status: 'error',
+				message: 'Not implemented',
+			});
+		}
+
+		try {
+			const calendarId = Number(req.params.id);
+			if (!calendarId) {
+				res.status(400).json({
+					status: 'error',
+					message: 'Calendar ID is required',
+				});
+			}
+
+			const resources = await serviceFunctions.getAll(calendarId);
+			logger.info(`Retrieved all ${resourceName}s for calendar ${calendarId}`);
+
+			res.status(200).json({
+				status: 'success',
+				data: resources,
+			});
+		} catch (error) {
+			logger.error(`Error retrieving ${resourceName}s: ${error.message}`);
 			res.status(500).json({
 				status: 'error',
 				message: 'Internal server error',

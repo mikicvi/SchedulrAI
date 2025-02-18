@@ -93,6 +93,64 @@ describe('eventController', () => {
 		});
 	});
 
+	describe('getAll', () => {
+		it('should return all events for a calendar', async () => {
+			req.params = { id: '1' };
+			const mockEvents = [mockEvent];
+			(dbServices.getAllEvents as jest.Mock).mockResolvedValue(mockEvents);
+
+			await eventController.getAll(req as Request, res as Response);
+
+			expect(res.status).toHaveBeenCalledWith(200);
+			expect(res.json).toHaveBeenCalledWith({
+				status: 'success',
+				data: mockEvents,
+			});
+			expect(logger.info).toHaveBeenCalled();
+		});
+
+		it('should return 200 and empty array if no events found for a calendar', async () => {
+			req.params = { id: '999' };
+			(dbServices.getAllEvents as jest.Mock).mockResolvedValue([]);
+
+			await eventController.getAll(req as Request, res as Response);
+
+			expect(res.status).toHaveBeenCalledWith(200);
+			expect(res.json).toHaveBeenCalledWith({
+				status: 'success',
+				data: [],
+			});
+			expect(logger.warn).toHaveBeenCalled();
+		});
+
+		it('should return 500 if there is an error', async () => {
+			const error = new Error('Internal server error');
+			req.params = { id: '1' };
+			(dbServices.getAllEvents as jest.Mock).mockRejectedValue(error);
+
+			await eventController.getAll(req as Request, res as Response);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.json).toHaveBeenCalledWith({
+				status: 'error',
+				message: error.message,
+			});
+			expect(logger.error).toHaveBeenCalled;
+		});
+
+		it('should return 400 if calendar id is missing', async () => {
+			req.params = {};
+			await eventController.getAll(req as Request, res as Response);
+
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.json).toHaveBeenCalledWith({
+				status: 'error',
+				message: 'Calendar ID is required',
+			});
+			expect(logger.warn).toHaveBeenCalled();
+		});
+	});
+
 	describe('update', () => {
 		it('should update an event and return the updated event', async () => {
 			const updatedEvent = { ...mockEvent, title: 'Updated Event' };

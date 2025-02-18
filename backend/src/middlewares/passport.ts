@@ -7,6 +7,7 @@ import {
 	getUserByGoogleIdOrEmail,
 	createUser,
 	updateUser,
+	setupUserCalendar,
 } from '../services/dbServices';
 import logger from '../utils/logger';
 import User from '../models/user.model';
@@ -98,6 +99,12 @@ passport.use(
 
 				if (!user) {
 					throw new Error('Failed to create user');
+				}
+
+				// Setup calendar for new user
+				const calendarSetup = await setupUserCalendar(user.id);
+				if (!calendarSetup) {
+					logger.error(`Failed to setup calendar for Google user ${user.id}`);
 				}
 
 				return done(null, user);

@@ -12,6 +12,7 @@ import {
 	getCalendarById,
 	updateCalendar,
 	deleteCalendar,
+	setupUserCalendar,
 	createEvent,
 	getEventById,
 	updateEvent,
@@ -153,6 +154,11 @@ describe('Database Services', () => {
 			}
 		});
 
+		it('should setup a user calendar', async () => {
+			const result = await setupUserCalendar(user.id);
+			expect(result).toBe(true);
+		});
+
 		it('should delete a calendar', async () => {
 			const affectedRows = await deleteCalendar(calendar.id);
 			expect(affectedRows).toBe(1);
@@ -179,6 +185,12 @@ describe('Database Services', () => {
 		it('should log an error when failing to create a calendar', async () => {
 			await createCalendar('', '', 9999);
 			expect(logger.error).toHaveBeenCalled();
+		});
+
+		it('should log an error when failing to setup a user calendar for non existing user', async () => {
+			const result = await setupUserCalendar(9999);
+			expect(logger.error).toHaveBeenCalled();
+			expect(result).toBe(false);
 		});
 	});
 

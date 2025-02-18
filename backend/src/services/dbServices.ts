@@ -308,3 +308,17 @@ export async function deleteEvent(id: number): Promise<number | void> {
 		logger.error(`Error deleting event: ${error.message}`);
 	}
 }
+
+export async function setupUserCalendar(userId: number): Promise<boolean> {
+	try {
+		const calendar = await createCalendar('Personal', 'Personal calendar', userId);
+		if (!calendar) {
+			return false;
+		}
+		await updateUser(userId, { calendarId: calendar.id });
+		return true;
+	} catch (error) {
+		logger.error(`Failed to setup calendar for user ${userId}: ${error.message}`);
+		return false;
+	}
+}

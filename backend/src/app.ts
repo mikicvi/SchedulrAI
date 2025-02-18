@@ -1,15 +1,16 @@
-import express from 'express';
-import session from 'express-session';
-import passport from './middlewares/passport';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import lusca from 'lusca';
 import chromaRoutes from './routes/chromaRoutes';
 import ollamaRoutes from './routes/ollamaRoutes';
 import documentIndexRoutes from './routes/documentIndexRoutes';
 import pipelineRoutes from './routes/pipelineRoutes';
 import authRoutes from './routes/authRoutes';
 import emailRoutes from './routes/emailRoutes';
+import calendarRoutes from './routes/calendarRoutes';
+import express from 'express';
+import session from 'express-session';
+import passport from './middlewares/passport';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import lusca from 'lusca';
 import { existsSync } from 'fs';
 import { initializeDatabase } from './middlewares/db';
 import SQLiteStore from 'connect-sqlite3';
@@ -74,9 +75,13 @@ const initializeApp = async () => {
 	app.use(
 		lusca({
 			csrf: {
-				cookie: 'XSRF-TOKEN', // The name of the cookie to send to the client
-				header: '_csrf', // The name of the header to read the token from
+				cookie: {
+					name: 'XSRF-TOKEN',
+				},
+				header: 'X-CSRF-Token',
+				key: '_csrf',
 			},
+			hsts: { maxAge: 24 * 60 * 60 * 1000, includeSubDomains: true, preload: true },
 			xssProtection: true,
 			nosniff: true,
 			referrerPolicy: 'same-origin',
@@ -94,6 +99,7 @@ const initializeApp = async () => {
 	app.use(baseApiRoute, pipelineRoutes);
 	app.use(baseApiRoute, authRoutes);
 	app.use(baseApiRoute, emailRoutes);
+	app.use(baseApiRoute, calendarRoutes);
 
 	return app;
 };

@@ -9,6 +9,7 @@ import {
 	getUserById,
 	getUserByGoogleIdOrEmail,
 	updateUser,
+	createCalendar,
 } from '../../services/dbServices';
 import User from '../../models/user.model';
 
@@ -43,6 +44,13 @@ describe('Authentication Routes', () => {
 		validPassword: jest.fn().mockResolvedValue(true),
 	} as unknown as User;
 
+	const mockCalendar = {
+		id: 1,
+		name: 'Personal',
+		description: 'Personal calendar',
+		userId: 1,
+	};
+
 	beforeEach(() => {
 		jest.clearAllMocks();
 	});
@@ -50,6 +58,8 @@ describe('Authentication Routes', () => {
 	describe('POST /auth/register', () => {
 		it('should successfully register a new user', async () => {
 			(createUser as jest.Mock).mockResolvedValue(mockUser);
+			(createCalendar as jest.Mock).mockResolvedValue(mockCalendar);
+			(updateUser as jest.Mock).mockResolvedValue([1, [mockUser]]);
 
 			const response = await request(app).post('/auth/register').send({
 				username: 'testuser',
@@ -62,6 +72,9 @@ describe('Authentication Routes', () => {
 			expect(response.status).toBe(200);
 			expect(response.body.message).toBe('User registered successfully');
 			expect(response.body.user).toBeTruthy();
+			expect(createUser).toHaveBeenCalledTimes(1);
+			expect(createCalendar).toHaveBeenCalledWith('Personal', 'Personal calendar', mockUser.id);
+			expect(updateUser).toHaveBeenCalledWith(mockUser.id, { calendarId: mockCalendar.id });
 		});
 
 		it('should handle duplicate username', async () => {
@@ -133,7 +146,7 @@ describe('Authentication Routes', () => {
 		});
 	});
 
-	describe('POST /auth/logout', () => {
+	describe('GET /auth/logout', () => {
 		it('should successfully log out a user', async () => {
 			const agent = request.agent(app);
 
@@ -143,7 +156,7 @@ describe('Authentication Routes', () => {
 				password: 'password123',
 			});
 
-			const response = await agent.post('/auth/logout');
+			const response = await agent.get('/auth/logout');
 
 			expect(response.status).toBe(200);
 			expect(response.body.message).toBe('Logged out successfully');

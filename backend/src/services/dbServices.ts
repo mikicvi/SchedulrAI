@@ -1,7 +1,7 @@
 import User, { UserAttributes } from '../models/user.model';
 import Calendar, { CalendarAttributes } from '../models/calendar.model';
 import Event, { EventAttributes } from '../models/event.model';
-import logger from '../utils/logger'; // Assuming you have a logger utility
+import logger from '../utils/logger';
 import sequelize from 'sequelize';
 export interface CreateUserParams {
 	username: string;
@@ -231,21 +231,22 @@ export async function deleteCalendar(id: number): Promise<number | void> {
 /**
  * Creates a new event in the database.
  *
- * @param {string} title - The title of the new event.
- * @param {Date} startTime - The start time of the new event.
- * @param {Date} endTime - The end time of the new event.
- * @param {number} calendarId - The ID of the calendar associated with the event.
- * @param {string} [description] - The description of the new event (optional).
+ * @param {EventAttributes} createEventParams - Calendar event attributes
  * @returns {Promise<Event | void>} A promise that resolves to the created event or void if an error occurs.
  */
-export async function createEvent(
-	title: string,
-	startTime: Date,
-	endTime: Date,
-	calendarId: number,
-	description?: string
-): Promise<Event | void> {
-	return await Event.create({ title, startTime, endTime, calendarId, description }).catch((error) => {
+export async function createEvent(createEventParams: EventAttributes): Promise<Event | void> {
+	const { title, description, startTime, endTime, calendarId, location, resourceId, importance } = createEventParams;
+
+	return await Event.create({
+		title,
+		description,
+		startTime,
+		endTime,
+		calendarId,
+		location,
+		resourceId,
+		importance,
+	}).catch((error) => {
 		logger.error(`Error creating event: ${error.message}`);
 	});
 }
@@ -305,5 +306,33 @@ export async function deleteEvent(id: number): Promise<number | void> {
 		return deletedEvent;
 	} catch (error) {
 		logger.error(`Error deleting event: ${error.message}`);
+	}
+}
+
+export async function setupUserCalendar(userId: number): Promise<boolean> {
+	try {
+		const calendar = await createCalendar('Personal', 'Personal calendar', userId);
+		if (!calendar) {
+			return false;
+		}
+		await updateUser(userId, { calendarId: calendar.id });
+		return true;
+	} catch (error) {
+		logger.error(`Failed to setup calendar for user ${userId}: ${error.message}`);
+		return false;
+	}
+}
+
+export async function getAllEvents(calendarId: number): Promise<Event[]> {
+	try {
+		const events = await Event.findAll({
+			where: { calendarId },
+			order: [['startTime', 'ASC']],
+		});
+		logger.info(`Retrieved ${events.length} events for calendar ${calendarId}`);
+		return events;
+	} catch (error) {
+		logger.error(`Error retrieving events for calendar ${calendarId}: ${error.message}`);
+		return [];
 	}
 }

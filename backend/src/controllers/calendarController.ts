@@ -1,7 +1,6 @@
 import { createBaseController } from './baseController';
 import { createCalendar, getCalendarById, updateCalendar, deleteCalendar } from '../services/dbServices';
 import Calendar from '../models/calendar.model';
-import logger from '../utils/logger';
 
 export const calendarController = createBaseController<Calendar>(
 	{

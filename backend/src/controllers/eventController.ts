@@ -1,7 +1,6 @@
 import { createBaseController } from './baseController';
 import { createEvent, getEventById, updateEvent, deleteEvent, getAllEvents } from '../services/dbServices';
 import Event from '../models/event.model';
-import logger from '../utils/logger';
 
 export const eventController = createBaseController<Event>(
 	{

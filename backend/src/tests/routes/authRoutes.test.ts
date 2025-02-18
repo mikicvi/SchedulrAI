@@ -146,7 +146,7 @@ describe('Authentication Routes', () => {
 		});
 	});
 
-	describe('POST /auth/logout', () => {
+	describe('GET /auth/logout', () => {
 		it('should successfully log out a user', async () => {
 			const agent = request.agent(app);
 
@@ -156,7 +156,7 @@ describe('Authentication Routes', () => {
 				password: 'password123',
 			});
 
-			const response = await agent.post('/auth/logout');
+			const response = await agent.get('/auth/logout');
 
 			expect(response.status).toBe(200);
 			expect(response.body.message).toBe('Logged out successfully');

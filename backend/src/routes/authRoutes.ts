@@ -44,7 +44,7 @@ router.post('/login', (req: Request, res: Response, next: NextFunction): void =>
 	})(req, res, next);
 });
 
-router.post('/logout', (req: Request, res: Response): void => {
+router.get('/logout', (req: Request, res: Response): void => {
 	req.logout((err: Error | null) => {
 		if (err) {
 			res.status(500).json({ message: 'Logout failed' });

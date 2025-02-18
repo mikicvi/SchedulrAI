@@ -81,6 +81,7 @@ const initializeApp = async () => {
 				header: 'X-CSRF-Token',
 				key: '_csrf',
 			},
+			hsts: { maxAge: 24 * 60 * 60 * 1000, includeSubDomains: true, preload: true },
 			xssProtection: true,
 			nosniff: true,
 			referrerPolicy: 'same-origin',

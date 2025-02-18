@@ -21,9 +21,6 @@ COPY frontend/index.html ./
 # Install dependencies
 RUN npm install
 
-# Print npm version and audit
-RUN npm --version && npm audit
-
 # Run the build command 
 RUN npm run build 
 

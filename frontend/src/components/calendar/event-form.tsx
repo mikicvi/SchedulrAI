@@ -14,7 +14,7 @@ interface EventFormProps {
 	onClose: () => void;
 	onSave: (event: Omit<Event, 'id'>) => void;
 	selectedDate?: Date;
-	selectedEndDate?: Date; // Add this prop for multiple date selection
+	selectedEndDate?: Date; //prop for multiple date selection
 }
 
 const defaultFormData = {
@@ -53,14 +53,16 @@ export function EventForm({ event, open, onClose, onSave, selectedDate, selected
 		} else if (selectedDate) {
 			// Set form data for new event
 			const startDate = format(selectedDate, 'yyyy-MM-dd');
+			const startTime = format(selectedDate, 'HH:mm');
 			const endDate = selectedEndDate ? format(selectedEndDate, 'yyyy-MM-dd') : startDate;
+			const endTime = selectedEndDate ? format(selectedEndDate, 'HH:mm') : '23:59';
 
 			setFormData({
 				...defaultFormData,
 				startDate,
+				startTime,
 				endDate,
-				startTime: '00:00',
-				endTime: selectedEndDate ? '23:59' : '23:59',
+				endTime,
 			});
 		}
 	}, [event, selectedDate, selectedEndDate, open]);

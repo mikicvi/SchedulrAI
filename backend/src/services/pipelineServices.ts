@@ -1,7 +1,7 @@
 import { getOllamaStatus } from './ollamaServices';
 import { getChromaStatus } from './chromaServices';
 import logger from '../utils/logger';
-import { systemPromptMessage, systemPromptMessage2, humanPromptMessage } from '../constants';
+import { systemPromptMessage, systemPromptMessage2, humanPromptMessage } from '../config/constants';
 
 import { ChatOllama, OllamaEmbeddings } from '@langchain/ollama';
 import { ChatPromptTemplate } from '@langchain/core/prompts';

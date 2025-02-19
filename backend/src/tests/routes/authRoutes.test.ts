@@ -9,7 +9,7 @@ import {
 	getUserById,
 	getUserByGoogleIdOrEmail,
 	updateUser,
-	createCalendar,
+	setupUserCalendar,
 } from '../../services/dbServices';
 import User from '../../models/user.model';
 
@@ -58,8 +58,7 @@ describe('Authentication Routes', () => {
 	describe('POST /auth/register', () => {
 		it('should successfully register a new user', async () => {
 			(createUser as jest.Mock).mockResolvedValue(mockUser);
-			(createCalendar as jest.Mock).mockResolvedValue(mockCalendar);
-			(updateUser as jest.Mock).mockResolvedValue([1, [mockUser]]);
+			(setupUserCalendar as jest.Mock).mockResolvedValue(true);
 
 			const response = await request(app).post('/auth/register').send({
 				username: 'testuser',
@@ -73,8 +72,7 @@ describe('Authentication Routes', () => {
 			expect(response.body.message).toBe('User registered successfully');
 			expect(response.body.user).toBeTruthy();
 			expect(createUser).toHaveBeenCalledTimes(1);
-			expect(createCalendar).toHaveBeenCalledWith('Personal', 'Personal calendar', mockUser.id);
-			expect(updateUser).toHaveBeenCalledWith(mockUser.id, { calendarId: mockCalendar.id });
+			expect(setupUserCalendar).toHaveBeenCalledWith(mockUser.id);
 		});
 
 		it('should handle duplicate username', async () => {

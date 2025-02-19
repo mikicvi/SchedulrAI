@@ -14,4 +14,5 @@ export interface Event {
 	location?: string;
 	resourceId?: string;
 	importance?: Importance;
+	calendarId?: number;
 }

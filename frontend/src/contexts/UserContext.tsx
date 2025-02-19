@@ -14,10 +14,10 @@ interface User {
 	calendarId: any;
 	initials: string;
 }
-
 interface UserContextType {
 	user: User | null;
 	isAuthenticated: boolean | null;
+	checkingAuth: boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -25,17 +25,26 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 	const [user, setUser] = useState<User | null>(null);
 	const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+	const [checkingAuth, setCheckingAuth] = useState(true);
 	const { apiFetch } = useApi();
 
 	useEffect(() => {
+		let mounted = true;
+
 		const checkAuth = async () => {
+			if (!mounted) return;
+
 			try {
 				const response = await apiFetch('http://localhost:3000/api/checkAuth', {
 					credentials: 'include',
 				});
+
+				if (!mounted) return;
+
 				if (response.ok) {
 					const data = await response.json();
 					const isGoogleUser = !!data.user.googleId;
+
 					setIsAuthenticated(true);
 					if (data.user) {
 						setUser({
@@ -57,16 +66,34 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 					setUser(null);
 				}
 			} catch (error) {
+				if (!mounted) return;
 				console.error('Auth check error:', error);
 				setIsAuthenticated(false);
 				setUser(null);
+			} finally {
+				if (mounted) {
+					setCheckingAuth(false);
+				}
 			}
 		};
 
 		checkAuth();
-	}, [apiFetch]);
 
-	return <UserContext.Provider value={{ user, isAuthenticated }}>{children}</UserContext.Provider>;
+		return () => {
+			mounted = false;
+		};
+	}, []); // Remove apiFetch from dependencies
+
+	const contextValue = React.useMemo(
+		() => ({
+			user,
+			isAuthenticated,
+			checkingAuth,
+		}),
+		[user, isAuthenticated, checkingAuth]
+	);
+
+	return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;
 };
 
 export const useUser = () => {

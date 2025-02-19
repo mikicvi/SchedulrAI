@@ -3,13 +3,16 @@ import { Event, Importance } from '@/types/calendar';
 import { format, getDay, parse, startOfWeek } from 'date-fns';
 import { enIE } from 'date-fns/locale';
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar as BigCalendar, dateFnsLocalizer, SlotInfo, ToolbarProps, View } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './calendar-style.css';
 import '@/index.css';
 import { EventDialog } from './event-dialog';
 import { EventForm } from './event-form';
+import { useUser } from '@/contexts/UserContext';
+import { useCalendarService } from '@/services/calendarService';
+import { useToast } from '@/hooks/use-toast';
 
 const locales = {
 	'en-IE': enIE,
@@ -39,6 +42,9 @@ const getEventStyle = (event: Event) => {
 };
 
 export default function CalendarComponent() {
+	const { user } = useUser();
+	const calendarService = useCalendarService();
+	const { toast } = useToast();
 	const [events, setEvents] = useState<Event[]>([]);
 	const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 	const [showEventDialog, setShowEventDialog] = useState(false);
@@ -46,22 +52,64 @@ export default function CalendarComponent() {
 	const [selectedSlot, setSelectedSlot] = useState<Date | null>(null);
 	const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>();
 
+	// Add fetchEvents function outside useEffect for reusability
+	const fetchEvents = async () => {
+		if (!user?.calendarId) return;
+		try {
+			const response = await calendarService.getEvents(user.calendarId);
+			if (response.data) {
+				// Filter out events with null dates and format them
+				const validEvents = response.data.filter(
+					(event: { start: null; end: null }) => event.start !== null && event.end !== null
+				);
+				setEvents(validEvents);
+			}
+		} catch (error) {
+			console.error('Error fetching events:', error);
+			toast({
+				title: 'Error',
+				description: 'Failed to fetch events',
+				variant: 'destructive',
+			});
+		}
+	};
+
+	// Add console.log to debug events
+	useEffect(() => {
+		console.log('Current events:', events);
+	}, [events]);
+
+	useEffect(() => {
+		fetchEvents();
+	}, [user?.calendarId]);
+
 	const handleSelectEvent = (event: Event) => {
 		setSelectedEvent(event);
 		setShowEventDialog(true);
 	};
 
 	const handleSelectSlot = (slotInfo: SlotInfo) => {
-		setSelectedSlot(slotInfo.start);
 		setSelectedEvent(null);
-		setShowEventForm(true);
-		if (slotInfo.end) {
-			const endDate = new Date(slotInfo.end);
-			endDate.setDate(endDate.getDate() - 1);
-			setSelectedEndDate(endDate);
-		} else {
-			setSelectedEndDate(undefined);
+
+		// Ensure we're working with the correct time
+		const start = new Date(slotInfo.start);
+		let end = new Date(slotInfo.end);
+
+		// For drag selections in month view, adjust the end date
+		if (slotInfo.action === 'select' && end.getHours() === 0) {
+			end.setDate(end.getDate() - 1);
+			end.setHours(23, 59, 0);
 		}
+
+		setSelectedSlot(start);
+		setSelectedEndDate(end);
+		setShowEventForm(true);
+
+		console.log('Selected slot:', {
+			start: start.toISOString(),
+			end: end.toISOString(),
+			action: slotInfo.action,
+		});
 	};
 
 	const handleAddEvent = () => {
@@ -70,22 +118,52 @@ export default function CalendarComponent() {
 		setShowEventForm(true);
 	};
 
-	const handleSaveEvent = (eventData: Omit<Event, 'id'>) => {
-		if (selectedEvent) {
-			setEvents(events.map((event) => (event.id === selectedEvent.id ? { ...eventData, id: event.id } : event)));
-		} else {
-			const newEvent: Event = {
-				...eventData,
-				id: Math.random().toString(36).substr(2, 9),
-			};
-			setEvents([...events, newEvent]);
+	const handleSaveEvent = async (eventData: Omit<Event, 'id'>) => {
+		try {
+			if (!user?.calendarId) {
+				throw new Error('No calendar found');
+			}
+
+			if (selectedEvent) {
+				const updated = await calendarService.updateEvent(selectedEvent.id, eventData);
+				setEvents(events.map((event) => (event.id === selectedEvent.id ? updated.data : event)));
+			} else {
+				const created = await calendarService.createEvent(user.calendarId, eventData);
+				setEvents([...events, created.data]);
+			}
+			await fetchEvents(); // Refresh events after save
+			setShowEventForm(false);
+			toast({
+				title: selectedEvent ? 'Event updated' : 'Event created',
+				description: 'Your calendar has been updated successfully.',
+			});
+		} catch (error) {
+			toast({
+				title: 'Error',
+				description: error instanceof Error ? error.message : 'An unknown error occurred',
+				variant: 'destructive',
+			});
 		}
 	};
 
-	const handleDeleteEvent = () => {
+	const handleDeleteEvent = async () => {
 		if (selectedEvent) {
-			setEvents(events.filter((event) => event.id !== selectedEvent.id));
-			setShowEventDialog(false);
+			try {
+				await calendarService.deleteEvent(selectedEvent.id);
+				// Remove the event from local state
+				setEvents(events.filter((event) => event.id !== selectedEvent.id));
+				setShowEventDialog(false);
+				toast({
+					title: 'Event deleted',
+					description: 'The event has been removed from your calendar.',
+				});
+			} catch (error) {
+				toast({
+					title: 'Error',
+					description: error instanceof Error ? error.message : 'An unknown error occurred',
+					variant: 'destructive',
+				});
+			}
 		}
 	};
 
@@ -97,17 +175,25 @@ export default function CalendarComponent() {
 	const CustomToolbar: React.FC<ToolbarProps<Event>> = (props) => {
 		const { label, onNavigate, onView } = props;
 
+		const handleViewChange = (newView: View) => {
+			onView(newView);
+		};
+
+		const handleNavigate = (action: 'PREV' | 'NEXT' | 'TODAY') => {
+			onNavigate(action);
+		};
+
 		return (
 			<div className='flex items-center justify-between py-4 border-b'>
 				<div className='flex items-center space-x-4'>
-					<Button variant='outline' onClick={() => onNavigate('TODAY')}>
+					<Button variant='outline' onClick={() => handleNavigate('TODAY')}>
 						Today
 					</Button>
 					<div className='flex items-center space-x-2'>
-						<Button variant='outline' onClick={() => onNavigate('PREV')}>
+						<Button variant='outline' onClick={() => handleNavigate('PREV')}>
 							Previous
 						</Button>
-						<Button variant='outline' onClick={() => onNavigate('NEXT')}>
+						<Button variant='outline' onClick={() => handleNavigate('NEXT')}>
 							Next
 						</Button>
 					</div>
@@ -120,7 +206,7 @@ export default function CalendarComponent() {
 					</Button>
 					<div className='flex space-x-2'>
 						{['month', 'week', 'day'].map((viewType) => (
-							<Button key={viewType} variant='outline' onClick={() => onView(viewType as View)}>
+							<Button key={viewType} variant='outline' onClick={() => handleViewChange(viewType as View)}>
 								{viewType.charAt(0).toUpperCase() + viewType.slice(1)}
 							</Button>
 						))}
@@ -141,6 +227,14 @@ export default function CalendarComponent() {
 					onSelectEvent={handleSelectEvent}
 					onSelectSlot={handleSelectSlot}
 					selectable
+					selected={selectedSlot}
+					dayLayoutAlgorithm='no-overlap'
+					scrollToTime={new Date()}
+					min={new Date(new Date().setHours(0, 0, 0, 0))}
+					max={new Date(new Date().setHours(23, 59, 59, 999))}
+					longPressThreshold={250}
+					step={30}
+					timeslots={2}
 					components={{
 						toolbar: CustomToolbar,
 					}}
@@ -148,6 +242,8 @@ export default function CalendarComponent() {
 						style: getEventStyle(event),
 					})}
 					culture='en-IE'
+					startAccessor='start'
+					endAccessor='end'
 				/>
 			</div>
 

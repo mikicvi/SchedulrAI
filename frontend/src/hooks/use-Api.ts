@@ -1,44 +1,86 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 export const useApi = () => {
-	const [csrfToken, setCsrfToken] = useState<string | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
+	const csrfTokenRef = useRef<string | null>(null);
+	const csrfPromiseRef = useRef<Promise<string> | null>(null);
 
-	useEffect(() => {
-		const fetchCsrfToken = async () => {
+	const getCsrfToken = useCallback(async () => {
+		// Return cached token if available
+		if (csrfTokenRef.current) {
+			return csrfTokenRef.current;
+		}
+
+		// If there's already a request in progress, return its promise
+		if (csrfPromiseRef.current) {
+			return csrfPromiseRef.current;
+		}
+
+		// Create new request
+		csrfPromiseRef.current = fetch('http://localhost:3000/api/csrfToken', {
+			credentials: 'include',
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				csrfTokenRef.current = data.csrfToken;
+				csrfPromiseRef.current = null;
+				return data.csrfToken;
+			})
+			.catch((error) => {
+				csrfPromiseRef.current = null;
+				console.error('Failed to fetch CSRF token:', error);
+				throw error;
+			});
+
+		return csrfPromiseRef.current;
+	}, []);
+
+	const apiFetch = useCallback(
+		async (url: string, options: RequestInit = {}) => {
+			setIsLoading(true);
 			try {
-				const response = await fetch('http://localhost:3000/api/csrfToken', {
+				const csrfToken = await getCsrfToken();
+
+				// Create headers with CSRF token
+				const headers = new Headers(options.headers || {});
+				headers.set('X-CSRF-TOKEN', csrfToken);
+
+				// Only set Content-Type if body is present
+				if (options.body) {
+					headers.set('Content-Type', 'application/json');
+				}
+
+				const response = await fetch(url, {
+					...options,
+					headers,
 					credentials: 'include',
 				});
-				const data = await response.json();
-				setCsrfToken(data.csrfToken);
+
+				if (response.status === 403) {
+					// Clear cached token
+					csrfTokenRef.current = null;
+
+					// Get new token and retry
+					const newToken = await getCsrfToken();
+					headers.set('X-CSRF-TOKEN', newToken);
+
+					return fetch(url, {
+						...options,
+						headers,
+						credentials: 'include',
+					});
+				}
+
+				return response;
 			} catch (error) {
-				console.error('Failed to fetch CSRF token:', error);
+				console.error('API fetch error:', error);
+				throw error;
 			} finally {
 				setIsLoading(false);
 			}
-		};
-		fetchCsrfToken();
-	}, []);
+		},
+		[getCsrfToken]
+	);
 
-	const apiFetch = async (url: string, options: RequestInit = {}) => {
-		// Wait for CSRF token to be available
-		if (isLoading) {
-			await new Promise((resolve) => setTimeout(resolve, 100));
-		}
-
-		const headers = {
-			'Content-Type': 'application/json',
-			_csrf: csrfToken || '',
-			...options.headers,
-		};
-
-		return fetch(url, {
-			...options,
-			headers,
-			credentials: 'include',
-		});
-	};
-
-	return { apiFetch, csrfToken, isLoading };
+	return { apiFetch, isLoading };
 };

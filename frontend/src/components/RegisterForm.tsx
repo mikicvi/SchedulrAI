@@ -82,7 +82,7 @@ const Register = () => {
 	};
 
 	const handleGoogleAuth = () => {
-		window.location.href = 'http://localhost:3000/api/google/callback';
+		window.location.href = 'http://localhost:3000/api/google'; // Will always prompt for consent
 	};
 
 	return (

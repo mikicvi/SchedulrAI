@@ -10,7 +10,6 @@ import { useUser } from '@/contexts/UserContext';
 import { toast } from '@/hooks/use-toast';
 import { ListRestart, Send } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Toaster } from '@/components/ui/toaster';
 import { useApi } from '@/hooks/use-Api';
 
 const emailSchema = z.object({
@@ -152,7 +151,6 @@ export default function SendMail() {
 						</Button>
 					</div>
 				</form>
-				<Toaster />
 			</Card>
 		</Layout>
 	);

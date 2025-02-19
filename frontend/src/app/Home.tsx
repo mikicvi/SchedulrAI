@@ -10,7 +10,7 @@ import { Toaster } from '@/components/ui/toaster';
 
 const Home = () => {
 	const { userInput, loading, response, handleInputChange, handleSubmit } = usePipeline();
-
+	const backendStatus = useBackendStatus();
 	const breadcrumbItems = [{ title: 'Task Time Estimation' }];
 
 	return (
@@ -21,7 +21,7 @@ const Home = () => {
 				</div>
 				<div className='flex justify-center items-center pt-[27vh]'>
 					<DynamicTextarea
-						label={useBackendStatus()}
+						label={backendStatus}
 						placeholder='Type/paste customer requirements here'
 						id='message'
 						value={userInput}

@@ -10,17 +10,19 @@ const Logout = () => {
 
 	useEffect(() => {
 		const performLogout = async () => {
-			// Wait for CSRF token to be available
 			if (isLoading) return;
 
 			try {
 				const response = await apiFetch('http://localhost:3000/api/logout', {
-					method: 'POST',
+					method: 'GET',
 				});
 
 				if (!response.ok) {
 					throw new Error('Logout failed');
 				}
+
+				// Clear any stored tokens/state here
+				sessionStorage.clear();
 
 				toast({
 					title: 'Success',
@@ -34,7 +36,7 @@ const Logout = () => {
 					description: 'Failed to logout',
 					variant: 'destructive',
 				});
-				navigate('/');
+				navigate('/login');
 			}
 		};
 

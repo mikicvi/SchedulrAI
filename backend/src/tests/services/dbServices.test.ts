@@ -17,6 +17,7 @@ import {
 	getEventById,
 	updateEvent,
 	deleteEvent,
+	getAllEvents,
 } from '../../services/dbServices';
 import logger from '../../utils/logger';
 
@@ -230,6 +231,12 @@ describe('Database Services', () => {
 			}
 		});
 
+		it('should retrieve all events for a calendar', async () => {
+			const events = await getAllEvents(calendar.id);
+			expect(events).toBeDefined();
+			expect(events.length).toBe(1);
+		});
+
 		it('should update an event', async () => {
 			const result = await updateEvent(event.id, { title: 'Updated Event' });
 			expect(result).toBeDefined();
@@ -271,6 +278,12 @@ describe('Database Services', () => {
 				calendarId: 9999,
 			};
 			await createEvent(testEventObject);
+			expect(logger.error).toHaveBeenCalled();
+		});
+
+		it('should log an error when failing to get all events for a calendar', async () => {
+			const events = await getAllEvents(99999);
+			expect(events).toStrictEqual([]);
 			expect(logger.error).toHaveBeenCalled();
 		});
 	});

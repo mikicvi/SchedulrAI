@@ -79,6 +79,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 	}
 };
 
+export const googleAuth = passport.authenticate('google', {
+	scope: ['profile', 'email'],
+});
+
 export const googleCallback = (req: Request, res: Response): void => {
 	res.redirect(`${process.env.FRONTEND_URL}/`);
 };

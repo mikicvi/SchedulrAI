@@ -48,6 +48,7 @@ describe('Auth Controller', () => {
 		});
 
 		test('should authenticate user with valid credentials', () => {
+			// Setup
 			mockRequest.body = { username: 'testuser', password: 'password' };
 			const mockUser = {
 				id: 1,
@@ -57,57 +58,89 @@ describe('Auth Controller', () => {
 				createdAt: new Date(),
 			};
 
+			// Mock passport.authenticate to simulate the authentication flow
 			(passport.authenticate as jest.Mock).mockImplementation((strategy, callback) => {
 				return (req: Request, res: Response, next: NextFunction) => {
+					// Simulate passport authentication
 					callback(null, mockUser, null);
-					(req.logIn as jest.Mock).mockImplementation((user, done) => {
-						done(null);
-						res.json({
-							message: 'Logged in successfully',
-							user: {
-								id: user.id,
-								username: user.username,
-								email: user.email,
-							},
-						});
-					});
+					return next();
 				};
 			});
 
+			// Mock req.logIn to simulate successful login
+			(mockRequest.logIn as jest.Mock).mockImplementation((user, callback) => {
+				callback(null);
+			});
+
+			// Execute
 			login(mockRequest as Request, mockResponse as Response, nextFunction);
 
+			// Verify the authentication flow
+			expect(passport.authenticate).toHaveBeenCalledWith('local', expect.any(Function));
 			expect(mockRequest.logIn).toHaveBeenCalledWith(mockUser, expect.any(Function));
-		});
-
-		test('should handle server error during authentication', () => {
-			mockRequest.body = { username: 'testuser', password: 'password' };
-
-			(passport.authenticate as jest.Mock).mockImplementation((strategy, callback) => {
-				callback(new Error('Server error'), false, null);
-				return (req: Request, res: Response, next: NextFunction) => {};
-			});
-
-			login(mockRequest as Request, mockResponse as Response, nextFunction);
-
-			expect(mockResponse.status).toHaveBeenCalledWith(500);
+			expect(mockResponse.status).not.toHaveBeenCalled();
 			expect(mockResponse.json).toHaveBeenCalledWith({
-				message: 'Authentication failed',
+				message: 'Logged in successfully',
+				user: {
+					id: mockUser.id,
+					username: mockUser.username,
+					email: mockUser.email,
+				},
 			});
 		});
 
-		test('should handle login error after successful authentication', () => {
-			mockRequest.body = { username: 'testuser', password: 'password' };
-			const mockUser = { id: 1, username: 'testuser', email: 'test@test.com' };
+		test('should handle authentication failure', () => {
+			// Setup
+			mockRequest.body = { username: 'testuser', password: 'wrongpassword' };
 
+			// Mock passport.authenticate to simulate authentication failure
 			(passport.authenticate as jest.Mock).mockImplementation((strategy, callback) => {
-				callback(null, mockUser, null);
-				return (req: Request, res: Response, next: NextFunction) => {};
+				return (req: Request, res: Response, next: NextFunction) => {
+					callback(null, false, { message: 'Invalid credentials' });
+					return next();
+				};
 			});
 
-			(mockRequest.logIn as jest.Mock).mockImplementation((user, cb) => cb(new Error('Login failed')));
-
+			// Execute
 			login(mockRequest as Request, mockResponse as Response, nextFunction);
 
+			// Verify
+			expect(passport.authenticate).toHaveBeenCalledWith('local', expect.any(Function));
+			expect(mockRequest.logIn).not.toHaveBeenCalled();
+			expect(mockResponse.status).toHaveBeenCalledWith(401);
+			expect(mockResponse.json).toHaveBeenCalledWith({
+				message: 'Invalid credentials',
+			});
+		});
+
+		test('should handle login session error', () => {
+			// Setup
+			mockRequest.body = { username: 'testuser', password: 'password' };
+			const mockUser = {
+				id: 1,
+				username: 'testuser',
+				email: 'test@test.com',
+			};
+
+			// Mock passport.authenticate for successful auth
+			(passport.authenticate as jest.Mock).mockImplementation((strategy, callback) => {
+				return (req: Request, res: Response, next: NextFunction) => {
+					callback(null, mockUser, null);
+					return next();
+				};
+			});
+
+			// Mock req.logIn to simulate session error
+			(mockRequest.logIn as jest.Mock).mockImplementation((user, callback) => {
+				callback(new Error('Session error'));
+			});
+
+			// Execute
+			login(mockRequest as Request, mockResponse as Response, nextFunction);
+
+			// Verify
+			expect(passport.authenticate).toHaveBeenCalledWith('local', expect.any(Function));
+			expect(mockRequest.logIn).toHaveBeenCalled();
 			expect(mockResponse.status).toHaveBeenCalledWith(500);
 			expect(mockResponse.json).toHaveBeenCalledWith({
 				message: 'Login failed',

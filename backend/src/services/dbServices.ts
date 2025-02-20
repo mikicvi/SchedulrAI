@@ -282,6 +282,7 @@ export async function createEvent(createEventParams: EventAttributes): Promise<E
 				location: event.location,
 				start: event.startTime,
 				end: event.endTime,
+				importance: event.importance,
 			});
 
 			if (googleEvent?.id) {
@@ -352,6 +353,7 @@ export async function updateEvent(id: number, updates: Partial<EventAttributes>)
 						location: updatedEvent.location,
 						start: updatedEvent.startTime,
 						end: updatedEvent.endTime,
+						importance: updatedEvent.importance,
 					},
 					event.resourceId
 				);

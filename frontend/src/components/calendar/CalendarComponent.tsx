@@ -52,6 +52,8 @@ export default function CalendarComponent() {
 	const [selectedSlot, setSelectedSlot] = useState<Date | null>(null);
 	const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>();
 	const [isSyncing, setIsSyncing] = useState(false);
+	const [isCreating, setIsCreating] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
 
 	// Add fetchEvents function outside useEffect for reusability
 	const fetchEvents = async () => {
@@ -122,21 +124,16 @@ export default function CalendarComponent() {
 		const start = new Date(slotInfo.start);
 		let end = new Date(slotInfo.end);
 
-		// For drag selections in month view, adjust the end date
-		if (slotInfo.action === 'select' && end.getHours() === 0) {
-			end.setDate(end.getDate() - 1);
-			end.setHours(23, 59, 0);
+		// In month view, selection end time will be 00:00 of the next day
+		if (end.getHours() === 0 && end.getMinutes() === 0) {
+			// Adjust the end date to be 23:59 of the previous day
+			end.setTime(end.getTime() - 60000); // Subtract one minute from midnight
 		}
 
+		// Set the selected dates
 		setSelectedSlot(start);
 		setSelectedEndDate(end);
 		setShowEventForm(true);
-
-		console.log('Selected slot:', {
-			start: start.toISOString(),
-			end: end.toISOString(),
-			action: slotInfo.action,
-		});
 	};
 
 	const handleAddEvent = () => {
@@ -146,6 +143,7 @@ export default function CalendarComponent() {
 	};
 
 	const handleSaveEvent = async (eventData: Omit<Event, 'id'>) => {
+		setIsCreating(true);
 		try {
 			if (!user?.calendarId) {
 				throw new Error('No calendar found');
@@ -170,11 +168,14 @@ export default function CalendarComponent() {
 				description: error instanceof Error ? error.message : 'An unknown error occurred',
 				variant: 'destructive',
 			});
+		} finally {
+			setIsCreating(false);
 		}
 	};
 
 	const handleDeleteEvent = async () => {
 		if (selectedEvent) {
+			setIsDeleting(true);
 			try {
 				await calendarService.deleteEvent(selectedEvent.id);
 				// Remove the event from local state
@@ -190,6 +191,8 @@ export default function CalendarComponent() {
 					description: error instanceof Error ? error.message : 'An unknown error occurred',
 					variant: 'destructive',
 				});
+			} finally {
+				setIsDeleting(false);
 			}
 		}
 	};
@@ -291,6 +294,7 @@ export default function CalendarComponent() {
 				onClose={() => setShowEventDialog(false)}
 				onEdit={handleEditEvent}
 				onDelete={handleDeleteEvent}
+				isDeleting={isDeleting}
 			/>
 
 			<EventForm
@@ -303,6 +307,7 @@ export default function CalendarComponent() {
 				onSave={handleSaveEvent}
 				selectedDate={selectedSlot ?? undefined}
 				selectedEndDate={selectedEndDate}
+				isCreating={isCreating}
 			/>
 		</div>
 	);

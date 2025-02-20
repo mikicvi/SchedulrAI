@@ -7,6 +7,7 @@ import { Event, Importance } from '@/types/calendar';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RefreshCw, Save } from 'lucide-react';
 
 interface EventFormProps {
 	event?: Event | null;
@@ -15,6 +16,7 @@ interface EventFormProps {
 	onSave: (event: Omit<Event, 'id'>) => void;
 	selectedDate?: Date;
 	selectedEndDate?: Date; //prop for multiple date selection
+	isCreating: boolean;
 }
 
 const defaultFormData = {
@@ -28,7 +30,15 @@ const defaultFormData = {
 	importance: undefined as Importance | undefined,
 };
 
-export function EventForm({ event, open, onClose, onSave, selectedDate, selectedEndDate }: EventFormProps) {
+export function EventForm({
+	event,
+	open,
+	onClose,
+	onSave,
+	selectedDate,
+	selectedEndDate,
+	isCreating,
+}: Readonly<EventFormProps>) {
 	const [formData, setFormData] = useState(defaultFormData);
 
 	useEffect(() => {
@@ -39,7 +49,7 @@ export function EventForm({ event, open, onClose, onSave, selectedDate, selected
 		}
 
 		if (event) {
-			// Set form data for existing event
+			// Use event info even if importance is undefined
 			setFormData({
 				title: event.title,
 				description: event.description || '',
@@ -48,7 +58,7 @@ export function EventForm({ event, open, onClose, onSave, selectedDate, selected
 				startTime: format(event.start, 'HH:mm'),
 				endDate: format(event.end, 'yyyy-MM-dd'),
 				endTime: format(event.end, 'HH:mm'),
-				importance: event.importance,
+				importance: event.importance || undefined, // This can be undefined if not set
 			});
 		} else if (selectedDate) {
 			// Set form data for new event
@@ -185,7 +195,10 @@ export function EventForm({ event, open, onClose, onSave, selectedDate, selected
 						<Button type='button' variant='outline' onClick={onClose}>
 							Cancel
 						</Button>
-						<Button type='submit'>{event ? 'Update Event' : 'Create Event'}</Button>
+						<Button type='submit' disabled={isCreating} className='flex items-center space-x-2'>
+							{isCreating ? <RefreshCw className='w-4 h-4 animate-spin' /> : <Save className='w-4 h-4' />}
+							<span>{isCreating ? 'Saving...' : 'Save Event'}</span>
+						</Button>
 					</div>
 				</form>
 			</DialogContent>

@@ -43,3 +43,29 @@
 	background-color: hsl(var(--secondary)) !important;
 	border-left: 1px solid hsl(var(--border)) !important;
 }
+
+/* Theme-aware styles using shadcn classes */
+:root[class~='dark'] input[type='date'],
+:root[class~='dark'] input[type='time'] {
+	color: #fff;
+	color-scheme: dark;
+}
+
+:root[class~='dark'] .rbc-off-range-bg {
+	border-left: 1px solid hsl(var(--popover)) !important;
+}
+:root[class~='dark'] .rbc-day-bg.rbc-selected-cell {
+	background-color: hsl(var(--secondary)) !important;
+	border: 1px dashed hsl(var(--chart-1)) !important;
+}
+
+:root[class~='light'] input[type='date'],
+:root[class~='light'] input[type='time'] {
+	color: hsl(var(--foreground));
+	color-scheme: light;
+	background-color: hsl(var(--background));
+}
+:root[class~='light'] .rbc-day-bg.rbc-selected-cell {
+	background-color: hsl(var(--secondary)) !important;
+	border: 1px dashed hsl(var(--chart-1)) !important;
+}

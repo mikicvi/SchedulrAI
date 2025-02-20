@@ -1,5 +1,6 @@
 import { createBaseController } from './baseController';
 import { createEvent, getEventById, updateEvent, deleteEvent, getAllEvents } from '../services/dbServices';
+import { syncGoogleCalendarEvents } from '../services/googleCalendarServices';
 import Event from '../models/event.model';
 
 export const eventController = createBaseController<Event>(
@@ -24,6 +25,10 @@ export const eventController = createBaseController<Event>(
 				return [];
 			}
 			return events || [];
+		},
+		syncEvents: async (userId: number) => {
+			const result = await syncGoogleCalendarEvents(userId);
+			return result || false;
 		},
 		update: async (id, updates) => {
 			const result = await updateEvent(id, updates);

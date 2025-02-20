@@ -20,8 +20,20 @@ import {
 	getAllEvents,
 } from '../../services/dbServices';
 import logger from '../../utils/logger';
+import { syncEventToGoogle, deleteGoogleEvent, syncGoogleCalendarEvents } from '../../services/googleCalendarServices';
 
-jest.mock('../../utils/logger'); // Mock the logger
+import * as dbServices from '../../services/dbServices';
+import Event from '../../models/event.model';
+
+// Mock the logger
+jest.mock('../../utils/logger');
+
+// Mock the googleCalendarServices
+jest.mock('../../services/googleCalendarServices', () => ({
+	syncEventToGoogle: jest.fn(),
+	deleteGoogleEvent: jest.fn(),
+	syncGoogleCalendarEvents: jest.fn(),
+}));
 
 const mockUserObj = {
 	username: 'testuser',
@@ -160,6 +172,20 @@ describe('Database Services', () => {
 			expect(result).toBe(true);
 		});
 
+		it('should set up a user calendar and sync events to Google', async () => {
+			const googleUser = await createUser({
+				username: 'googleUser',
+				password: '123',
+				email: 'sample@email.com',
+				googleId: 'fakeGoogleId',
+			});
+			expect(googleUser).toBeTruthy();
+			if (!googleUser) return;
+			const result = await setupUserCalendar(googleUser.id);
+			expect(result).toBe(true);
+			expect(syncGoogleCalendarEvents).toHaveBeenCalled();
+		});
+
 		it('should delete a calendar', async () => {
 			const affectedRows = await deleteCalendar(calendar.id);
 			expect(affectedRows).toBe(1);
@@ -285,6 +311,289 @@ describe('Database Services', () => {
 			const events = await getAllEvents(99999);
 			expect(events).toStrictEqual([]);
 			expect(logger.error).toHaveBeenCalled();
+		});
+
+		describe('Google Event Sync', () => {
+			it('should call syncEventToGoogle and syncGoogleCalendarEvents on event creation for a user with googleId', async () => {
+				const googleUser = await createUser({
+					username: 'googleUser',
+					password: '123',
+					email: 'google@example.com',
+					googleId: 'fakeGoogleId',
+				});
+				expect(googleUser).toBeTruthy();
+				if (!googleUser) return;
+				const cal = await createCalendar('My Google Calendar', '', googleUser.id);
+				if (!cal) return;
+				expect(cal).toBeTruthy();
+				await createEvent({
+					title: 'Google Synced',
+					startTime: new Date(),
+					endTime: new Date(),
+					calendarId: cal?.id || 0,
+				});
+				expect(syncEventToGoogle).toHaveBeenCalled();
+				expect(syncGoogleCalendarEvents).toHaveBeenCalled();
+			});
+		});
+	});
+
+	describe('Google Calendar Integration', () => {
+		let googleUser;
+		let googleCalendar;
+
+		// Add mock event data
+		const mockEventData = {
+			title: 'Test Google Event',
+			startTime: new Date('2024-01-01T10:00:00Z'),
+			endTime: new Date('2024-01-01T11:00:00Z'),
+			description: 'Test Description',
+			location: 'Test Location',
+		};
+
+		const mockGoogleEventResponse = {
+			id: 'google-event-id-123',
+			summary: mockEventData.title,
+			description: mockEventData.description,
+			location: mockEventData.location,
+			start: { dateTime: mockEventData.startTime.toISOString() },
+			end: { dateTime: mockEventData.endTime.toISOString() },
+		};
+
+		beforeEach(async () => {
+			// Reset mocks before each test
+			(syncEventToGoogle as jest.Mock).mockReset();
+			(deleteGoogleEvent as jest.Mock).mockReset();
+			(syncGoogleCalendarEvents as jest.Mock).mockReset();
+
+			// Set up default mock responses
+			(syncEventToGoogle as jest.Mock).mockResolvedValue(mockGoogleEventResponse);
+			(deleteGoogleEvent as jest.Mock).mockResolvedValue(true);
+			(syncGoogleCalendarEvents as jest.Mock).mockResolvedValue(true);
+
+			try {
+				// Create a user with Google account
+				googleUser = await createUser({
+					username: 'googleuser',
+					password: 'password123',
+					email: 'google@test.com',
+					googleId: 'google123',
+					googleAccessToken: 'fake-access-token',
+					googleRefreshToken: 'fake-refresh-token',
+				});
+
+				if (!googleUser) {
+					throw new Error('Failed to create Google user');
+				}
+
+				googleCalendar = await createCalendar('Google Calendar', 'Test Calendar', googleUser.id);
+				if (!googleCalendar) {
+					throw new Error('Failed to create Google Calendar');
+				}
+			} catch (error) {
+				console.error('Setup failed:', error);
+				throw error;
+			}
+		});
+
+		// Cleanup after each test
+		afterEach(async () => {
+			if (googleCalendar?.id) {
+				await deleteCalendar(googleCalendar.id);
+			}
+			if (googleUser?.id) {
+				await deleteUser(googleUser.id);
+			}
+		});
+
+		describe('Event Creation with Google Calendar', () => {
+			it('should sync new event to Google Calendar with correct data', async () => {
+				const event = await createEvent({
+					...mockEventData,
+					calendarId: googleCalendar.id,
+				});
+
+				expect(event).toBeDefined();
+				if (!event) return; // Type guard for void
+
+				expect(syncEventToGoogle).toHaveBeenCalledWith(
+					googleUser.id,
+					expect.objectContaining({
+						title: mockEventData.title,
+						description: mockEventData.description,
+						location: mockEventData.location,
+						start: mockEventData.startTime,
+						end: mockEventData.endTime,
+					})
+				);
+				expect(event.resourceId).toBe(mockGoogleEventResponse.id);
+			});
+
+			it('should handle Google sync failure gracefully', async () => {
+				(syncEventToGoogle as jest.Mock).mockRejectedValueOnce(new Error('Google API Error'));
+
+				const event = await createEvent({
+					...mockEventData,
+					calendarId: googleCalendar.id,
+				});
+
+				expect(event).toBeUndefined();
+				expect(logger.error).toHaveBeenCalled();
+			});
+
+			it('should handle invalid event dates', async () => {
+				const event = await createEvent({
+					...mockEventData,
+					startTime: new Date('invalid'),
+					endTime: new Date('invalid'),
+					calendarId: googleCalendar.id,
+				});
+
+				expect(event).toBeUndefined();
+				expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Invalid event dates'));
+				expect(syncEventToGoogle).not.toHaveBeenCalled();
+			});
+
+			it('should handle non-existent calendar', async () => {
+				const event = await createEvent({
+					...mockEventData,
+					calendarId: 99999,
+				});
+
+				expect(event).toBeUndefined();
+				expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Calendar not found'));
+				expect(syncEventToGoogle).not.toHaveBeenCalled();
+			});
+
+			it('should handle duplicate resourceId', async () => {
+				// Create first event
+				await createEvent({
+					...mockEventData,
+					calendarId: googleCalendar.id,
+					resourceId: 'existing-id',
+				});
+
+				// Reset mocks
+				(logger.debug as jest.Mock).mockClear();
+
+				// Try to create duplicate
+				const duplicateEvent = await createEvent({
+					...mockEventData,
+					calendarId: googleCalendar.id,
+					resourceId: 'existing-id',
+				});
+
+				expect(logger.debug).toHaveBeenCalledWith(
+					expect.stringContaining('Event with resourceId existing-id already exists')
+				);
+			});
+		});
+
+		describe('Event Updates with Google Calendar', () => {
+			it('should sync event updates to Google Calendar with correct data', async () => {
+				const event = await createEvent({
+					...mockEventData,
+					calendarId: googleCalendar.id,
+					resourceId: 'existing-google-id',
+				});
+
+				expect(event).toBeDefined();
+				if (!event) return; // Type guard for void
+
+				const updateData = {
+					title: 'Updated Title',
+					description: 'Updated Description',
+				};
+
+				const updateResult = await updateEvent(event.id, updateData);
+				expect(updateResult).toBeDefined();
+				if (!updateResult) return; // Type guard for void
+
+				expect(syncEventToGoogle).toHaveBeenCalledWith(
+					googleUser.id,
+					expect.objectContaining(updateData),
+					'existing-google-id'
+				);
+			});
+
+			it('should handle non-existent event during update', async () => {
+				const updateResult = await updateEvent(99999, { title: 'Updated Title' });
+
+				expect(updateResult).toBeUndefined();
+				expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Event with id 99999 not found'));
+				expect(syncEventToGoogle).not.toHaveBeenCalled();
+			});
+
+			it('should handle Google sync failure during update', async () => {
+				const event = await createEvent({
+					...mockEventData,
+					calendarId: googleCalendar.id,
+					resourceId: 'existing-google-id',
+				});
+				expect(event).toBeDefined();
+				if (!event) return;
+
+				(syncEventToGoogle as jest.Mock).mockRejectedValueOnce(new Error('Google API Error'));
+
+				const updateResult = await updateEvent(event.id, { title: 'Updated Title' });
+				expect(updateResult).toBeUndefined();
+				expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Error updating event'));
+			});
+		});
+
+		describe('Event Deletion with Google Calendar', () => {
+			it('should handle Google deletion failure gracefully', async () => {
+				const event = await createEvent({
+					...mockEventData,
+					calendarId: googleCalendar.id,
+					resourceId: 'google-event-id-456',
+				});
+
+				expect(event).toBeDefined();
+				if (!event) return; // Type guard for void
+
+				await deleteEvent(event.id);
+
+				expect(deleteGoogleEvent).toHaveBeenCalledWith(googleUser.id, 'google-event-id-456');
+				expect(logger.error).toHaveBeenCalled();
+			});
+
+			it('should handle non-existent event during deletion', async () => {
+				const deleteResult = await deleteEvent(99999);
+
+				expect(deleteResult).toBeUndefined();
+				expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Event with id 99999 not found'));
+				expect(deleteGoogleEvent).not.toHaveBeenCalled();
+			});
+
+			it('should handle Google sync failure during deletion', async () => {
+				const event = await createEvent({
+					...mockEventData,
+					calendarId: googleCalendar.id,
+					resourceId: 'google-event-id-456',
+				});
+				expect(event).toBeDefined();
+				if (!event) return;
+
+				(deleteGoogleEvent as jest.Mock).mockRejectedValueOnce(new Error('Google API Error'));
+
+				const deleteResult = await deleteEvent(event.id);
+				expect(deleteResult).toBeUndefined();
+				expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Error deleting event'));
+			});
+
+			it('should handle event without resourceId gracefully', async () => {
+				const event = await createEvent({
+					...mockEventData,
+					calendarId: googleCalendar.id,
+				});
+				expect(event).toBeDefined();
+				if (!event) return;
+
+				await deleteEvent(event.id);
+				expect(deleteGoogleEvent).toHaveBeenCalled();
+				expect(syncGoogleCalendarEvents).toHaveBeenCalled();
+			});
 		});
 	});
 });

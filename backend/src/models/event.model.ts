@@ -15,6 +15,8 @@ export interface EventAttributes {
 	startTime: Date;
 	endTime: Date;
 	calendarId: number; // Foreign key for Calendar
+	createdAt?: Date;
+	updatedAt?: Date;
 	description?: string;
 	location?: string;
 	resourceId?: string;
@@ -30,6 +32,8 @@ class Event extends Model<EventAttributes, EventCreationAttributes> implements E
 	public startTime!: Date;
 	public endTime!: Date;
 	public calendarId!: number; // Foreign key for Calendar
+	public readonly createdAt!: Date;
+	public updatedAt!: Date;
 	public location?: string;
 	public resourceId?: string;
 	public importance?: Importance;
@@ -66,6 +70,16 @@ Event.init(
 				model: 'calendars',
 				key: 'id',
 			},
+		},
+		createdAt: {
+			type: DataTypes.DATE,
+			allowNull: false,
+			defaultValue: DataTypes.NOW,
+		},
+		updatedAt: {
+			type: DataTypes.DATE,
+			allowNull: false,
+			defaultValue: DataTypes.NOW,
 		},
 		location: {
 			type: new DataTypes.STRING(256),

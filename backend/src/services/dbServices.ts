@@ -1,6 +1,7 @@
 import User, { UserAttributes } from '../models/user.model';
 import Calendar, { CalendarAttributes } from '../models/calendar.model';
 import Event, { EventAttributes } from '../models/event.model';
+import { syncEventToGoogle, deleteGoogleEvent, syncGoogleCalendarEvents } from './googleCalendarServices';
 import logger from '../utils/logger';
 import sequelize from 'sequelize';
 export interface CreateUserParams {
@@ -235,20 +236,68 @@ export async function deleteCalendar(id: number): Promise<number | void> {
  * @returns {Promise<Event | void>} A promise that resolves to the created event or void if an error occurs.
  */
 export async function createEvent(createEventParams: EventAttributes): Promise<Event | void> {
-	const { title, description, startTime, endTime, calendarId, location, resourceId, importance } = createEventParams;
+	try {
+		const { title, description, startTime, endTime, calendarId, location, resourceId, importance } =
+			createEventParams;
 
-	return await Event.create({
-		title,
-		description,
-		startTime,
-		endTime,
-		calendarId,
-		location,
-		resourceId,
-		importance,
-	}).catch((error) => {
+		// Validate dates before proceeding
+		if (!startTime || !endTime || isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+			throw new Error('Invalid event dates');
+		}
+
+		const calendar = await getCalendarById(calendarId);
+		if (!calendar) throw new Error('Calendar not found');
+
+		const user = await getUserById(calendar.userId);
+		if (!user) throw new Error('User not found');
+
+		// Check if event with this resourceId already exists
+		if (resourceId) {
+			const existingEvent = await Event.findOne({
+				where: { resourceId },
+			});
+			if (existingEvent) {
+				logger.debug(`Event with resourceId ${resourceId} already exists, skipping creation`);
+				return existingEvent;
+			}
+		}
+
+		// Create local event first
+		const event = await Event.create({
+			title,
+			description,
+			startTime,
+			endTime,
+			calendarId,
+			location,
+			resourceId,
+			importance,
+		});
+
+		// Sync with Google Calendar only if user has Google account and no resourceId exists
+		if (user.googleId && !resourceId) {
+			const googleEvent = await syncEventToGoogle(calendar.userId, {
+				title: event.title,
+				description: event.description,
+				location: event.location,
+				start: event.startTime,
+				end: event.endTime,
+			});
+
+			if (googleEvent?.id) {
+				await event.update({ resourceId: googleEvent.id });
+			}
+		}
+
+		// Trigger sync after creating event
+		if (user.googleId) {
+			await syncGoogleCalendarEvents(user.id);
+		}
+
+		return event;
+	} catch (error) {
 		logger.error(`Error creating event: ${error.message}`);
-	});
+	}
 }
 
 /**
@@ -278,14 +327,44 @@ export async function getEventById(id: number): Promise<Event | null | void> {
  */
 export async function updateEvent(id: number, updates: Partial<EventAttributes>): Promise<[number, Event[]] | void> {
 	try {
-		// Perform updates
+		const event = await Event.findByPk(id);
+		if (!event) throw new Error(`Event with id ${id} not found`);
+
+		const calendar = await getCalendarById(event.calendarId);
+		if (!calendar) throw new Error('Calendar not found');
+
+		const user = await getUserById(calendar.userId);
+		if (!user) throw new Error('User not found');
+
 		const affectedRows = await Event.update(updates, { where: { id } });
-		// Fetch affected events
+
 		if (affectedRows[0] > 0) {
 			const updatedEvents = await Event.findAll({ where: { id } });
+
+			// Sync with Google Calendar only if user has Google account and event has resourceId
+			if (user.googleId && event.resourceId) {
+				const updatedEvent = updatedEvents[0];
+				await syncEventToGoogle(
+					calendar.userId,
+					{
+						title: updatedEvent.title,
+						description: updatedEvent.description,
+						location: updatedEvent.location,
+						start: updatedEvent.startTime,
+						end: updatedEvent.endTime,
+					},
+					event.resourceId
+				);
+			}
+
+			// Trigger sync after updating event
+			if (user.googleId) {
+				await syncGoogleCalendarEvents(user.id);
+			}
+
 			return [affectedRows[0], updatedEvents];
 		}
-		throw new Error(`Update ${JSON.stringify(updates)} could not be performed on the event with ${id}`);
+		throw new Error(`Update could not be performed on the event with ${id}`);
 	} catch (error) {
 		logger.error(`Error updating event: ${error.message}`);
 	}
@@ -299,10 +378,30 @@ export async function updateEvent(id: number, updates: Partial<EventAttributes>)
  */
 export async function deleteEvent(id: number): Promise<number | void> {
 	try {
+		const event = await Event.findByPk(id);
+		if (!event) throw new Error(`Event with id ${id} not found`);
+
+		const calendar = await getCalendarById(event.calendarId);
+		if (!calendar) throw new Error('Calendar not found');
+
+		const user = await getUserById(calendar.userId);
+		if (!user) throw new Error('User not found');
+
+		// Delete from Google Calendar only if user has Google account and event has resourceId
+		if (user.googleId && event.resourceId) {
+			await deleteGoogleEvent(calendar.userId, event.resourceId);
+		}
+
 		const deletedEvent = await Event.destroy({ where: { id } });
 		if (!deletedEvent) {
 			throw new Error(`Could not delete an event with id: ${id}`);
 		}
+
+		// Trigger sync after deleting event
+		if (user.googleId) {
+			await syncGoogleCalendarEvents(user.id);
+		}
+
 		return deletedEvent;
 	} catch (error) {
 		logger.error(`Error deleting event: ${error.message}`);
@@ -316,6 +415,15 @@ export async function setupUserCalendar(userId: number): Promise<boolean> {
 			return false;
 		}
 		await updateUser(userId, { calendarId: calendar.id });
+		const user = await getUserById(userId);
+		if (!user) throw new Error('User not found');
+
+		// Only sync if user has Google account
+		if (user.googleId) {
+			// Use syncGoogleCalendarEvents instead of manual event creation
+			await syncGoogleCalendarEvents(userId);
+		}
+		logger.info(`Calendar setup successfully for user ${userId}`);
 		return true;
 	} catch (error) {
 		logger.error(`Failed to setup calendar for user ${userId}: ${error.message}`);

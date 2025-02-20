@@ -19,5 +19,6 @@ router.post('/events', ensureAuthenticated, eventController.create);
 router.get('/events/:id', ensureAuthenticated, eventController.getById);
 router.put('/events/:id', ensureAuthenticated, eventController.update);
 router.delete('/events/:id', ensureAuthenticated, eventController.delete);
+router.post('/events/sync/:id', ensureAuthenticated, eventController.syncEvents);
 
 export default router;

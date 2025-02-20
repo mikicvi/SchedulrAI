@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Event, Importance } from '@/types/calendar';
 import { format, getDay, parse, startOfWeek } from 'date-fns';
 import { enIE } from 'date-fns/locale';
-import { Plus } from 'lucide-react';
+import { Plus, RefreshCw } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Calendar as BigCalendar, dateFnsLocalizer, SlotInfo, ToolbarProps, View } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -51,6 +51,7 @@ export default function CalendarComponent() {
 	const [showEventForm, setShowEventForm] = useState(false);
 	const [selectedSlot, setSelectedSlot] = useState<Date | null>(null);
 	const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>();
+	const [isSyncing, setIsSyncing] = useState(false);
 
 	// Add fetchEvents function outside useEffect for reusability
 	const fetchEvents = async () => {
@@ -74,6 +75,28 @@ export default function CalendarComponent() {
 		}
 	};
 
+	const handleSyncCalendar = async () => {
+		if (!user?.googleUser) return;
+
+		setIsSyncing(true);
+		try {
+			await calendarService.syncGoogleCalendar(user.id);
+			await fetchEvents(); // Refresh events after sync
+			toast({
+				title: 'Calendar synced',
+				description: 'Your calendar has been synced with Google Calendar.',
+			});
+		} catch (error) {
+			toast({
+				title: 'Sync failed',
+				description: error instanceof Error ? error.message : 'Failed to sync with Google Calendar',
+				variant: 'destructive',
+			});
+		} finally {
+			setIsSyncing(false);
+		}
+	};
+
 	// Add console.log to debug events
 	useEffect(() => {
 		console.log('Current events:', events);
@@ -81,6 +104,10 @@ export default function CalendarComponent() {
 
 	useEffect(() => {
 		fetchEvents();
+		// If user has Google account, sync on initial load
+		if (user?.googleUser) {
+			handleSyncCalendar();
+		}
 	}, [user?.calendarId]);
 
 	const handleSelectEvent = (event: Event) => {
@@ -200,6 +227,17 @@ export default function CalendarComponent() {
 					<h2 className='text-xl font-semibold'>{label}</h2>
 				</div>
 				<div className='flex items-center space-x-4'>
+					{user?.googleUser && (
+						<Button
+							onClick={handleSyncCalendar}
+							disabled={isSyncing}
+							variant='outline'
+							className='flex items-center space-x-2'
+						>
+							<RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+							<span>{isSyncing ? 'Syncing...' : 'Sync Google Calendar'}</span>
+						</Button>
+					)}
 					<Button onClick={handleAddEvent} className='flex items-center space-x-2'>
 						<Plus className='w-4 h-4' />
 						<span>Add Event</span>

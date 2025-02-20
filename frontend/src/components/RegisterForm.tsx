@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Card, CardDescription, CardTitle } from './ui/card';
 import { Input } from './ui/input';
-import { Chrome, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { GoogleGLogo } from './ui/google-g-logo';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from './ui/toaster';
 import { useNavigate } from 'react-router-dom';
@@ -157,9 +158,9 @@ const Register = () => {
 							className='absolute right-0 top-1/2 -translate-y-1/2 bg-transparent hover:bg-transparent focus:outline-none'
 						>
 							{showPassword ? (
-								<EyeOff className='h-4 w-4 text-gray-500 hover:text-gray-700' />
+								<EyeOff className='h-4 w-4 mr-2 text-gray-500 hover:text-gray-700' />
 							) : (
-								<Eye className='h-4 w-4 text-gray-500 hover:text-gray-700' />
+								<Eye className='h-4 w-4 mr-2 text-gray-500 hover:text-gray-700' />
 							)}
 						</button>
 					</div>
@@ -190,7 +191,7 @@ const Register = () => {
 				OR
 			</p>
 			<Button className='w-full' variant='outline' onClick={handleGoogleAuth}>
-				<Chrome className='mr-2' />
+				<GoogleGLogo className='mr-2' />
 				Create an account with Google
 			</Button>
 			<div className='mt-4 text-center'>

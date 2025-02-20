@@ -10,16 +10,27 @@ import {
 	BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Home } from 'lucide-react';
 
 interface LayoutProps {
 	children: React.ReactNode;
 	breadcrumbItems: Array<{ title: string; href?: string }>;
 }
+const SIDEBAR_STORAGE_KEY = 'sidebar_expanded';
 
 export default function Layout({ children, breadcrumbItems }: LayoutProps) {
-	const [open, setOpen] = React.useState(true);
+	const [open, setOpen] = React.useState(() => {
+		// Initialize from localStorage, default to true if not found
+		const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+		return stored ? JSON.parse(stored) : true;
+	});
+
+	// Save to localStorage whenever the state changes
+	useEffect(() => {
+		localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(open));
+	}, [open]);
+
 	return (
 		<SidebarProvider open={open} onOpenChange={setOpen}>
 			<AppSidebar />

@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Event, Importance } from '@/types/calendar';
 import { format, getDay, parse, startOfWeek } from 'date-fns';
 import { enIE } from 'date-fns/locale';
-import { Plus, RefreshCw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, RefreshCw } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Calendar as BigCalendar, dateFnsLocalizer, SlotInfo, ToolbarProps, View } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -214,38 +214,45 @@ export default function CalendarComponent() {
 		};
 
 		return (
-			<div className='flex items-center justify-between py-4 border-b'>
-				<div className='flex items-center space-x-4'>
-					<Button variant='outline' onClick={() => handleNavigate('TODAY')}>
-						Today
-					</Button>
-					<div className='flex items-center space-x-2'>
-						<Button variant='outline' onClick={() => handleNavigate('PREV')}>
-							Previous
+			<div className='flex flex-col gap-4 py-4 border-b sm:flex-row sm:items-center sm:justify-between'>
+				{/* Navigation Group */}
+				<div className='flex flex-wrap items-center gap-4'>
+					<div className='flex items-center gap-2'>
+						<Button variant='outline' onClick={() => handleNavigate('TODAY')}>
+							Today
 						</Button>
-						<Button variant='outline' onClick={() => handleNavigate('NEXT')}>
-							Next
-						</Button>
+						<div className='flex items-center gap-2'>
+							<Button variant='outline' onClick={() => handleNavigate('PREV')}>
+								<ChevronLeft className='w-4 h-4' />
+							</Button>
+							<Button variant='outline' onClick={() => handleNavigate('NEXT')}>
+								<ChevronRight className='w-4 h-4' />
+							</Button>
+						</div>
 					</div>
 					<h2 className='text-xl font-semibold'>{label}</h2>
 				</div>
-				<div className='flex items-center space-x-4'>
-					{user?.googleUser && (
-						<Button
-							onClick={handleSyncCalendar}
-							disabled={isSyncing}
-							variant='outline'
-							className='flex items-center space-x-2'
-						>
-							<RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-							<span>{isSyncing ? 'Syncing...' : 'Sync Google Calendar'}</span>
+
+				{/* Actions Group */}
+				<div className='flex flex-wrap items-center gap-4'>
+					<div className='flex flex-wrap items-center gap-2'>
+						{user?.googleUser && (
+							<Button
+								onClick={handleSyncCalendar}
+								disabled={isSyncing}
+								variant='outline'
+								className='flex items-center gap-2'
+							>
+								<RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+								<span>{isSyncing ? 'Syncing...' : 'Sync'}</span>
+							</Button>
+						)}
+						<Button onClick={handleAddEvent} className='flex items-center gap-2'>
+							<Plus className='w-4 h-4' />
+							<span>Add Event</span>
 						</Button>
-					)}
-					<Button onClick={handleAddEvent} className='flex items-center space-x-2'>
-						<Plus className='w-4 h-4' />
-						<span>Add Event</span>
-					</Button>
-					<div className='flex space-x-2'>
+					</div>
+					<div className='flex gap-2'>
 						{['month', 'week', 'day'].map((viewType) => (
 							<Button key={viewType} variant='outline' onClick={() => handleViewChange(viewType as View)}>
 								{viewType.charAt(0).toUpperCase() + viewType.slice(1)}

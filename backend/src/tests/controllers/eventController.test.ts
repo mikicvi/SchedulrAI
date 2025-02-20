@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import { eventController } from '../../controllers/eventController';
 import * as dbServices from '../../services/dbServices';
+import * as googleCalendarServices from '../../services/googleCalendarServices';
 import logger from '../../utils/logger';
 
 jest.mock('../../services/dbServices');
+jest.mock('../../services/googleCalendarServices');
 jest.mock('../../utils/logger');
 
 describe('eventController', () => {
@@ -61,6 +63,19 @@ describe('eventController', () => {
 			});
 			expect(logger.error).toHaveBeenCalled();
 		});
+
+		it('should throw an error if there is not result from createEvent', async () => {
+			req.body = mockEvent;
+			(dbServices.createEvent as jest.Mock).mockResolvedValue(null);
+			await eventController.create(req as Request, res as Response);
+
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.json).toHaveBeenCalledWith({
+				status: 'error',
+				message: 'Failed to create event',
+			});
+			expect(logger.error).toHaveBeenCalled();
+		});
 	});
 
 	describe('getById', () => {
@@ -90,6 +105,21 @@ describe('eventController', () => {
 				message: 'Event not found',
 			});
 			expect(logger.warn).toHaveBeenCalled();
+		});
+
+		it('should return 500 if there is an error', async () => {
+			const error = new Error('Database error');
+			req.params = { id: '1' };
+			(dbServices.getEventById as jest.Mock).mockRejectedValue(error);
+
+			await eventController.getById(req as Request, res as Response);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.json).toHaveBeenCalledWith({
+				status: 'error',
+				message: 'Internal server error',
+			});
+			expect(logger.error).toHaveBeenCalled();
 		});
 	});
 
@@ -123,19 +153,18 @@ describe('eventController', () => {
 			expect(logger.warn).toHaveBeenCalled();
 		});
 
-		it('should return 500 if there is an error', async () => {
-			const error = new Error('Internal server error');
+		it('should return 200 and empty array if getAllEvents returns null', async () => {
 			req.params = { id: '1' };
-			(dbServices.getAllEvents as jest.Mock).mockRejectedValue(error);
+			(dbServices.getAllEvents as jest.Mock).mockResolvedValue(null);
 
 			await eventController.getAll(req as Request, res as Response);
 
-			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.status).toHaveBeenCalledWith(200);
 			expect(res.json).toHaveBeenCalledWith({
-				status: 'error',
-				message: error.message,
+				status: 'success',
+				data: [],
 			});
-			expect(logger.error).toHaveBeenCalled;
+			expect(logger.info).toHaveBeenCalled();
 		});
 
 		it('should return 400 if calendar id is missing', async () => {
@@ -148,6 +177,21 @@ describe('eventController', () => {
 				message: 'Calendar ID is required',
 			});
 			expect(logger.warn).toHaveBeenCalled();
+		});
+
+		it('should return 500 if there is an error', async () => {
+			const error = new Error('Database error');
+			req.params = { id: '1' };
+			(dbServices.getAllEvents as jest.Mock).mockRejectedValue(error);
+
+			await eventController.getAll(req as Request, res as Response);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.json).toHaveBeenCalledWith({
+				status: 'error',
+				message: 'Internal server error',
+			});
+			expect(logger.error).toHaveBeenCalled();
 		});
 	});
 
@@ -182,6 +226,22 @@ describe('eventController', () => {
 			});
 			expect(logger.warn).toHaveBeenCalled();
 		});
+
+		it('should return 400 if there is an error', async () => {
+			const error = new Error('Validation error');
+			req.params = { id: '1' };
+			req.body = { title: 'Updated Event' };
+			(dbServices.updateEvent as jest.Mock).mockRejectedValue(error);
+
+			await eventController.update(req as Request, res as Response);
+
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.json).toHaveBeenCalledWith({
+				status: 'error',
+				message: error.message,
+			});
+			expect(logger.error).toHaveBeenCalled();
+		});
 	});
 
 	describe('delete', () => {
@@ -208,6 +268,74 @@ describe('eventController', () => {
 				message: 'Event not found',
 			});
 			expect(logger.warn).toHaveBeenCalled();
+		});
+
+		it('should return 500 if there is an error', async () => {
+			const error = new Error('Database error');
+			req.params = { id: '1' };
+			(dbServices.deleteEvent as jest.Mock).mockRejectedValue(error);
+
+			await eventController.delete(req as Request, res as Response);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.json).toHaveBeenCalledWith({
+				status: 'error',
+				message: 'Internal server error',
+			});
+			expect(logger.error).toHaveBeenCalled();
+		});
+	});
+
+	describe('syncEvents', () => {
+		beforeEach(() => {
+			req = {
+				params: { id: '1' }, // Calendar ID
+				user: { id: 1 } as unknown as any, // User ID
+			};
+			res = {
+				status: jest.fn().mockReturnThis(),
+				json: jest.fn(),
+			};
+		});
+
+		it('should successfully sync events and return 200', async () => {
+			(googleCalendarServices.syncGoogleCalendarEvents as jest.Mock).mockResolvedValue(true);
+
+			await eventController.syncEvents(req as Request, res as Response);
+
+			expect(googleCalendarServices.syncGoogleCalendarEvents).toHaveBeenCalledWith(1);
+			expect(res.status).toHaveBeenCalledWith(200);
+			expect(res.json).toHaveBeenCalledWith({
+				message: 'Calendar synced successfully',
+			});
+			expect(logger.info).toHaveBeenCalled();
+		});
+
+		it('should return 500 if user is not authenticated', async () => {
+			req.user = undefined;
+
+			await eventController.syncEvents(req as Request, res as Response);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.json).toHaveBeenCalledWith({
+				error: 'Failed to sync calendar',
+				message: "Cannot read properties of undefined (reading 'id')",
+			});
+			expect(logger.warn).toHaveBeenCalled();
+		});
+
+		it('should handle sync errors gracefully', async () => {
+			const error = new Error('Sync failed');
+			(googleCalendarServices.syncGoogleCalendarEvents as jest.Mock).mockRejectedValue(error);
+
+			await eventController.syncEvents(req as Request, res as Response);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.json).toHaveBeenCalledWith({
+				error: 'Failed to sync calendar',
+				message: 'Sync failed',
+			});
+			expect(logger.error).toHaveBeenCalledWith('Sync failed:', error);
 		});
 	});
 });

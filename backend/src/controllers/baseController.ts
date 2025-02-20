@@ -5,6 +5,7 @@ type ServiceFunctions<T> = {
 	create: (data: any) => Promise<T>;
 	getById: (id: number) => Promise<T | null>;
 	getAll?: (id: number) => Promise<T[]>;
+	syncEvents?: (id: number) => Promise<boolean>;
 	update: (id: number, data: any) => Promise<[number, T[]] | null | void>;
 	delete: (id: number) => Promise<number | void>;
 };
@@ -59,15 +60,6 @@ export const createBaseController = <T>(serviceFunctions: ServiceFunctions<T>, r
 	},
 
 	async getAll(req: Request, res: Response) {
-		// Check if getAll is implemented
-		if (!serviceFunctions.getAll) {
-			logger.warn(`getAll not implemented for ${resourceName}`);
-			res.status(501).json({
-				status: 'error',
-				message: 'Not implemented',
-			});
-		}
-
 		try {
 			const calendarId = Number(req.params.id);
 			if (!calendarId) {
@@ -90,6 +82,22 @@ export const createBaseController = <T>(serviceFunctions: ServiceFunctions<T>, r
 				status: 'error',
 				message: 'Internal server error',
 			});
+		}
+	},
+
+	async syncEvents(req: Request, res: Response) {
+		try {
+			const userId = req.user.id;
+			const result = await serviceFunctions.syncEvents(userId);
+			if (result) {
+				logger.info('Calendar synced successfully');
+				res.status(200).json({ message: 'Calendar synced successfully' });
+			} else {
+				logger.warn('Failed to sync calendar');
+			}
+		} catch (error) {
+			logger.error('Sync failed:', error);
+			res.status(500).json({ error: 'Failed to sync calendar', message: error.message });
 		}
 	},
 

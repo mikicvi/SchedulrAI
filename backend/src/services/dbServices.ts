@@ -331,42 +331,41 @@ export async function updateEvent(id: number, updates: Partial<EventAttributes>)
 		const event = await Event.findByPk(id);
 		if (!event) throw new Error(`Event with id ${id} not found`);
 
+		// Update local event first
+		const [affectedRows] = await Event.update(updates, { where: { id } });
+		const updatedEvents = await Event.findAll({ where: { id } });
+
 		const calendar = await getCalendarById(event.calendarId);
 		if (!calendar) throw new Error('Calendar not found');
 
 		const user = await getUserById(calendar.userId);
 		if (!user) throw new Error('User not found');
 
-		const affectedRows = await Event.update(updates, { where: { id } });
+		// Only sync with Google if update was successful
+		if (affectedRows > 0 && user.googleId && event.resourceId) {
+			const updatedEvent = updatedEvents[0];
+			await syncEventToGoogle(
+				calendar.userId,
+				{
+					title: updatedEvent.title,
+					description: updatedEvent.description,
+					location: updatedEvent.location,
+					start: updatedEvent.startTime,
+					end: updatedEvent.endTime,
+					importance: updatedEvent.importance,
+				},
+				event.resourceId
+			);
 
-		if (affectedRows[0] > 0) {
-			const updatedEvents = await Event.findAll({ where: { id } });
+			// Wait for sync to complete
+			await new Promise((resolve) => setTimeout(resolve, 1000));
 
-			// Sync with Google Calendar only if user has Google account and event has resourceId
-			if (user.googleId && event.resourceId) {
-				const updatedEvent = updatedEvents[0];
-				await syncEventToGoogle(
-					calendar.userId,
-					{
-						title: updatedEvent.title,
-						description: updatedEvent.description,
-						location: updatedEvent.location,
-						start: updatedEvent.startTime,
-						end: updatedEvent.endTime,
-						importance: updatedEvent.importance,
-					},
-					event.resourceId
-				);
-			}
-
-			// Trigger sync after updating event
-			if (user.googleId) {
-				await syncGoogleCalendarEvents(user.id);
-			}
-
-			return [affectedRows[0], updatedEvents];
+			// Fetch the final state
+			const finalEvent = await Event.findByPk(id);
+			return [affectedRows, [finalEvent]];
 		}
-		throw new Error(`Update could not be performed on the event with ${id}`);
+
+		return [affectedRows, updatedEvents];
 	} catch (error) {
 		logger.error(`Error updating event: ${error.message}`);
 	}

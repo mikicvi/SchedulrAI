@@ -49,12 +49,14 @@ export async function getGoogleCalendarEvents(userId: number) {
 
 		// Calculate date 2 months from now
 		const twoMonthsFromNow = new Date(now);
+		const twoMonthsAgo = new Date(now);
 		twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+		twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
 
 		const response = await googleCalendar.events.list({
 			auth: oauth2Client,
 			calendarId: 'primary',
-			timeMin: now.toISOString(),
+			timeMin: twoMonthsAgo.toISOString(),
 			timeMax: twoMonthsFromNow.toISOString(),
 			maxResults: 250,
 			singleEvents: true, // This ensures recurring events are expanded

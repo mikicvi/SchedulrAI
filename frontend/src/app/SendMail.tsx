@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { z } from 'zod';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from '@/hooks/use-toast';
-import { ListRestart, Send } from 'lucide-react';
+import { ListRestart, Send, RefreshCw } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApi } from '@/hooks/use-Api';
 
@@ -27,6 +27,7 @@ export default function SendMail() {
 		{ title: 'Send Mail', href: '/sendMail' },
 		{ title: 'Send email from your Google Account' },
 	];
+	const [isSending, setIsSending] = useState(false);
 
 	const [to, setTo] = useState(searchParams.get('to') || '');
 	const [subject, setSubject] = useState(searchParams.get('subject') || '');
@@ -62,6 +63,7 @@ export default function SendMail() {
 	};
 
 	const handleSendEmail = async () => {
+		setIsSending(true);
 		try {
 			emailSchema.parse({ to, subject, body });
 
@@ -97,6 +99,8 @@ export default function SendMail() {
 					variant: 'destructive',
 				});
 			}
+		} finally {
+			setIsSending(false);
 		}
 	};
 
@@ -143,8 +147,9 @@ export default function SendMail() {
 						/>
 					</div>
 					<div className='flex justify-between'>
-						<Button type='submit'>
-							Send Email <Send />
+						<Button type='submit' disabled={isSending} className='flex items-center space-x-2'>
+							{isSending ? <RefreshCw className='w-4 h-4 animate-spin' /> : <Send className='w-4 h-4' />}
+							<span>{isSending ? 'Sending...' : 'Send Email'}</span>
 						</Button>
 						<Button type='reset' variant='secondary' className='ml-4' onClick={resetFields}>
 							Reset Fields <ListRestart />

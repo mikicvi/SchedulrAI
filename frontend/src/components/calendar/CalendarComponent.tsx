@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Event, Importance } from '@/types/calendar';
 import { format, getDay, parse, startOfWeek } from 'date-fns';
 import { enIE } from 'date-fns/locale';
-import { Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, RefreshCw } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Calendar as BigCalendar, dateFnsLocalizer, SlotInfo, ToolbarProps, View } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -51,6 +51,9 @@ export default function CalendarComponent() {
 	const [showEventForm, setShowEventForm] = useState(false);
 	const [selectedSlot, setSelectedSlot] = useState<Date | null>(null);
 	const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>();
+	const [isSyncing, setIsSyncing] = useState(false);
+	const [isCreating, setIsCreating] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
 
 	// Add fetchEvents function outside useEffect for reusability
 	const fetchEvents = async () => {
@@ -74,6 +77,28 @@ export default function CalendarComponent() {
 		}
 	};
 
+	const handleSyncCalendar = async () => {
+		if (!user?.googleUser) return;
+
+		setIsSyncing(true);
+		try {
+			await calendarService.syncGoogleCalendar(user.id);
+			await fetchEvents(); // Refresh events after sync
+			toast({
+				title: 'Calendar synced',
+				description: 'Your calendar has been synced with Google Calendar.',
+			});
+		} catch (error) {
+			toast({
+				title: 'Sync failed',
+				description: error instanceof Error ? error.message : 'Failed to sync with Google Calendar',
+				variant: 'destructive',
+			});
+		} finally {
+			setIsSyncing(false);
+		}
+	};
+
 	// Add console.log to debug events
 	useEffect(() => {
 		console.log('Current events:', events);
@@ -81,6 +106,10 @@ export default function CalendarComponent() {
 
 	useEffect(() => {
 		fetchEvents();
+		// If user has Google account, sync on initial load
+		if (user?.googleUser) {
+			handleSyncCalendar();
+		}
 	}, [user?.calendarId]);
 
 	const handleSelectEvent = (event: Event) => {
@@ -95,21 +124,16 @@ export default function CalendarComponent() {
 		const start = new Date(slotInfo.start);
 		let end = new Date(slotInfo.end);
 
-		// For drag selections in month view, adjust the end date
-		if (slotInfo.action === 'select' && end.getHours() === 0) {
-			end.setDate(end.getDate() - 1);
-			end.setHours(23, 59, 0);
+		// In month view, selection end time will be 00:00 of the next day
+		if (end.getHours() === 0 && end.getMinutes() === 0) {
+			// Adjust the end date to be 23:59 of the previous day
+			end.setTime(end.getTime() - 60000); // Subtract one minute from midnight
 		}
 
+		// Set the selected dates
 		setSelectedSlot(start);
 		setSelectedEndDate(end);
 		setShowEventForm(true);
-
-		console.log('Selected slot:', {
-			start: start.toISOString(),
-			end: end.toISOString(),
-			action: slotInfo.action,
-		});
 	};
 
 	const handleAddEvent = () => {
@@ -119,6 +143,7 @@ export default function CalendarComponent() {
 	};
 
 	const handleSaveEvent = async (eventData: Omit<Event, 'id'>) => {
+		setIsCreating(true);
 		try {
 			if (!user?.calendarId) {
 				throw new Error('No calendar found');
@@ -143,11 +168,14 @@ export default function CalendarComponent() {
 				description: error instanceof Error ? error.message : 'An unknown error occurred',
 				variant: 'destructive',
 			});
+		} finally {
+			setIsCreating(false);
 		}
 	};
 
 	const handleDeleteEvent = async () => {
 		if (selectedEvent) {
+			setIsDeleting(true);
 			try {
 				await calendarService.deleteEvent(selectedEvent.id);
 				// Remove the event from local state
@@ -163,6 +191,8 @@ export default function CalendarComponent() {
 					description: error instanceof Error ? error.message : 'An unknown error occurred',
 					variant: 'destructive',
 				});
+			} finally {
+				setIsDeleting(false);
 			}
 		}
 	};
@@ -184,27 +214,45 @@ export default function CalendarComponent() {
 		};
 
 		return (
-			<div className='flex items-center justify-between py-4 border-b'>
-				<div className='flex items-center space-x-4'>
-					<Button variant='outline' onClick={() => handleNavigate('TODAY')}>
-						Today
-					</Button>
-					<div className='flex items-center space-x-2'>
-						<Button variant='outline' onClick={() => handleNavigate('PREV')}>
-							Previous
+			<div className='flex flex-col gap-4 py-4 border-b sm:flex-row sm:items-center sm:justify-between'>
+				{/* Navigation Group */}
+				<div className='flex flex-wrap items-center gap-4'>
+					<div className='flex items-center gap-2'>
+						<Button variant='outline' onClick={() => handleNavigate('TODAY')}>
+							Today
 						</Button>
-						<Button variant='outline' onClick={() => handleNavigate('NEXT')}>
-							Next
-						</Button>
+						<div className='flex items-center gap-2'>
+							<Button variant='outline' onClick={() => handleNavigate('PREV')}>
+								<ChevronLeft className='w-4 h-4' />
+							</Button>
+							<Button variant='outline' onClick={() => handleNavigate('NEXT')}>
+								<ChevronRight className='w-4 h-4' />
+							</Button>
+						</div>
 					</div>
 					<h2 className='text-xl font-semibold'>{label}</h2>
 				</div>
-				<div className='flex items-center space-x-4'>
-					<Button onClick={handleAddEvent} className='flex items-center space-x-2'>
-						<Plus className='w-4 h-4' />
-						<span>Add Event</span>
-					</Button>
-					<div className='flex space-x-2'>
+
+				{/* Actions Group */}
+				<div className='flex flex-wrap items-center gap-4'>
+					<div className='flex flex-wrap items-center gap-2'>
+						{user?.googleUser && (
+							<Button
+								onClick={handleSyncCalendar}
+								disabled={isSyncing}
+								variant='outline'
+								className='flex items-center gap-2'
+							>
+								<RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+								<span>{isSyncing ? 'Syncing...' : 'Sync'}</span>
+							</Button>
+						)}
+						<Button onClick={handleAddEvent} className='flex items-center gap-2'>
+							<Plus className='w-4 h-4' />
+							<span>Add Event</span>
+						</Button>
+					</div>
+					<div className='flex gap-2'>
 						{['month', 'week', 'day'].map((viewType) => (
 							<Button key={viewType} variant='outline' onClick={() => handleViewChange(viewType as View)}>
 								{viewType.charAt(0).toUpperCase() + viewType.slice(1)}
@@ -253,6 +301,7 @@ export default function CalendarComponent() {
 				onClose={() => setShowEventDialog(false)}
 				onEdit={handleEditEvent}
 				onDelete={handleDeleteEvent}
+				isDeleting={isDeleting}
 			/>
 
 			<EventForm
@@ -265,6 +314,7 @@ export default function CalendarComponent() {
 				onSave={handleSaveEvent}
 				selectedDate={selectedSlot ?? undefined}
 				selectedEndDate={selectedEndDate}
+				isCreating={isCreating}
 			/>
 		</div>
 	);

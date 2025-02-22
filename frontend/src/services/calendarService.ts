@@ -161,5 +161,15 @@ export const useCalendarService = () => {
 			// Don't try to parse JSON, just return success
 			return { success: true };
 		},
+
+		async syncGoogleCalendar(userId: number) {
+			const response = await apiFetch(`${baseUrl}/events/sync/${userId}`, {
+				method: 'POST',
+				credentials: 'include',
+			});
+
+			if (!response.ok) throw new Error('Failed to sync Google Calendar');
+			return response.json();
+		},
 	};
 };

@@ -43,3 +43,63 @@
 	background-color: hsl(var(--secondary)) !important;
 	border-left: 1px solid hsl(var(--border)) !important;
 }
+
+/* Theme-aware styles using shadcn classes */
+:root[class~='dark'] input[type='date'],
+:root[class~='dark'] input[type='time'] {
+	color: #fff;
+	color-scheme: dark;
+}
+
+:root[class~='dark'] .rbc-off-range-bg {
+	border-left: 1px solid hsl(var(--popover)) !important;
+}
+:root[class~='dark'] .rbc-day-bg.rbc-selected-cell {
+	background-color: hsl(var(--secondary)) !important;
+	border: 1px dashed hsl(var(--chart-1)) !important;
+}
+
+:root[class~='light'] input[type='date'],
+:root[class~='light'] input[type='time'] {
+	color: hsl(var(--foreground));
+	color-scheme: light;
+	background-color: hsl(var(--background));
+}
+:root[class~='light'] .rbc-day-bg.rbc-selected-cell {
+	background-color: hsl(var(--secondary)) !important;
+	border: 1px dashed hsl(var(--chart-1)) !important;
+}
+
+/* Time indicator line */
+.rbc-current-time-indicator {
+	position: absolute;
+	z-index: 3;
+	left: 0;
+	right: 0;
+	height: 2px;
+	background-color: #f43f5e; /* Bright pink that contrasts with all event colors */
+}
+
+/* Circle on the left */
+.rbc-current-time-indicator::before {
+	content: '';
+	position: absolute;
+	left: -6px;
+	top: -4px;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background-color: #f43f5e;
+}
+
+:root[class~='dark'] .rbc-current-time-indicator,
+:root[class~='dark'] .rbc-current-time-indicator::before {
+	background-color: #f43f5e;
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+:root[class~='light'] .rbc-current-time-indicator,
+:root[class~='light'] .rbc-current-time-indicator::before {
+	background-color: #e11d48;
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+}

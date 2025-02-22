@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Event } from '@/types/calendar';
 import { format } from 'date-fns';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, Trash2, RefreshCw } from 'lucide-react';
 
 interface EventDialogProps {
 	event: Event | null;
@@ -10,9 +10,10 @@ interface EventDialogProps {
 	onClose: () => void;
 	onEdit: () => void;
 	onDelete: () => void;
+	isDeleting: boolean;
 }
 
-export function EventDialog({ event, open, onClose, onEdit, onDelete }: EventDialogProps) {
+export function EventDialog({ event, open, onClose, onEdit, onDelete, isDeleting }: Readonly<EventDialogProps>) {
 	if (!event) return null;
 
 	return (
@@ -55,9 +56,18 @@ export function EventDialog({ event, open, onClose, onEdit, onDelete }: EventDia
 							<Edit2 className='w-4 h-4' />
 							<span>Edit</span>
 						</Button>
-						<Button variant='destructive' onClick={onDelete} className='flex items-center space-x-2'>
-							<Trash2 className='w-4 h-4' />
-							<span>Delete</span>
+						<Button
+							variant='destructive'
+							onClick={onDelete}
+							disabled={isDeleting}
+							className='flex items-center space-x-2'
+						>
+							{isDeleting ? (
+								<RefreshCw className='w-4 h-4 animate-spin' />
+							) : (
+								<Trash2 className='w-4 h-4' />
+							)}
+							<span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
 						</Button>
 					</div>
 				</DialogFooter>

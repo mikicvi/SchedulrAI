@@ -1,7 +1,7 @@
 import { getOllamaStatus } from './ollamaServices';
 import { getChromaStatus } from './chromaServices';
 import logger from '../utils/logger';
-import { systemPromptMessage, humanPromptMessage } from '../config/constants';
+import { systemPromptMessage } from '../config/constants';
 
 import { ChatOllama, OllamaEmbeddings } from '@langchain/ollama';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
@@ -37,6 +37,10 @@ class RAGPipeline {
 	private readonly chromaVectorStore: Chroma;
 
 	constructor(llmSettings: PipelineService, vectorStoreParams: ChromaLibArgs) {
+		if (!llmSettings.baseUrl || !llmSettings.model) {
+			throw new Error('Invalid LLM settings');
+		}
+
 		this.llmSettings = llmSettings;
 		this.embeddings = new OllamaEmbeddings({
 			model: this.llmSettings.embeddingModel,
@@ -89,37 +93,45 @@ class RAGPipeline {
 
 		for (let attempt = 0; attempt < retry; attempt++) {
 			statusCallback?.(`Analyzing requirements (attempt ${attempt + 1}/${retry})...`);
-			const result = await qaChain.invoke({ question: userInput });
-			logger.debug(`Raw LLM response: ${result}`);
 
 			try {
-				statusCallback?.('Processing LLM response...');
+				const result = await qaChain.invoke({ question: userInput });
+				logger.debug(`Raw LLM response: ${result}`);
+
 				const parsedResult = JSON.parse(result);
-				if (parsedResult.suggestedTime) {
-					// Convert "X.X hours" format to decimal
-					const timeMatch = parsedResult.suggestedTime.match(/(\d+\.?\d*)\s*(?:hours?)?/i);
-					if (timeMatch) {
-						parsedResult.suggestedTime = Number(timeMatch[1]).toFixed(2);
-					}
-					// Verify final format
-					if (/^\d+\.\d{2}$/.test(parsedResult.suggestedTime)) {
-						statusCallback?.('Success!');
-						return {
-							...parsedResult,
-							originalPrompt: userInput,
-						};
-					}
-				} else {
+				if (!parsedResult.suggestedTime) {
 					logger.warn(`Invalid or missing 'suggestedTime' in response: ${JSON.stringify(parsedResult)}`);
+					continue;
+				}
+
+				statusCallback?.('Processing LLM response...');
+				const timeStr = parsedResult.suggestedTime.toString().toLowerCase();
+
+				// Updated regex to handle more formats with flexible spacing
+				const timeMatch = timeStr.match(/^(?:(?:\d*\.\d+)|(?:\d+\.?\d*))\s*(?:hours?)?$/i);
+
+				if (timeMatch) {
+					// Remove 'hour(s)' from the extracted time, returning only the number
+					const extractedTime = timeMatch[0].replace(/\s*hours?/i, '');
+					const time = parseFloat(extractedTime);
+					parsedResult.suggestedTime = time.toFixed(2);
+					statusCallback?.('Success!');
+					return {
+						...parsedResult,
+						originalPrompt: userInput,
+					};
 				}
 			} catch (error) {
-				statusCallback?.(`Attempt ${attempt + 1} failed for reason: ${error.message}, retrying...`);
-				logger.error(`Parsing failed on attempt ${attempt + 1}: ${error.message}`);
+				logger.error(`Attempt ${attempt + 1} failed:`, error);
+				statusCallback?.(
+					`Attempt ${attempt + 1} failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+				);
 			}
 		}
 
-		logger.error(`Final rejected response after ${retry} attempts.`);
+		const error = new Error('Max retries reached without valid response');
 		statusCallback?.('LLM failed to provide a valid response - please try again.');
+		throw error;
 	}
 
 	private async _showResults(result: string): Promise<void> {
@@ -150,7 +162,13 @@ class RAGPipeline {
 			]);
 
 			const isReady = !!(chromaStatusResponse && ollamaEmbedStatus);
-			logger.info(isReady ? 'Pipeline ready' : 'Pipeline has issues');
+			isReady
+				? logger.info('Pipeline Status:', {
+						chroma: chromaStatusResponse,
+						ollama: 'Working',
+				  })
+				: logger.warn('Pipeline has issues');
+
 			return isReady;
 		} catch (error) {
 			logger.error(`Pipeline readiness check failed: ${error.message}`);

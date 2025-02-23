@@ -38,6 +38,14 @@ class PipelineController {
 	}
 
 	/**
+	 * Gets the pipeline emitter
+	 * @internal
+	 */
+	public _getEmitter(): EventEmitter {
+		return pipelineEmitter;
+	}
+
+	/**
 	 * Handles the execution of a pipeline based on user input.
 	 *
 	 * @param req - The HTTP request object, containing the user input in the body.

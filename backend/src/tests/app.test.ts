@@ -103,6 +103,22 @@ jest.mock('@langchain/ollama', () => ({
 	})),
 }));
 
+// Mock PipelineController to ensure no actual exection which results in test failures
+jest.mock('../controllers/pipelineController', () => {
+	return jest.fn().mockImplementation(() => ({
+		runPipeline: jest.fn(),
+		checkPipelineStatus: jest.fn(),
+		streamStatus: jest.fn(),
+		_getEmitter: jest.fn(),
+	}));
+});
+
+jest.mock('../services/pipelineServices', () => {
+	return jest.fn().mockImplementation(() => ({
+		isPipelineReady: jest.fn(),
+	}));
+});
+
 describe('initializeApp', () => {
 	let app: any;
 

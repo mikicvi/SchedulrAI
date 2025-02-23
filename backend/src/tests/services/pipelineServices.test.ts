@@ -74,7 +74,6 @@ describe('RAGPipeline', () => {
 
 	describe('_requestLLM Retry Functionality', () => {
 		beforeEach(() => {
-			// Mock RunnableSequence to return a mock chain with controllable invoke
 			const mockQAChain = {
 				invoke: jest.fn(),
 			};
@@ -82,49 +81,154 @@ describe('RAGPipeline', () => {
 		});
 
 		it('should retry when response format is incorrect', async () => {
-			// Spy on the actual method implementation
-			const originalMethod = ragPipeline['_requestLLM'].bind(ragPipeline);
-			const spy = jest.spyOn(ragPipeline as any, '_requestLLM').mockImplementation(originalMethod);
-
-			// Mock the invoke method to return invalid responses then a valid one
+			// Setup chain mock responses
 			const mockChain = RunnableSequence.from as jest.Mock;
-			mockChain()
-				.invoke.mockResolvedValueOnce('Invalid Response')
-				.mockResolvedValueOnce('Another Invalid Response')
-				.mockResolvedValueOnce('Time: 1.23');
+			const mockInvoke = jest.fn();
+			mockInvoke
+				.mockResolvedValueOnce('Invalid JSON')
+				.mockResolvedValueOnce('{"missing": "time"}')
+				.mockResolvedValueOnce('{"suggestedTime": "1.23", "taskSummary": "Test"}');
+			mockChain().invoke = mockInvoke;
 
 			const result = await ragPipeline['_requestLLM']('test query');
 
-			expect(result).toBe('Time: 1.23');
-			expect(spy).toHaveBeenCalledTimes(3);
-			expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Invalid response format'));
-
-			// Restore the original method
-			spy.mockRestore();
+			expect(result).toEqual({
+				suggestedTime: '1.23',
+				taskSummary: 'Test',
+				originalPrompt: 'test query',
+			});
+			expect(mockInvoke).toHaveBeenCalledTimes(3);
+			expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Raw LLM response'));
 		});
 
 		it('should throw an error after max retries', async () => {
-			// Mock the invoke method to always return invalid responses
 			const mockChain = RunnableSequence.from as jest.Mock;
-			mockChain().invoke.mockResolvedValue('Invalid Response');
+			const mockInvoke = jest.fn().mockResolvedValue('Invalid JSON');
+			mockChain().invoke = mockInvoke;
 
-			await expect(ragPipeline['_requestLLM']('test query')).rejects.toThrow(
-				'Max retries reached. Invalid response format.'
-			);
+			const statusCallback = jest.fn();
+			try {
+				await ragPipeline['_requestLLM']('test query', statusCallback);
+				fail('Expected method to throw');
+			} catch (error) {
+				expect(statusCallback).toHaveBeenCalledWith(
+					'LLM failed to provide a valid response - please try again.'
+				);
+				expect(mockInvoke).toHaveBeenCalledTimes(3);
+			}
+		});
+	});
+
+	describe('_requestLLM Response Processing', () => {
+		beforeEach(() => {
+			const mockQAChain = {
+				invoke: jest.fn(),
+			};
+			(RunnableSequence.from as jest.Mock).mockReturnValue(mockQAChain);
+		});
+
+		it('should handle various time formats', async () => {
+			const mockChain = RunnableSequence.from as jest.Mock;
+			const testCases = [
+				{ input: '{"suggestedTime": "2 hours", "taskSummary": "Test"}', expected: '2.00' },
+				{ input: '{"suggestedTime": "1.5", "taskSummary": "Test"}', expected: '1.50' },
+				{ input: '{"suggestedTime": "0.75 hours", "taskSummary": "Test"}', expected: '0.75' },
+				{ input: '{"suggestedTime": ".5", "taskSummary": "Test"}', expected: '0.50' },
+				{ input: '{"suggestedTime": "2.50 hours", "taskSummary": "Test"}', expected: '2.50' },
+				{ input: '{"suggestedTime": "2.50  hours", "taskSummary": "Test"}', expected: '2.50' }, // Multiple spaces
+			];
+
+			for (const testCase of testCases) {
+				const mockInvoke = jest.fn().mockResolvedValue(testCase.input);
+				mockChain().invoke = mockInvoke;
+				const result = await ragPipeline['_requestLLM']('test query');
+				expect(result.suggestedTime).toBe(testCase.expected);
+			}
+		});
+
+		it('should handle status callback updates', async () => {
+			const mockChain = RunnableSequence.from as jest.Mock;
+			mockChain().invoke = jest.fn().mockResolvedValue('{"suggestedTime": "1.00", "taskSummary": "Test"}');
+
+			const statusCallback = jest.fn();
+			await ragPipeline['_requestLLM']('test query', statusCallback);
+
+			expect(statusCallback).toHaveBeenCalledWith('Setting up the retrieval pipeline...');
+			expect(statusCallback).toHaveBeenCalledWith('Running the retrieval pipeline...');
+			expect(statusCallback).toHaveBeenCalledWith('Analyzing requirements (attempt 1/3)...');
+			expect(statusCallback).toHaveBeenCalledWith('Processing LLM response...');
+			expect(statusCallback).toHaveBeenCalledWith('Success!');
+		});
+
+		it('should handle malformed JSON responses', async () => {
+			const mockChain = RunnableSequence.from as jest.Mock;
+			const mockInvoke = jest
+				.fn()
+				.mockRejectedValueOnce(new Error('Invalid JSON'))
+				.mockRejectedValueOnce(new Error('Parse error'))
+				.mockResolvedValue('{"suggestedTime": "1.00", "taskSummary": "Test"}');
+			mockChain().invoke = mockInvoke;
+
+			const statusCallback = jest.fn();
+			const result = await ragPipeline['_requestLLM']('test query', statusCallback);
+
+			expect(result.suggestedTime).toBe('1.00');
+			expect(statusCallback).toHaveBeenCalledWith(expect.stringContaining('failed'));
+		});
+	});
+
+	describe('Pipeline Initialization', () => {
+		it('should handle invalid LLM settings', () => {
+			const invalidSettings = {
+				...mockLlmSettings,
+				baseUrl: '',
+			};
+
+			expect(() => new RAGPipeline(invalidSettings, mockVectorStoreParams)).toThrow('Invalid LLM settings');
+		});
+	});
+
+	describe('Error Handling', () => {
+		it('should handle network errors in isPipelineReady', async () => {
+			(getChromaStatus as jest.Mock).mockRejectedValue(new Error('Network error'));
+
+			const result = await ragPipeline.isPipelineReady();
+
+			expect(result).toBe(false);
+			expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Pipeline readiness check failed'));
+		});
+
+		it('should handle timeout errors in _requestLLM', async () => {
+			const mockChain = RunnableSequence.from as jest.Mock;
+			mockChain().invoke = jest.fn().mockRejectedValue(new Error('Timeout'));
+
+			const statusCallback = jest.fn();
+			try {
+				await ragPipeline['_requestLLM']('test query', statusCallback);
+				fail('Expected method to throw');
+			} catch (error) {
+				expect(statusCallback).toHaveBeenCalledWith(expect.stringContaining('failed'));
+				expect(logger.error).toHaveBeenCalled();
+			}
 		});
 	});
 
 	describe('runPipeline', () => {
 		it('should call _requestLLM and _showResults', async () => {
-			// Spy on _requestLLM and _showResults
-			const mockRequestLLM = jest.spyOn(ragPipeline as any, '_requestLLM').mockResolvedValue('Time: 1.23');
+			const expectedResponse = {
+				suggestedTime: '1.23',
+				taskSummary: 'Test task',
+				originalPrompt: 'test query',
+			};
+
+			const mockRequestLLM = jest.spyOn(ragPipeline as any, '_requestLLM').mockResolvedValue(expectedResponse);
 			const mockShowResults = jest.spyOn(ragPipeline as any, '_showResults');
 
 			const result = await ragPipeline.runPipeline('test query');
 
-			expect(result).toBe('Time: 1.23');
-			expect(mockRequestLLM).toHaveBeenCalledWith('test query');
-			expect(mockShowResults).toHaveBeenCalledWith('Time: 1.23');
+			expect(result).toEqual(expectedResponse);
+			expect(mockRequestLLM).toHaveBeenCalledWith('test query', undefined);
+			expect(mockShowResults).toHaveBeenCalledWith(JSON.stringify(expectedResponse, null, 2));
 		});
 	});
 });

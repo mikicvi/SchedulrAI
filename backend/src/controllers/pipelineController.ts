@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
+import { EventEmitter } from 'events';
 import logger from '../utils/logger';
 import RAGPipeline from '../services/pipelineServices';
+
+const pipelineEmitter = new EventEmitter();
 
 class PipelineController {
 	private readonly pipelineService: RAGPipeline;
@@ -46,9 +49,25 @@ class PipelineController {
 	public async runPipeline(req: Request, res: Response): Promise<void> {
 		try {
 			const userInput = req.body.userInput;
-			const result = await this.pipelineService.runPipeline(userInput);
-			res.status(200).json({ result });
-			logger.debug(`|runPipeline  |: in:${JSON.stringify(req.body.userInput)} out:${JSON.stringify(result)}`);
+			const requestId = Date.now().toString();
+
+			// Emit more detailed status updates
+			pipelineEmitter.emit('status', {
+				requestId,
+				status: 'Initializing pipeline...',
+				timestamp: new Date().toISOString(),
+			});
+
+			const result = await this.pipelineService.runPipeline(userInput, (status: string) => {
+				pipelineEmitter.emit('status', {
+					requestId,
+					status,
+					timestamp: new Date().toISOString(),
+				});
+			});
+
+			res.status(200).json(result);
+			logger.debug(`|runPipeline  |: in:${userInput} out:${JSON.stringify(result)}`);
 		} catch (error) {
 			logger.error('Error running pipeline:', error);
 			res.status(500).json({ error: error.message });
@@ -72,6 +91,40 @@ class PipelineController {
 			res.status(500).json({ error: error.message });
 		}
 		logger.info(`|checkPipelineStatus  |: ${req.method} ${res.statusCode}`);
+	}
+
+	/**
+	 * Streams status updates to the client using Server-Sent Events (SSE).
+	 *
+	 * @param req - The HTTP request object.
+	 * @param res - The HTTP response object.
+	 */
+	public async streamStatus(req: Request, res: Response): Promise<void> {
+		res.setHeader('Content-Type', 'text/event-stream');
+
+		// Send initial connection message
+		res.write(`data: ${JSON.stringify({ status: 'Connected to status stream' })}\n\n`);
+
+		const listener = (data: any) => {
+			try {
+				res.write(`data: ${JSON.stringify(data)}\n\n`);
+			} catch (error) {
+				logger.error('Error sending SSE update:', error);
+			}
+		};
+
+		pipelineEmitter.on('status', listener);
+
+		// Keep connection alive
+		const keepAlive = setInterval(() => {
+			res.write(`: keepalive\n\n`);
+		}, 30000);
+
+		req.on('close', () => {
+			clearInterval(keepAlive);
+			pipelineEmitter.off('status', listener);
+			res.end();
+		});
 	}
 }
 

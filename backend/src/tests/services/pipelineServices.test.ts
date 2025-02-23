@@ -134,6 +134,8 @@ describe('RAGPipeline', () => {
 				{ input: '{"suggestedTime": "1.5", "taskSummary": "Test"}', expected: '1.50' },
 				{ input: '{"suggestedTime": "0.75 hours", "taskSummary": "Test"}', expected: '0.75' },
 				{ input: '{"suggestedTime": ".5", "taskSummary": "Test"}', expected: '0.50' },
+				{ input: '{"suggestedTime": "2.50 hours", "taskSummary": "Test"}', expected: '2.50' },
+				{ input: '{"suggestedTime": "2.50  hours", "taskSummary": "Test"}', expected: '2.50' }, // Multiple spaces
 			];
 
 			for (const testCase of testCases) {

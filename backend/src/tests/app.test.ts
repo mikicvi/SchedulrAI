@@ -113,6 +113,12 @@ jest.mock('../controllers/pipelineController', () => {
 	}));
 });
 
+jest.mock('../services/pipelineServices', () => {
+	return jest.fn().mockImplementation(() => ({
+		isPipelineReady: jest.fn(),
+	}));
+});
+
 describe('initializeApp', () => {
 	let app: any;
 

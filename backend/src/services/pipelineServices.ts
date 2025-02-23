@@ -1,7 +1,7 @@
 import { getOllamaStatus } from './ollamaServices';
 import { getChromaStatus } from './chromaServices';
 import logger from '../utils/logger';
-import { systemPromptMessage, humanPromptMessage } from '../config/constants';
+import { systemPromptMessage } from '../config/constants';
 
 import { ChatOllama, OllamaEmbeddings } from '@langchain/ollama';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
@@ -92,36 +92,40 @@ class RAGPipeline {
 		]);
 
 		for (let attempt = 0; attempt < retry; attempt++) {
+			statusCallback?.(`Analyzing requirements (attempt ${attempt + 1}/${retry})...`);
+
 			try {
-				statusCallback?.(`Analyzing requirements (attempt ${attempt + 1}/${retry})...`);
 				const result = await qaChain.invoke({ question: userInput });
 				logger.debug(`Raw LLM response: ${result}`);
 
-				try {
-					statusCallback?.('Processing LLM response...');
-					const parsedResult = JSON.parse(result);
-					if (parsedResult.suggestedTime) {
-						// Improved time format parsing
-						const timeStr = parsedResult.suggestedTime.toString().toLowerCase();
-						const timeMatch = timeStr.match(/^\.?\d+\.?\d*|\d*\.?\d+\s*(?:hours?)?$/i);
-						if (timeMatch) {
-							const time = parseFloat(timeMatch[0]);
-							parsedResult.suggestedTime = time.toFixed(2);
-							statusCallback?.('Success!');
-							return {
-								...parsedResult,
-								originalPrompt: userInput,
-							};
-						}
-					}
+				const parsedResult = JSON.parse(result);
+				if (!parsedResult.suggestedTime) {
 					logger.warn(`Invalid or missing 'suggestedTime' in response: ${JSON.stringify(parsedResult)}`);
-				} catch (error) {
-					statusCallback?.(`Attempt ${attempt + 1} failed: ${error.message}`);
-					logger.error(`Parsing failed on attempt ${attempt + 1}: ${error.message}`);
+					continue;
+				}
+
+				statusCallback?.('Processing LLM response...');
+				const timeStr = parsedResult.suggestedTime.toString().toLowerCase();
+
+				// Updated regex to handle more formats with flexible spacing
+				const timeMatch = timeStr.match(/^(?:(?:\d*\.\d+)|(?:\d+\.?\d*))\s*(?:hours?)?$/i);
+
+				if (timeMatch) {
+					// Remove 'hour(s)' from the extracted time, returning only the number
+					const extractedTime = timeMatch[0].replace(/\s*hours?/i, '');
+					const time = parseFloat(extractedTime);
+					parsedResult.suggestedTime = time.toFixed(2);
+					statusCallback?.('Success!');
+					return {
+						...parsedResult,
+						originalPrompt: userInput,
+					};
 				}
 			} catch (error) {
-				statusCallback?.(`Attempt ${attempt + 1} failed: Network or timeout error`);
-				logger.error(`Request failed on attempt ${attempt + 1}: ${error.message}`);
+				logger.error(`Attempt ${attempt + 1} failed:`, error);
+				statusCallback?.(
+					`Attempt ${attempt + 1} failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+				);
 			}
 		}
 

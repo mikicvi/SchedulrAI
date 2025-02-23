@@ -25,12 +25,23 @@ const DynamicTextarea: React.FC<DynamicTextareaProps> = ({ label, placeholder, i
 		}
 	};
 
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+		if (e.key === 'Enter' && !e.shiftKey) {
+			e.preventDefault();
+			const submitButton = textareaRef.current?.form?.querySelector('button[type="submit"]');
+			if (submitButton instanceof HTMLButtonElement) {
+				submitButton.click();
+				submitButton.focus();
+			}
+		}
+	};
+
 	useEffect(() => {
 		handleInput(); // Adjust height on initial render
 	}, [value]);
 
 	return (
-		<div className="w-1/2">
+		<div className='w-full'>
 			<Label htmlFor={id}>{label}</Label>
 			<Textarea
 				ref={textareaRef}
@@ -39,7 +50,8 @@ const DynamicTextarea: React.FC<DynamicTextareaProps> = ({ label, placeholder, i
 				value={value}
 				onChange={onChange}
 				onInput={handleInput}
-				className="resize-none max-h-[70vh]"
+				onKeyDown={handleKeyDown}
+				className='resize-none w-full max-h-[70vh] min-h-[150px]'
 				style={{ height: textareaHeight, overflow: overflow }}
 			/>
 		</div>

@@ -17,6 +17,7 @@ interface EventFormProps {
 	selectedDate?: Date;
 	selectedEndDate?: Date; //prop for multiple date selection
 	isCreating: boolean;
+	initialData?: Omit<Event, 'id'>;
 }
 
 const defaultFormData = {
@@ -38,6 +39,7 @@ export function EventForm({
 	selectedDate,
 	selectedEndDate,
 	isCreating,
+	initialData,
 }: Readonly<EventFormProps>) {
 	const [formData, setFormData] = useState(defaultFormData);
 
@@ -60,6 +62,18 @@ export function EventForm({
 				endTime: format(event.end, 'HH:mm'),
 				importance: event.importance || undefined, // This can be undefined if not set
 			});
+		} else if (initialData) {
+			// Handle pre-filled data from estimation
+			setFormData({
+				title: initialData.title,
+				description: initialData.description || '',
+				location: initialData.location || '',
+				startDate: format(initialData.start, 'yyyy-MM-dd'),
+				startTime: format(initialData.start, 'HH:mm'),
+				endDate: format(initialData.end, 'yyyy-MM-dd'),
+				endTime: format(initialData.end, 'HH:mm'),
+				importance: initialData.importance || Importance.NotUrgentImportant,
+			});
 		} else if (selectedDate) {
 			// Set form data for new event
 			const startDate = format(selectedDate, 'yyyy-MM-dd');
@@ -75,7 +89,7 @@ export function EventForm({
 				endTime,
 			});
 		}
-	}, [event, selectedDate, selectedEndDate, open]);
+	}, [event, selectedDate, selectedEndDate, open, initialData]);
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();

@@ -29,6 +29,7 @@ const defaultFormData = {
 	endDate: '',
 	endTime: '23:59',
 	importance: undefined as Importance | undefined,
+	customerEmail: '',
 };
 
 export function EventForm({
@@ -61,6 +62,7 @@ export function EventForm({
 				endDate: format(event.end, 'yyyy-MM-dd'),
 				endTime: format(event.end, 'HH:mm'),
 				importance: event.importance || undefined, // This can be undefined if not set
+				customerEmail: event.customerEmail || '',
 			});
 		} else if (initialData) {
 			// Handle pre-filled data from estimation
@@ -73,6 +75,7 @@ export function EventForm({
 				endDate: format(initialData.end, 'yyyy-MM-dd'),
 				endTime: format(initialData.end, 'HH:mm'),
 				importance: initialData.importance || Importance.NotUrgentImportant,
+				customerEmail: initialData.customerEmail || '',
 			});
 		} else if (selectedDate) {
 			// Set form data for new event
@@ -104,6 +107,7 @@ export function EventForm({
 			start,
 			end,
 			importance: formData.importance,
+			customerEmail: formData.customerEmail,
 		});
 		onClose();
 	};

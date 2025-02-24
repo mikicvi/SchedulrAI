@@ -31,11 +31,11 @@ export function ConfirmationDialog({
 	selectedDate,
 	selectedTime,
 	onConfirm,
-}: ConfirmationDialogProps) {
+}: Readonly<ConfirmationDialogProps>) {
 	const generateDefaultTitle = (data: EstimationResponse) => {
-		if (!data.taskSummary && !data.userInfo) return 'SchedulrAI automated event';
+		if (!data.taskSummary && !data.customerName) return 'SchedulrAI automated event';
 
-		const prefix = data.userInfo ? `[${data.userInfo}] ` : '';
+		const prefix = data.customerName ? `[${data.customerName}] ` : '';
 		const summary = data.taskSummary ? data.taskSummary.split(' ').slice(0, 5).join(' ') : '';
 
 		return `${prefix}${summary}`.trim();
@@ -45,6 +45,7 @@ export function ConfirmationDialog({
 		title: '',
 		duration: '',
 		startTime: '09:00',
+		customerEmail: '',
 	});
 
 	useEffect(() => {
@@ -61,6 +62,7 @@ export function ConfirmationDialog({
 				title: generateDefaultTitle(estimatedData),
 				duration: estimatedData.suggestedTime,
 				startTime: startTime as string,
+				customerEmail: estimatedData.customerEmail || '',
 			});
 		}
 	}, [open, estimatedData, selectedTime]);
@@ -78,9 +80,11 @@ export function ConfirmationDialog({
 			title: formData.title,
 			start: startDate,
 			end: endDate,
+			customerEmail: formData.customerEmail,
 			description: `Created from AI estimation:
             Estimated duration: ${formData.duration} hours
-            ${estimatedData.userInfo ? `Client: ${estimatedData.userInfo}` : ''}
+            ${estimatedData.customerName ? `Client: ${estimatedData.customerName}` : ''}
+			${estimatedData.customerEmail ? `Client email: ${estimatedData.customerEmail}` : ''}
             ${estimatedData.preferredDay ? `Preferred day: ${estimatedData.preferredDay}` : ''}
             ${estimatedData.preferredTimeOfDay ? `Preferred time: ${estimatedData.preferredTimeOfDay}` : ''},
             ${estimatedData.taskSummary ? `Task summary: ${estimatedData.taskSummary}` : ''},
@@ -140,6 +144,18 @@ export function ConfirmationDialog({
 							onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
 							className='col-span-3'
 							readOnly
+						/>
+					</div>
+
+					<div className='grid grid-cols-4 items-center gap-4'>
+						<Label htmlFor='customerEmail' className='text-right'>
+							Customer Email
+						</Label>
+						<Input
+							id='customerEmail'
+							value={formData.customerEmail}
+							onChange={(e) => setFormData({ ...formData, customerEmail: e.target.value })}
+							className='col-span-3'
 						/>
 					</div>
 

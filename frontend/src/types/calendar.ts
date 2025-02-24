@@ -15,4 +15,5 @@ export interface Event {
 	resourceId?: string;
 	importance?: Importance;
 	calendarId?: number;
+	customerEmail?: string;
 }

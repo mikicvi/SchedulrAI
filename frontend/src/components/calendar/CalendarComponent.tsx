@@ -156,15 +156,12 @@ export default function CalendarComponent() {
 				throw new Error('No calendar found');
 			}
 
-			let createdEvent;
 			if (selectedEvent) {
 				const updated = await calendarService.updateEvent(selectedEvent.id, eventData);
 				setEvents(events.map((event) => (event.id === selectedEvent.id ? updated.data : event)));
-				createdEvent = updated.data;
 			} else {
 				const created = await calendarService.createEvent(user.calendarId, eventData);
 				setEvents([...events, created.data]);
-				createdEvent = created.data;
 			}
 
 			await fetchEvents();
@@ -174,9 +171,10 @@ export default function CalendarComponent() {
 				description: 'Your calendar has been updated successfully.',
 			});
 
-			// Replace window.confirm with state updates
-			if (user?.googleUser && !selectedEvent) {
+			// Set the pending email event with the saved event data
+			if (user?.googleUser && !selectedEvent && eventData.customerEmail) {
 				setPendingEmailEvent(eventData);
+
 				setShowEmailConfirm(true);
 			}
 		} catch (error) {
@@ -298,17 +296,23 @@ export default function CalendarComponent() {
 	const handleEmailConfirm = () => {
 		if (pendingEmailEvent) {
 			const emailSubject = `Event Scheduled: ${pendingEmailEvent.title}`;
+			const emailTo = pendingEmailEvent.customerEmail ?? '';
 			const emailBody = `
-Event: ${pendingEmailEvent.title}
-Date: ${format(pendingEmailEvent.start, 'PPP')}
-Time: ${format(pendingEmailEvent.start, 'p')} - ${format(pendingEmailEvent.end, 'p')}
-${pendingEmailEvent.location ? `Location: ${pendingEmailEvent.location}` : ''}
-${pendingEmailEvent.description || ''}
+			Event: ${pendingEmailEvent.title}
+			Date: ${format(pendingEmailEvent.start, 'PPP')}
+			Time: ${format(pendingEmailEvent.start, 'p')} - ${format(pendingEmailEvent.end, 'p')}
+			${pendingEmailEvent.location ? `Location: ${pendingEmailEvent.location}` : ''}
+			${pendingEmailEvent.description || ''}
             `.trim();
 
-			navigate(`/sendMail?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`, {
-				state: null,
-			});
+			navigate(
+				`/sendMail?subject=${encodeURIComponent(emailSubject)}&to=${encodeURIComponent(
+					emailTo
+				)}&body=${encodeURIComponent(emailBody)}`,
+				{
+					state: null,
+				}
+			);
 		}
 	};
 

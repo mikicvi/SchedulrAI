@@ -14,7 +14,8 @@ import { PipelineService } from '../types/pipeline';
 export interface ExtractedContext {
 	suggestedTime: string;
 	taskSummary?: string;
-	userInfo?: string;
+	customerName?: string;
+	customerEmail?: string;
 	preferredTimeOfDay?: string;
 	preferredDay?: string;
 	originalPrompt?: string;
@@ -24,7 +25,8 @@ const JSON_SCHEMA =
 	`{{\n` +
 	`  "suggestedTime": "X.XX",\n` +
 	`  "taskSummary": "Brief description of the task/event",\n` +
-	`  "userInfo": "Any mentioned user details",\n` +
+	`  "customerName": "Any mentioned customer name",\n` +
+	`  "customerEmail": "Any mentioned email address",\n` +
 	`  "preferredTimeOfDay": "Any mentioned time of day",\n` +
 	`  "preferredDay": "Day"\n` +
 	`}}`;

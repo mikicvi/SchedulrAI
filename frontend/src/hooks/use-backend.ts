@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useApi } from './use-Api';
 
 function useBackendStatus(pollInterval = 5000) {
-	const [status, setStatus] = useState('Not Ready');
+	const [status, setStatus] = useState('🟡 Not Ready');
 	const { apiFetch } = useApi();
 
 	useEffect(() => {

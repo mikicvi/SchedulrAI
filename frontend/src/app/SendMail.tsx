@@ -39,6 +39,32 @@ export default function SendMail() {
 		setBody(searchParams.get('body') || '');
 	}, [searchParams]);
 
+	// Add recipient suggestion based on event data
+	useEffect(() => {
+		const body = searchParams.get('body') || '';
+		// Try to extract client info from the event description
+		const clientMatch = body.match(/Client:\s*([^\n]+)/);
+		if (clientMatch && clientMatch[1]) {
+			// If we have client info, suggest adding recipient
+			toast({
+				title: 'Suggestion',
+				description: 'Would you like to add the client email?',
+				action: (
+					<Button
+						variant='outline'
+						size='sm'
+						onClick={() => {
+							// For now, just focus the field - could implement email lookup in the future
+							document.getElementById('to-email')?.focus();
+						}}
+					>
+						Add Email
+					</Button>
+				),
+			});
+		}
+	}, [searchParams]);
+
 	// Redirect if not Google authenticated
 	if (!user?.googleUser) {
 		return (
@@ -121,6 +147,7 @@ export default function SendMail() {
 					<div className='mb-4'>
 						<Label>To</Label>
 						<Input
+							id='to-email'
 							value={to}
 							onChange={(e) => setTo(e.target.value)}
 							required

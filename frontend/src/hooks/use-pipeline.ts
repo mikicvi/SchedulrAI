@@ -20,12 +20,18 @@ const usePipeline = () => {
 				body: JSON.stringify({ userInput: userInput }),
 			});
 			const data = await response.json();
-			setResponse(data.result.replace(/\"/g, ''));
+			setResponse(typeof data === 'string' ? data.replace(/"/g, '') : JSON.stringify(data));
 		} catch (error) {
 			console.error('Error:', error);
 		} finally {
 			setLoading(false);
 		}
+	};
+
+	const resetPipeline = () => {
+		setUserInput('');
+		setResponse(null);
+		setLoading(false);
 	};
 
 	return {
@@ -34,6 +40,7 @@ const usePipeline = () => {
 		response,
 		handleInputChange,
 		handleSubmit,
+		resetPipeline,
 	};
 };
 

@@ -5,9 +5,7 @@ import { Card, CardDescription, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { GoogleGLogo } from './ui/google-g-logo';
-// import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import { Toaster } from './ui/toaster';
 import { useApi } from '@/hooks/use-Api';
 
 const LoginForm = () => {
@@ -15,7 +13,6 @@ const LoginForm = () => {
 	const [password, setPassword] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
-	// const navigate = useNavigate();
 	const { apiFetch } = useApi();
 
 	const handleSubmit = async (e: any) => {
@@ -126,7 +123,6 @@ const LoginForm = () => {
 					Don't have an account? Sign up
 				</a>
 			</div>
-			<Toaster />
 		</Card>
 	);
 };

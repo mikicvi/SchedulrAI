@@ -17,11 +17,16 @@ const FormSchema = z.object({
 	}),
 });
 
-export function DatePickerForm() {
+interface DatePickerFormProps {
+	selected?: Date;
+	onSelect: (date: Date) => void;
+}
+
+export function DatePickerForm({ selected, onSelect }: DatePickerFormProps) {
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
-			workingDate: new Date(),
+			workingDate: selected || new Date(),
 		},
 	});
 
@@ -33,6 +38,7 @@ export function DatePickerForm() {
 				title: 'Date selected:',
 				description: `Date selected: ${format(date, 'PPP')}`,
 			});
+			onSelect(date);
 		}
 	}
 
@@ -51,7 +57,7 @@ export function DatePickerForm() {
 										<Button
 											variant={'outline'}
 											className={cn(
-												'w-[240px] pl-3 text-left font-normal',
+												'w-[248px] pl-3 text-left font-normal',
 												!field.value && 'text-muted-foreground'
 											)}
 										>
@@ -65,7 +71,7 @@ export function DatePickerForm() {
 										mode='single'
 										selected={field.value}
 										onSelect={handleDateChange}
-										disabled={(date) => date < new Date()}
+										disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
 										initialFocus
 									/>
 								</PopoverContent>

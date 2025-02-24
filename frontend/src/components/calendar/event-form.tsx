@@ -17,6 +17,7 @@ interface EventFormProps {
 	selectedDate?: Date;
 	selectedEndDate?: Date; //prop for multiple date selection
 	isCreating: boolean;
+	initialData?: Omit<Event, 'id'>;
 }
 
 const defaultFormData = {
@@ -28,6 +29,7 @@ const defaultFormData = {
 	endDate: '',
 	endTime: '23:59',
 	importance: undefined as Importance | undefined,
+	customerEmail: '',
 };
 
 export function EventForm({
@@ -38,6 +40,7 @@ export function EventForm({
 	selectedDate,
 	selectedEndDate,
 	isCreating,
+	initialData,
 }: Readonly<EventFormProps>) {
 	const [formData, setFormData] = useState(defaultFormData);
 
@@ -59,6 +62,20 @@ export function EventForm({
 				endDate: format(event.end, 'yyyy-MM-dd'),
 				endTime: format(event.end, 'HH:mm'),
 				importance: event.importance || undefined, // This can be undefined if not set
+				customerEmail: event.customerEmail || '',
+			});
+		} else if (initialData) {
+			// Handle pre-filled data from estimation
+			setFormData({
+				title: initialData.title,
+				description: initialData.description || '',
+				location: initialData.location || '',
+				startDate: format(initialData.start, 'yyyy-MM-dd'),
+				startTime: format(initialData.start, 'HH:mm'),
+				endDate: format(initialData.end, 'yyyy-MM-dd'),
+				endTime: format(initialData.end, 'HH:mm'),
+				importance: initialData.importance || Importance.NotUrgentImportant,
+				customerEmail: initialData.customerEmail || '',
 			});
 		} else if (selectedDate) {
 			// Set form data for new event
@@ -75,7 +92,7 @@ export function EventForm({
 				endTime,
 			});
 		}
-	}, [event, selectedDate, selectedEndDate, open]);
+	}, [event, selectedDate, selectedEndDate, open, initialData]);
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -90,6 +107,7 @@ export function EventForm({
 			start,
 			end,
 			importance: formData.importance,
+			customerEmail: formData.customerEmail,
 		});
 		onClose();
 	};

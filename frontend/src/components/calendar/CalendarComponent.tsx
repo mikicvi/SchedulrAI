@@ -12,7 +12,9 @@ import { EventDialog } from './event-dialog';
 import { EventForm } from './event-form';
 import { useUser } from '@/contexts/UserContext';
 import { useCalendarService } from '@/services/calendarService';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 
 const locales = {
 	'en-IE': enIE,
@@ -43,6 +45,8 @@ const getEventStyle = (event: Event) => {
 
 export default function CalendarComponent() {
 	const { user } = useUser();
+	const location = useLocation();
+	const navigate = useNavigate();
 	const calendarService = useCalendarService();
 	const { toast } = useToast();
 	const [events, setEvents] = useState<Event[]>([]);
@@ -54,6 +58,9 @@ export default function CalendarComponent() {
 	const [isSyncing, setIsSyncing] = useState(false);
 	const [isCreating, setIsCreating] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
+	const [initialEventData, setInitialEventData] = useState<Omit<Event, 'id'> | undefined>(undefined);
+	const [showEmailConfirm, setShowEmailConfirm] = useState(false);
+	const [pendingEmailEvent, setPendingEmailEvent] = useState<Omit<Event, 'id'> | null>(null);
 
 	// Add fetchEvents function outside useEffect for reusability
 	const fetchEvents = async () => {
@@ -156,12 +163,20 @@ export default function CalendarComponent() {
 				const created = await calendarService.createEvent(user.calendarId, eventData);
 				setEvents([...events, created.data]);
 			}
-			await fetchEvents(); // Refresh events after save
+
+			await fetchEvents();
 			setShowEventForm(false);
 			toast({
 				title: selectedEvent ? 'Event updated' : 'Event created',
 				description: 'Your calendar has been updated successfully.',
 			});
+
+			// Set the pending email event with the saved event data
+			if (user?.googleUser && !selectedEvent && eventData.customerEmail) {
+				setPendingEmailEvent(eventData);
+
+				setShowEmailConfirm(true);
+			}
 		} catch (error) {
 			toast({
 				title: 'Error',
@@ -201,6 +216,20 @@ export default function CalendarComponent() {
 		setShowEventDialog(false);
 		setShowEventForm(true);
 	};
+
+	useEffect(() => {
+		const state = location.state as { showEventForm: boolean; eventData: Omit<Event, 'id'> };
+		if (state?.showEventForm) {
+			// Store the event data
+			setInitialEventData(state.eventData);
+			setSelectedSlot(state.eventData.start);
+			setSelectedEndDate(state.eventData.end);
+			setShowEventForm(true);
+
+			// Clear the location state
+			navigate(location.pathname, { replace: true });
+		}
+	}, [location.state]);
 
 	const CustomToolbar: React.FC<ToolbarProps<Event>> = (props) => {
 		const { label, onNavigate, onView } = props;
@@ -264,6 +293,29 @@ export default function CalendarComponent() {
 		);
 	};
 
+	const handleEmailConfirm = () => {
+		if (pendingEmailEvent) {
+			const emailSubject = `Event Scheduled: ${pendingEmailEvent.title}`;
+			const emailTo = pendingEmailEvent.customerEmail ?? '';
+			const emailBody = `
+			Event: ${pendingEmailEvent.title}
+			Date: ${format(pendingEmailEvent.start, 'PPP')}
+			Time: ${format(pendingEmailEvent.start, 'p')} - ${format(pendingEmailEvent.end, 'p')}
+			${pendingEmailEvent.location ? `Location: ${pendingEmailEvent.location}` : ''}
+			${pendingEmailEvent.description || ''}
+            `.trim();
+
+			navigate(
+				`/sendMail?subject=${encodeURIComponent(emailSubject)}&to=${encodeURIComponent(
+					emailTo
+				)}&body=${encodeURIComponent(emailBody)}`,
+				{
+					state: null,
+				}
+			);
+		}
+	};
+
 	return (
 		<div className='h-full w-full px-4'>
 			<div className='h-[calc(85vh-3rem)] rounded-lg shadow-sm'>
@@ -310,11 +362,24 @@ export default function CalendarComponent() {
 				onClose={() => {
 					setShowEventForm(false);
 					setSelectedEndDate(undefined);
+					setInitialEventData(undefined); // Clear initial data on close
 				}}
 				onSave={handleSaveEvent}
 				selectedDate={selectedSlot ?? undefined}
 				selectedEndDate={selectedEndDate}
 				isCreating={isCreating}
+				initialData={initialEventData} // Pass the stored initial data
+			/>
+
+			<ConfirmationDialog
+				open={showEmailConfirm}
+				onOpenChange={setShowEmailConfirm}
+				title='Send Email Notification'
+				description='Would you like to send an email notification about this event?'
+				confirmText='Send Email'
+				cancelText='Skip'
+				onConfirm={handleEmailConfirm}
+				onCancel={() => setPendingEmailEvent(null)}
 			/>
 		</div>
 	);

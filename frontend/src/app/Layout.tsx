@@ -33,40 +33,44 @@ export default function Layout({ children, breadcrumbItems }: LayoutProps) {
 
 	return (
 		<SidebarProvider open={open} onOpenChange={setOpen}>
-			<AppSidebar />
-			<main className='flex-1 m-0'>
-				<div className='flex justify-between items-center p-4'>
-					<div className='flex items-center'>
-						<SidebarTrigger variant='outline' />
-						<Separator orientation='vertical' className='mx-4 h-6' />
-						<Breadcrumb>
-							<BreadcrumbList>
-								<BreadcrumbItem>
-									<BreadcrumbLink href='/'>
-										<Home className='w-5 h-5' />
-									</BreadcrumbLink>
-								</BreadcrumbItem>
-								<BreadcrumbSeparator />
-								{breadcrumbItems.map((item, index) => (
-									<React.Fragment key={index}>
-										<BreadcrumbItem>
-											{item.href ? (
-												<BreadcrumbLink href={item.href}>{item.title}</BreadcrumbLink>
-											) : (
-												<BreadcrumbPage>{item.title}</BreadcrumbPage>
-											)}
-										</BreadcrumbItem>
-										{index < breadcrumbItems.length - 1 && <BreadcrumbSeparator />}
-									</React.Fragment>
-								))}
-							</BreadcrumbList>
-						</Breadcrumb>
+			<div className='flex h-screen w-full overflow-hidden'>
+				<AppSidebar />
+				<main className='flex-1 flex flex-col h-screen w-full overflow-hidden'>
+					<div className='flex justify-between items-center p-4 shrink-0 w-full'>
+						<div className='flex items-center'>
+							<SidebarTrigger variant='outline' />
+							<Separator orientation='vertical' className='mx-4 h-6' />
+							<Breadcrumb>
+								<BreadcrumbList>
+									<BreadcrumbItem>
+										<BreadcrumbLink href='/'>
+											<Home className='w-5 h-5' />
+										</BreadcrumbLink>
+									</BreadcrumbItem>
+									<BreadcrumbSeparator />
+									{breadcrumbItems.map((item, index) => (
+										<React.Fragment key={index}>
+											<BreadcrumbItem>
+												{item.href ? (
+													<BreadcrumbLink href={item.href}>{item.title}</BreadcrumbLink>
+												) : (
+													<BreadcrumbPage>{item.title}</BreadcrumbPage>
+												)}
+											</BreadcrumbItem>
+											{index < breadcrumbItems.length - 1 && <BreadcrumbSeparator />}
+										</React.Fragment>
+									))}
+								</BreadcrumbList>
+							</Breadcrumb>
+						</div>
+						<ModeToggle />
 					</div>
-					<ModeToggle />
-				</div>
-				<Separator className='mt-0' />
-				<div className='p-4'>{children}</div>
-			</main>
+					<Separator className='mt-0 shrink-0' />
+					<div className='flex-1 overflow-y-auto w-full'>
+						<div className='p-4 w-full'>{children}</div>
+					</div>
+				</main>
+			</div>
 		</SidebarProvider>
 	);
 }

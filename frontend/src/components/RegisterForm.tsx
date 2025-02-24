@@ -6,7 +6,6 @@ import { Input } from './ui/input';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { GoogleGLogo } from './ui/google-g-logo';
 import { useToast } from '@/hooks/use-toast';
-import { Toaster } from './ui/toaster';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '@/hooks/use-Api';
 
@@ -199,7 +198,6 @@ const Register = () => {
 					Already have an account? Log in
 				</a>
 			</div>
-			<Toaster />
 		</Card>
 	);
 };

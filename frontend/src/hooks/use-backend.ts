@@ -13,7 +13,7 @@ function useBackendStatus(pollInterval = 5000) {
 			if (!mounted) return;
 
 			try {
-				const response = await apiFetch('http://localhost:3000/api/checkPipelineStatus', {
+				const response = await apiFetch('/checkPipelineStatus', {
 					credentials: 'include',
 				});
 

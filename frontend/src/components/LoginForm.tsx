@@ -19,7 +19,7 @@ const LoginForm = () => {
 		e.preventDefault();
 		setIsLoading(true);
 		try {
-			const response = await apiFetch('http://localhost:3000/api/login', {
+			const response = await apiFetch('/login', {
 				method: 'POST',
 				body: JSON.stringify({ username, password }),
 			});

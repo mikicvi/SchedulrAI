@@ -38,7 +38,7 @@ const Register = () => {
 		}
 
 		try {
-			const response = await apiFetch('http://localhost:3000/api/register', {
+			const response = await apiFetch('/register', {
 				method: 'POST',
 				body: JSON.stringify({
 					firstName,

@@ -93,7 +93,7 @@ export default function SendMail() {
 		try {
 			emailSchema.parse({ to, subject, body });
 
-			const response = await apiFetch('http://localhost:3000/api/email/send', {
+			const response = await apiFetch('/email/send', {
 				method: 'POST',
 				body: JSON.stringify({ to, subject, body }),
 			});

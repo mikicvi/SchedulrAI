@@ -35,7 +35,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 			if (!mounted) return;
 
 			try {
-				const response = await apiFetch('http://localhost:3000/api/checkAuth', {
+				const response = await apiFetch('/checkAuth', {
 					credentials: 'include',
 				});
 

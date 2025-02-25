@@ -13,7 +13,7 @@ const Logout = () => {
 			if (isLoading) return;
 
 			try {
-				const response = await apiFetch('http://localhost:3000/api/logout', {
+				const response = await apiFetch('/logout', {
 					method: 'GET',
 				});
 

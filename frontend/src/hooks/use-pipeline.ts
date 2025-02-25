@@ -15,7 +15,7 @@ const usePipeline = () => {
 	const handleSubmit = async () => {
 		setLoading(true);
 		try {
-			const response = await apiFetch('http://localhost:3000/api/runPipeline', {
+			const response = await apiFetch('/runPipeline', {
 				method: 'POST',
 				body: JSON.stringify({ userInput: userInput }),
 			});

@@ -36,7 +36,7 @@ export default function Layout({ children, breadcrumbItems }: LayoutProps) {
 			<div className='flex h-screen w-full overflow-hidden'>
 				<AppSidebar />
 				<main className='flex-1 flex flex-col h-screen w-full overflow-hidden'>
-					<div className='flex justify-between items-center p-4 shrink-0 w-full'>
+					<div className='flex justify-between items-center p-3 shrink-0 w-full'>
 						<div className='flex items-center'>
 							<SidebarTrigger variant='outline' />
 							<Separator orientation='vertical' className='mx-4 h-6' />

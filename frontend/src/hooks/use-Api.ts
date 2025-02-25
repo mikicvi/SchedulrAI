@@ -38,6 +38,9 @@ export const useApi = () => {
 	const apiFetch = useCallback(
 		async (url: string, options: RequestInit = {}) => {
 			setIsLoading(true);
+			const defaultUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
+			// Support both absolute URLs and relative paths
+			const apiUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `${defaultUrl}/${url}`;
 			try {
 				const csrfToken = await getCsrfToken();
 
@@ -49,8 +52,7 @@ export const useApi = () => {
 				if (options.body) {
 					headers.set('Content-Type', 'application/json');
 				}
-
-				const response = await fetch(url, {
+				const response = await fetch(apiUrl, {
 					...options,
 					headers,
 					credentials: 'include',
@@ -64,7 +66,7 @@ export const useApi = () => {
 					const newToken = await getCsrfToken();
 					headers.set('X-CSRF-TOKEN', newToken);
 
-					return fetch(url, {
+					return fetch(apiUrl, {
 						...options,
 						headers,
 						credentials: 'include',

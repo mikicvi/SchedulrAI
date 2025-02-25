@@ -12,20 +12,6 @@ services:
         volumes:
             - .chroma_volume:/chroma/chroma
 
-    ollama:
-        image: mikicv/schedulrai-ollama:latest
-        ports:
-            - '11434:11434'
-        volumes:
-            - .ollama_volume:/root/.ollama
-        container_name: ollama
-        pull_policy: always
-        tty: true
-        restart: always
-        networks:
-            - schedulrai
-        env_file: .env
-
     backend:
         image: mikicv/schedulrai-backend:latest
         ports:

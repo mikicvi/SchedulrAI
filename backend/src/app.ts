@@ -5,6 +5,7 @@ import pipelineRoutes from './routes/pipelineRoutes';
 import authRoutes from './routes/authRoutes';
 import emailRoutes from './routes/emailRoutes';
 import calendarRoutes from './routes/calendarRoutes';
+import profileRoutes from './routes/profileRoutes';
 import express from 'express';
 import session from 'express-session';
 import passport from './middlewares/passport';
@@ -100,6 +101,7 @@ const initializeApp = async () => {
 	app.use(baseApiRoute, authRoutes);
 	app.use(baseApiRoute, emailRoutes);
 	app.use(baseApiRoute, calendarRoutes);
+	app.use(baseApiRoute, profileRoutes);
 
 	return app;
 };

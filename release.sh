@@ -26,9 +26,9 @@ docker buildx build --platform linux/amd64,linux/arm64 -t $FRONTEND_IMAGE_NAME:l
 echo "Building and pushing backend image..."
 docker buildx build --platform linux/amd64,linux/arm64 -t $BACKEND_IMAGE_NAME:latest -t $BACKEND_IMAGE_NAME:$VERSION_TAG -f Dockerfile.backend . --push
 
-# Build and push ollama image for both x86 and ARM64
-echo "Building and pushing ollama image..."
-docker buildx build --platform linux/amd64,linux/arm64 -t $OLLAMA_IMAGE_NAME:latest -t $OLLAMA_IMAGE_NAME:$VERSION_TAG -f Dockerfile.ollama . --push
+# # Build and push ollama image for both x86 and ARM64
+# echo "Building and pushing ollama image..."
+# docker buildx build --platform linux/amd64,linux/arm64 -t $OLLAMA_IMAGE_NAME:latest -t $OLLAMA_IMAGE_NAME:$VERSION_TAG -f Dockerfile.ollama . --push
 # Remove the builder instance
 docker buildx rm
 docker buildx use default

@@ -12,22 +12,6 @@ services:
         volumes:
             - .chroma_volume:/chroma/chroma
 
-    ollama:
-        build:
-            context: .
-            dockerfile: Dockerfile.ollama
-        ports:
-            - '11434:11434'
-        volumes:
-            - .ollama_volume:/root/.ollama
-        container_name: ollama
-        pull_policy: always
-        tty: true
-        restart: always
-        networks:
-            - schedulrai
-        env_file: ./docker/ollama.env
-
     backend:
         build:
             context: .
@@ -45,7 +29,9 @@ services:
             - .sqlite_volume:/app/data
         environment:
             - CHROMA_SERVER_HOST=chroma
-            - OLLAMA_API_BASE=ollama
+            - OLLAMA_API_BASE=host.docker.internal
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
 
     frontend:
         build:
@@ -63,6 +49,5 @@ networks:
     schedulrai:
         driver: bridge
 volumes:
-    ollama_volume:
     chroma_volume:
     sqlite_volume:

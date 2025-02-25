@@ -43,6 +43,5 @@ networks:
     schedulrai:
         driver: bridge
 volumes:
-    ollama_volume:
     chroma_volume:
     sqlite_volume:

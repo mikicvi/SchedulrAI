@@ -88,3 +88,50 @@ export async function indexDocuments(): Promise<void> {
 		throw error;
 	}
 }
+
+export async function listDocuments(): Promise<Array<{ name: string; content: string }>> {
+	try {
+		if (!fs.existsSync(documentsPath)) {
+			return [];
+		}
+
+		const files = fs.readdirSync(documentsPath);
+		return files.map((file) => ({
+			name: file,
+			content: fs.readFileSync(path.join(documentsPath, file), 'utf-8'),
+		}));
+	} catch (error) {
+		logger.error('Failed to list documents:', error);
+		throw error;
+	}
+}
+
+export async function createDocument(title: string, content: string): Promise<void> {
+	try {
+		if (!fs.existsSync(documentsPath)) {
+			fs.mkdirSync(documentsPath, { recursive: true });
+		}
+
+		const fileName = `${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.md`;
+		const filePath = path.join(documentsPath, fileName);
+
+		fs.writeFileSync(filePath, content, 'utf-8');
+		logger.info(`Document created: ${filePath}`);
+	} catch (error) {
+		logger.error(`Failed to create document:`, error);
+		throw error;
+	}
+}
+
+export async function deleteDocument(filename: string): Promise<void> {
+	try {
+		const filePath = path.join(documentsPath, filename);
+		if (fs.existsSync(filePath)) {
+			fs.unlinkSync(filePath);
+			logger.info(`Document deleted: ${filePath}`);
+		}
+	} catch (error) {
+		logger.error(`Failed to delete document:`, error);
+		throw error;
+	}
+}

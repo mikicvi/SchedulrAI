@@ -1,6 +1,6 @@
 import chromaRoutes from './routes/chromaRoutes';
 import ollamaRoutes from './routes/ollamaRoutes';
-import documentIndexRoutes from './routes/documentIndexRoutes';
+import knowledgeRoutes from './routes/knowledgeRoutes';
 import pipelineRoutes from './routes/pipelineRoutes';
 import authRoutes from './routes/authRoutes';
 import emailRoutes from './routes/emailRoutes';
@@ -96,7 +96,7 @@ const initializeApp = async () => {
 	// Routes
 	app.use(baseApiRoute, chromaRoutes);
 	app.use(baseApiRoute, ollamaRoutes);
-	app.use(baseApiRoute, documentIndexRoutes);
+	app.use(baseApiRoute, knowledgeRoutes);
 	app.use(baseApiRoute, pipelineRoutes);
 	app.use(baseApiRoute, authRoutes);
 	app.use(baseApiRoute, emailRoutes);

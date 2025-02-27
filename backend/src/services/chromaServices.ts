@@ -1,5 +1,4 @@
 import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
-import { chromaCollections } from '../controllers/chromaController';
 
 export async function getChromaStatus() {
 	const chromaClient = new ChromaClient({

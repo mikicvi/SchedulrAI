@@ -55,16 +55,6 @@ export function SettingsForm() {
 		},
 	});
 
-	useEffect(() => {
-		if (user?.userSettings?.knowledgeBase) {
-			form.reset({
-				userSettings: {
-					knowledgeBase: [], // Reset to empty array when loading user data to prevent conflicts with existing data
-				},
-			});
-		}
-	}, [user, form.reset]);
-
 	const fetchDocuments = async () => {
 		try {
 			const response = await apiFetch('/kb/listDocuments');
@@ -88,6 +78,7 @@ export function SettingsForm() {
 				throw new Error('Failed to delete document');
 			}
 
+			// Only fetch updated documents, don't reset the form
 			await fetchDocuments();
 
 			toast({

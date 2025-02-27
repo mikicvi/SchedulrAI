@@ -13,6 +13,7 @@ globalThis.mockAuthMiddleware = (req: Request, res: Response, next: NextFunction
 };
 
 // Mock environment variables
+process.env.DOCUMENTS_PATH = '/mock/documents/path';
 process.env.GOOGLE_CLIENT_ID = 'test-client-id';
 process.env.GOOGLE_CLIENT_SECRET = 'test-client';
 process.env.GOOGLE_CALLBACK_URL = 'http://localhost:3000/auth/google/callback';

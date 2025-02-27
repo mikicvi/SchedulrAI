@@ -3,7 +3,7 @@ import path from 'path';
 import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
 import { CharacterTextSplitter } from 'langchain/text_splitter';
 import logger from '../../utils/logger';
-import { indexDocuments } from '../../services/documentServices';
+import { createDocument, deleteDocument, indexDocuments, listDocuments } from '../../services/documentServices';
 
 // Mock dependencies
 jest.mock('fs');
@@ -30,7 +30,6 @@ describe('Document Indexing Workflow', () => {
 		process.env.OLLAMA_PORT = '11434';
 		process.env.LLM_EMBED_MODEL = 'test-model';
 		process.env.CHROMA_CLIENT_AUTH_CREDENTIALS = 'test-credentials';
-		process.env.DOCUMENTS_PATH = mockDocumentsPath;
 
 		// Preset mocks for file system and text splitting
 		(fs.readdirSync as jest.Mock).mockReturnValue(mockFiles);
@@ -43,6 +42,7 @@ describe('Document Indexing Workflow', () => {
 			splitText: jest.fn().mockImplementation((text) => text.split('---')),
 		}));
 
+		(fs.existsSync as jest.Mock).mockReturnValue(true);
 		// mock the path to the documents
 		//jest.spyOn(path, 'join').mockReturnValue(mockDocumentsPath);
 	});
@@ -109,5 +109,97 @@ describe('Document Indexing Workflow', () => {
 		await expect(indexDocuments()).rejects.toThrow('Storage failed');
 		expect(logger.error).toHaveBeenCalledWith('Failed to store embeddings:', expect.any(Error));
 		expect(logger.error).toHaveBeenCalledWith('Indexing failed:', expect.any(Error));
+	});
+	describe('listDocuments', () => {
+		it('should return empty array when documents directory does not exist', async () => {
+			(fs.existsSync as jest.Mock).mockReturnValue(false);
+			const result = await listDocuments();
+			expect(result).toEqual([]);
+		});
+
+		it('should return list of documents with content', async () => {
+			(fs.readdirSync as jest.Mock).mockReturnValue(['doc1.md', 'doc2.md']);
+			(fs.readFileSync as jest.Mock).mockImplementation((path) => `content of ${path}`);
+
+			const result = await listDocuments();
+			expect(result).toHaveLength(2);
+			expect(result[0]).toHaveProperty('name', 'doc1.md');
+			expect(result[0]).toHaveProperty('content');
+		});
+
+		it('should handle errors when listing documents', async () => {
+			(fs.readdirSync as jest.Mock).mockImplementation(() => {
+				throw new Error('Failed to read directory');
+			});
+
+			await expect(listDocuments()).rejects.toThrow('Failed to read directory');
+			expect(logger.error).toHaveBeenCalledWith('Failed to list documents:', expect.any(Error));
+		});
+	});
+
+	describe('createDocument', () => {
+		beforeEach(() => {
+			jest.resetModules();
+			process.env.DOCUMENTS_PATH = mockDocumentsPath;
+		});
+
+		it('should create document directory if it does not exist', async () => {
+			(fs.existsSync as jest.Mock).mockReturnValueOnce(false);
+			await createDocument('test', 'content');
+			expect(fs.mkdirSync).toHaveBeenCalledWith(mockDocumentsPath, { recursive: true });
+		});
+		it('should write file with sanitized filename', async () => {
+			await createDocument('Test Title!', 'test content');
+			expect(fs.writeFileSync).toHaveBeenCalledWith(
+				expect.stringContaining('test-title.md'),
+				'test content',
+				'utf-8'
+			);
+		});
+
+		it('should handle write errors', async () => {
+			(fs.writeFileSync as jest.Mock).mockImplementation(() => {
+				throw new Error('Write failed');
+			});
+
+			await expect(createDocument('test', 'content')).rejects.toThrow('Write failed');
+			expect(logger.error).toHaveBeenCalledWith('Failed to create document:', expect.any(Error));
+		});
+	});
+
+	describe('deleteDocument', () => {
+		it('should successfully delete an existing document', async () => {
+			const filename = 'test.md';
+			await deleteDocument(filename);
+
+			expect(fs.unlinkSync).toHaveBeenCalledWith(path.resolve(mockDocumentsPath, filename));
+			expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Document deleted:'));
+		});
+
+		it('should throw error for filenames with path traversal attempts', async () => {
+			const invalidFilenames = ['../test.md', '../../test.md', '/test.md', '\\test.md', 'subfolder/../test.md'];
+
+			for (const filename of invalidFilenames) {
+				await expect(deleteDocument(filename)).rejects.toThrow('Invalid filename');
+			}
+		});
+
+		it('should throw error when resolved path is outside documents directory', async () => {
+			// Mock path.resolve to simulate a path outside documents directory
+			jest.spyOn(path, 'resolve').mockImplementationOnce((documentsPath, filename) => {
+				return path.join('/some/malicious/path', filename);
+			});
+
+			await expect(deleteDocument('test.md')).rejects.toThrow('Invalid file path');
+		});
+
+		it('should handle file system errors', async () => {
+			(fs.unlinkSync as jest.Mock).mockImplementation(() => {
+				throw new Error('File system error');
+			});
+			const filename = path.join('..', 'outside.md');
+
+			await expect(deleteDocument(filename)).rejects.toThrow('Invalid filename');
+		});
 	});
 });

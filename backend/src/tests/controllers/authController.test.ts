@@ -41,13 +41,13 @@ describe('Auth Controller', () => {
 	});
 
 	describe('login', () => {
-		test('should return 400 if username or password is missing', () => {
+		it('should return 400 if username or password is missing', () => {
 			login(mockRequest as Request, mockResponse as Response, nextFunction);
 			expect(mockResponse.status).toHaveBeenCalledWith(400);
 			expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Username and password are required' });
 		});
 
-		test('should authenticate user with valid credentials', () => {
+		it('should authenticate user with valid credentials', () => {
 			// Setup
 			mockRequest.body = { username: 'testuser', password: 'password' };
 			const mockUser = {
@@ -89,7 +89,7 @@ describe('Auth Controller', () => {
 			});
 		});
 
-		test('should handle authentication failure', () => {
+		it('should handle authentication failure', () => {
 			// Setup
 			mockRequest.body = { username: 'testuser', password: 'wrongpassword' };
 
@@ -113,7 +113,7 @@ describe('Auth Controller', () => {
 			});
 		});
 
-		test('should handle login session error', () => {
+		it('should handle login session error', () => {
 			// Setup
 			mockRequest.body = { username: 'testuser', password: 'password' };
 			const mockUser = {
@@ -149,7 +149,7 @@ describe('Auth Controller', () => {
 	});
 
 	describe('logout', () => {
-		test('should logout user successfully', () => {
+		it('should logout user successfully', () => {
 			(mockRequest.logout as jest.Mock).mockImplementation((cb) => cb(null));
 			logout(mockRequest as Request, mockResponse as Response);
 			expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Logged out successfully' });
@@ -165,7 +165,7 @@ describe('Auth Controller', () => {
 			lastName: 'User',
 		};
 
-		test('should handle missing required fields', async () => {
+		it('should handle missing required fields', async () => {
 			mockRequest.body = { username: 'newuser' }; // Missing required fields
 
 			await register(mockRequest as Request, mockResponse as Response);
@@ -176,7 +176,7 @@ describe('Auth Controller', () => {
 			});
 		});
 
-		test('should handle calendar creation failure', async () => {
+		it('should handle calendar creation failure', async () => {
 			mockRequest.body = validUserData;
 			const mockUser = { id: 1, ...validUserData };
 
@@ -191,7 +191,7 @@ describe('Auth Controller', () => {
 			});
 		});
 
-		test('should handle calendar creation failure', async () => {
+		it('should handle calendar creation failure', async () => {
 			mockRequest.body = validUserData;
 			const mockUser = { id: 1, ...validUserData };
 
@@ -207,7 +207,7 @@ describe('Auth Controller', () => {
 			});
 		});
 
-		test('should register new user successfully', async () => {
+		it('should register new user successfully', async () => {
 			mockRequest.body = {
 				username: 'newuser',
 				password: 'password',
@@ -232,7 +232,7 @@ describe('Auth Controller', () => {
 	});
 
 	describe('checkAuth', () => {
-		test('should return authenticated status when user is logged in', () => {
+		it('should return authenticated status when user is logged in', () => {
 			(mockRequest.isAuthenticated as unknown as jest.Mock).mockReturnValue(true);
 			mockRequest.user = {
 				id: 1,
@@ -251,7 +251,7 @@ describe('Auth Controller', () => {
 	});
 
 	describe('getCsrfToken', () => {
-		test('should set csrf token cookie and return token', () => {
+		it('should set csrf token cookie and return token', () => {
 			const mockToken = 'test-csrf-token';
 			mockRequest.csrfToken = jest.fn().mockReturnValue(mockToken);
 

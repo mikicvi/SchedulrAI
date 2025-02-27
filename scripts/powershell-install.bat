@@ -7,7 +7,7 @@ set DOCKER_PATH="C:\Program Files\Docker\Docker\Docker Desktop.exe"
 set DOCKER_COMPOSE_PATH="C:\Program Files\Docker\Docker\resources\bin\docker-compose.exe"
 set DOCKER_HOME=C:\Program Files\Docker
 set OLLAMA_PATH="%LOCALAPPDATA%\Programs\Ollama\ollama app.exe"
-set NEXTCLOUD_BASE_URL=https://nextcloud.mikicvi.com/s/5AwmomnJYiG7Rmw/download?path=/&files=
+set NEXTCLOUD_BASE_URL=https://nextcloud.mikicvi.com/public.php/dav/files/n2fnyfQ5Aa8zEGF/
 set DOCKER_COMPOSE_URL=%NEXTCLOUD_BASE_URL%docker-compose.yml
 set ENV_FILE_URL=%NEXTCLOUD_BASE_URL%.env
 
@@ -131,6 +131,7 @@ if %errorlevel% equ 0 (
 
 :: Start Docker Compose (fixing the path issue)
 echo Starting Docker Compose...
+docker-compose pull
 docker-compose up -d
 
 echo +----------------------------------------------------+

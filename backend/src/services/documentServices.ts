@@ -112,7 +112,11 @@ export async function createDocument(title: string, content: string): Promise<vo
 			fs.mkdirSync(documentsPath, { recursive: true });
 		}
 
-		const fileName = `${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.md`;
+		const fileName = `${title
+			.toLowerCase()
+			.replace(/[^a-z0-9-]+/g, '-')
+			.replace(/-+$/, '')}.md`;
+
 		const filePath = path.join(documentsPath, fileName);
 
 		fs.writeFileSync(filePath, content, 'utf-8');

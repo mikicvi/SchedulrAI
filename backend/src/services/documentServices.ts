@@ -125,7 +125,17 @@ export async function createDocument(title: string, content: string): Promise<vo
 
 export async function deleteDocument(filename: string): Promise<void> {
 	try {
-		const filePath = path.join(documentsPath, filename);
+		// Basic filename validation
+		if (!filename || filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
+			throw new Error('Invalid filename');
+		}
+
+		// Normalize and verify the path is within documents directory
+		const filePath = path.resolve(documentsPath, filename);
+		if (!filePath.startsWith(documentsPath)) {
+			throw new Error('Invalid file path');
+		}
+
 		if (fs.existsSync(filePath)) {
 			fs.unlinkSync(filePath);
 			logger.info(`Document deleted: ${filePath}`);

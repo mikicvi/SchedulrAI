@@ -40,7 +40,7 @@ export const useApi = () => {
 			setIsLoading(true);
 			const defaultUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
 			// Support both absolute URLs and relative paths
-			const apiUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `${defaultUrl}/${url}`;
+			const apiUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `${defaultUrl}${url}`;
 			try {
 				const csrfToken = await getCsrfToken();
 

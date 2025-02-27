@@ -50,10 +50,20 @@ export function SettingsForm() {
 		resolver: zodResolver(settingsFromSchema),
 		defaultValues: {
 			userSettings: {
-				knowledgeBase: user?.userSettings?.knowledgeBase || [],
+				knowledgeBase: [], // Always start with empty array
 			},
 		},
 	});
+
+	useEffect(() => {
+		if (user?.userSettings?.knowledgeBase) {
+			form.reset({
+				userSettings: {
+					knowledgeBase: [], // Reset to empty array when loading user data to prevent conflicts with existing data
+				},
+			});
+		}
+	}, [user, form.reset]);
 
 	const fetchDocuments = async () => {
 		try {
@@ -108,6 +118,13 @@ export function SettingsForm() {
 			}
 
 			await fetchDocuments();
+
+			// Reset the form after successful save, ensuring the user doesn't accidentally overwrite the data
+			form.reset({
+				userSettings: {
+					knowledgeBase: [],
+				},
+			});
 
 			toast({
 				title: 'Success',

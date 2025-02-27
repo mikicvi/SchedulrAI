@@ -28,7 +28,9 @@ services:
             - documents_volume:/app/documents
         environment:
             - CHROMA_SERVER_HOST=chroma
-            - OLLAMA_API_BASE=ollama
+            - OLLAMA_API_BASE=host.docker.internal
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
 
     frontend:
         image: mikicv/schedulrai-frontend:latest
@@ -39,11 +41,12 @@ services:
             - schedulrai
         depends_on:
             - backend
+        pull_policy: always
 
 networks:
     schedulrai:
         driver: bridge
 volumes:
+    ollama_volume:
     chroma_volume:
     sqlite_volume:
-    documents_volume:

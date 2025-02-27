@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define URLs for required files
-NEXTCLOUD_BASE_URL="https://nextcloud.mikicvi.com/s/5AwmomnJYiG7Rmw/download?path=/&files="
+NEXTCLOUD_BASE_URL="https://nextcloud.mikicvi.com/public.php/dav/files/n2fnyfQ5Aa8zEGF/"
 DOCKER_COMPOSE_URL="${NEXTCLOUD_BASE_URL}docker-compose.yml"
 ENV_FILE_URL="${NEXTCLOUD_BASE_URL}.env"
 DOCKER_URL="https://www.docker.com/products/docker-desktop/"
@@ -130,11 +130,12 @@ echo "Starting Ollama in the background..."
 nohup ollama serve > /dev/null 2>&1 &
 
 echo "Starting Docker Compose..."
+docker compose pull
 docker compose up -d
 
-echo +----------------------------------------------------+
-echo ^| SchedulrAI Environment is ready! ^|
-echo ^| You can access the interface at http://localhost ^|
-echo ^| Your files are at %INSTALL_DIR% ^|
-echo +----------------------------------------------------+
+echo "+----------------------------------------------------+"
+echo "| SchedulrAI Environment is ready!                  |"
+echo "| You can access the interface at http://localhost  |"
+echo "| Your files are at $INSTALL_DIR                    |"
+echo "+----------------------------------------------------+"
 

@@ -44,7 +44,7 @@ const getEventStyle = (event: Event) => {
 };
 
 export default function CalendarComponent() {
-	const { user, addNotification } = useUser();
+	const { user } = useUser();
 	const location = useLocation();
 	const navigate = useNavigate();
 	const calendarService = useCalendarService();
@@ -108,19 +108,6 @@ export default function CalendarComponent() {
 			setIsSyncing(false);
 		}
 	};
-
-	// Add console.log to debug events
-	useEffect(() => {
-		console.log('Current events:', events);
-	}, [events]);
-
-	useEffect(() => {
-		fetchEvents();
-		// If user has Google account, sync on initial load
-		if (user?.googleUser) {
-			handleSyncCalendar();
-		}
-	}, [user?.calendarId]);
 
 	const handleSelectEvent = (event: Event) => {
 		setSelectedEvent(event);
@@ -221,6 +208,29 @@ export default function CalendarComponent() {
 		setShowEventForm(true);
 	};
 
+	const handleEmailConfirm = () => {
+		if (pendingEmailEvent) {
+			const emailSubject = `Event Scheduled: ${pendingEmailEvent.title}`;
+			const emailTo = pendingEmailEvent.customerEmail ?? '';
+			const emailBody = `
+			Event: ${pendingEmailEvent.title}
+			Date: ${format(pendingEmailEvent.start, 'PPP')}
+			Time: ${format(pendingEmailEvent.start, 'p')} - ${format(pendingEmailEvent.end, 'p')}
+			${pendingEmailEvent.location ? `Location: ${pendingEmailEvent.location}` : ''}
+			${pendingEmailEvent.description || ''}
+            `.trim();
+
+			navigate(
+				`/sendMail?subject=${encodeURIComponent(emailSubject)}&to=${encodeURIComponent(
+					emailTo
+				)}&body=${encodeURIComponent(emailBody)}`,
+				{
+					state: null,
+				}
+			);
+		}
+	};
+
 	useEffect(() => {
 		const state = location.state as { showEventForm: boolean; eventData: Omit<Event, 'id'> };
 		if (state?.showEventForm) {
@@ -235,21 +245,7 @@ export default function CalendarComponent() {
 		}
 	}, [location.state]);
 
-	// Add this effect to handle event viewing from notifications
-	useEffect(() => {
-		const state = location.state as { viewEventId?: string };
-		if (state?.viewEventId) {
-			const event = events.find((e) => e.id === state.viewEventId);
-			if (event) {
-				setSelectedEvent(event);
-				setShowEventDialog(true);
-			}
-			// Clear the state
-			navigate(location.pathname, { replace: true });
-		}
-	}, [location.state, events]);
-
-	// Add new effect to handle URL parameters and state
+	// Handle url query params for auto-viewing events from notifications
 	useEffect(() => {
 		const state = location.state as { viewEventId?: string; autoViewEventId?: string };
 		const params = new URLSearchParams(location.search);
@@ -265,6 +261,14 @@ export default function CalendarComponent() {
 			}
 		}
 	}, [location.search, location.state, events]);
+
+	useEffect(() => {
+		fetchEvents();
+		// If user has Google account, sync on initial load
+		if (user?.googleUser) {
+			handleSyncCalendar();
+		}
+	}, [user?.calendarId]);
 
 	const CustomToolbar: React.FC<ToolbarProps<Event>> = (props) => {
 		const { label, onNavigate, onView } = props;
@@ -326,29 +330,6 @@ export default function CalendarComponent() {
 				</div>
 			</div>
 		);
-	};
-
-	const handleEmailConfirm = () => {
-		if (pendingEmailEvent) {
-			const emailSubject = `Event Scheduled: ${pendingEmailEvent.title}`;
-			const emailTo = pendingEmailEvent.customerEmail ?? '';
-			const emailBody = `
-			Event: ${pendingEmailEvent.title}
-			Date: ${format(pendingEmailEvent.start, 'PPP')}
-			Time: ${format(pendingEmailEvent.start, 'p')} - ${format(pendingEmailEvent.end, 'p')}
-			${pendingEmailEvent.location ? `Location: ${pendingEmailEvent.location}` : ''}
-			${pendingEmailEvent.description || ''}
-            `.trim();
-
-			navigate(
-				`/sendMail?subject=${encodeURIComponent(emailSubject)}&to=${encodeURIComponent(
-					emailTo
-				)}&body=${encodeURIComponent(emailBody)}`,
-				{
-					state: null,
-				}
-			);
-		}
 	};
 
 	return (

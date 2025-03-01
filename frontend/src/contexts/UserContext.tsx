@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useApi } from '@/hooks/use-Api';
 
-// Add new interfaces
 export interface Notification {
 	id: string;
 	title: string;
@@ -113,8 +112,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 		return () => {
 			mounted = false;
 		};
-	}, []); // Remove apiFetch from dependencies
-
+	}, []); // Don't put apiFetch in the dependencies array - causes issues
 	// Save notifications to localStorage whenever they change
 	useEffect(() => {
 		localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(notifications));
@@ -123,7 +121,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 	const addNotification = (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
 		const newNotification: Notification = {
 			...notification,
-			id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+			id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
 			timestamp: new Date(),
 			read: false,
 		};

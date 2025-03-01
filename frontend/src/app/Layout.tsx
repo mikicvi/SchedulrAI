@@ -70,10 +70,8 @@ export default function Layout({ children, breadcrumbItems }: LayoutProps) {
 								importance: event.importance,
 							});
 
-							// Play sound
 							playNotificationSound();
 
-							// Store notification in context
 							addNotification({
 								title: 'Upcoming Event',
 								message: `${event.title} starts in ${minutesDiff} minutes`,

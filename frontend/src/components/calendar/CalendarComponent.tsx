@@ -119,7 +119,7 @@ export default function CalendarComponent() {
 
 		// Ensure we're working with the correct time
 		const start = new Date(slotInfo.start);
-		let end = new Date(slotInfo.end);
+		const end = new Date(slotInfo.end);
 
 		// In month view, selection end time will be 00:00 of the next day
 		if (end.getHours() === 0 && end.getMinutes() === 0) {

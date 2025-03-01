@@ -27,9 +27,9 @@ jobs:
               working-directory: ./backend
               run: npm install && npm run build
 
-            # - name: Install Frontend Dependencies
-            #   working-directory: ./frontend
-            #   run: npm ci
+            - name: Install Frontend Dependencies
+              working-directory: ./frontend
+              run: CI=true npm run build
 
             - name: Backend Tests
               working-directory: ./backend

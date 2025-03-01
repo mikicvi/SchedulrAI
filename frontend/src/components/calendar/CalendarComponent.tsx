@@ -13,7 +13,7 @@ import { EventForm } from './event-form';
 import { useUser } from '@/contexts/UserContext';
 import { useCalendarService } from '@/services/calendarService';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
+import { useNotificationToast } from '@/hooks/use-notification-toast';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 
 const locales = {
@@ -48,7 +48,7 @@ export default function CalendarComponent() {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const calendarService = useCalendarService();
-	const { toast } = useToast();
+	const { toast } = useNotificationToast();
 	const [events, setEvents] = useState<Event[]>([]);
 	const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 	const [showEventDialog, setShowEventDialog] = useState(false);
@@ -73,6 +73,8 @@ export default function CalendarComponent() {
 					(event: { start: null; end: null }) => event.start !== null && event.end !== null
 				);
 				setEvents(validEvents);
+				// Store events in localStorage for global access
+				localStorage.setItem(`calendar_events_${user.calendarId}`, JSON.stringify(validEvents));
 			}
 		} catch (error) {
 			console.error('Error fetching events:', error);
@@ -92,12 +94,13 @@ export default function CalendarComponent() {
 			await calendarService.syncGoogleCalendar(user.id);
 			await fetchEvents(); // Refresh events after sync
 			toast({
-				title: 'Calendar synced',
-				description: 'Your calendar has been synced with Google Calendar.',
+				title: 'Success',
+				description: 'Calendar synced with Google Calendar',
+				variant: 'default',
 			});
 		} catch (error) {
 			toast({
-				title: 'Sync failed',
+				title: 'Error',
 				description: error instanceof Error ? error.message : 'Failed to sync with Google Calendar',
 				variant: 'destructive',
 			});
@@ -105,19 +108,6 @@ export default function CalendarComponent() {
 			setIsSyncing(false);
 		}
 	};
-
-	// Add console.log to debug events
-	useEffect(() => {
-		console.log('Current events:', events);
-	}, [events]);
-
-	useEffect(() => {
-		fetchEvents();
-		// If user has Google account, sync on initial load
-		if (user?.googleUser) {
-			handleSyncCalendar();
-		}
-	}, [user?.calendarId]);
 
 	const handleSelectEvent = (event: Event) => {
 		setSelectedEvent(event);
@@ -167,8 +157,9 @@ export default function CalendarComponent() {
 			await fetchEvents();
 			setShowEventForm(false);
 			toast({
-				title: selectedEvent ? 'Event updated' : 'Event created',
-				description: 'Your calendar has been updated successfully.',
+				title: 'Success',
+				description: selectedEvent ? 'Event updated successfully' : 'Event created successfully',
+				variant: 'default',
 			});
 
 			// Set the pending email event with the saved event data
@@ -217,6 +208,29 @@ export default function CalendarComponent() {
 		setShowEventForm(true);
 	};
 
+	const handleEmailConfirm = () => {
+		if (pendingEmailEvent) {
+			const emailSubject = `Event Scheduled: ${pendingEmailEvent.title}`;
+			const emailTo = pendingEmailEvent.customerEmail ?? '';
+			const emailBody = `
+			Event: ${pendingEmailEvent.title}
+			Date: ${format(pendingEmailEvent.start, 'PPP')}
+			Time: ${format(pendingEmailEvent.start, 'p')} - ${format(pendingEmailEvent.end, 'p')}
+			${pendingEmailEvent.location ? `Location: ${pendingEmailEvent.location}` : ''}
+			${pendingEmailEvent.description || ''}
+            `.trim();
+
+			navigate(
+				`/sendMail?subject=${encodeURIComponent(emailSubject)}&to=${encodeURIComponent(
+					emailTo
+				)}&body=${encodeURIComponent(emailBody)}`,
+				{
+					state: null,
+				}
+			);
+		}
+	};
+
 	useEffect(() => {
 		const state = location.state as { showEventForm: boolean; eventData: Omit<Event, 'id'> };
 		if (state?.showEventForm) {
@@ -230,6 +244,31 @@ export default function CalendarComponent() {
 			navigate(location.pathname, { replace: true });
 		}
 	}, [location.state]);
+
+	// Handle url query params for auto-viewing events from notifications
+	useEffect(() => {
+		const state = location.state as { viewEventId?: string; autoViewEventId?: string };
+		const params = new URLSearchParams(location.search);
+		const eventId = params.get('event') || state?.viewEventId || state?.autoViewEventId;
+
+		if (eventId && events.length > 0) {
+			const event = events.find((e) => e.id === eventId);
+			if (event) {
+				setSelectedEvent(event);
+				setShowEventDialog(true);
+				// Clean up the URL and state
+				window.history.replaceState(null, '', '/calendar');
+			}
+		}
+	}, [location.search, location.state, events]);
+
+	useEffect(() => {
+		fetchEvents();
+		// If user has Google account, sync on initial load
+		if (user?.googleUser) {
+			handleSyncCalendar();
+		}
+	}, [user?.calendarId]);
 
 	const CustomToolbar: React.FC<ToolbarProps<Event>> = (props) => {
 		const { label, onNavigate, onView } = props;
@@ -291,29 +330,6 @@ export default function CalendarComponent() {
 				</div>
 			</div>
 		);
-	};
-
-	const handleEmailConfirm = () => {
-		if (pendingEmailEvent) {
-			const emailSubject = `Event Scheduled: ${pendingEmailEvent.title}`;
-			const emailTo = pendingEmailEvent.customerEmail ?? '';
-			const emailBody = `
-			Event: ${pendingEmailEvent.title}
-			Date: ${format(pendingEmailEvent.start, 'PPP')}
-			Time: ${format(pendingEmailEvent.start, 'p')} - ${format(pendingEmailEvent.end, 'p')}
-			${pendingEmailEvent.location ? `Location: ${pendingEmailEvent.location}` : ''}
-			${pendingEmailEvent.description || ''}
-            `.trim();
-
-			navigate(
-				`/sendMail?subject=${encodeURIComponent(emailSubject)}&to=${encodeURIComponent(
-					emailTo
-				)}&body=${encodeURIComponent(emailBody)}`,
-				{
-					state: null,
-				}
-			);
-		}
 	};
 
 	return (

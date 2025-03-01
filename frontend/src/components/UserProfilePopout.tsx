@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
-import { ChevronsUpDown, LogOut, Bell, CogIcon, UserCogIcon } from 'lucide-react';
+import { ChevronsUpDown, LogOut, CogIcon, UserCogIcon } from 'lucide-react';
 
 export function UserProfile({ user }: { user: { name: string; email: string; avatar: any } }) {
 	const { isMobile } = useSidebar();
@@ -76,13 +76,7 @@ export function UserProfile({ user }: { user: { name: string; email: string; ava
 							<DropdownMenuItem asChild>
 								<Link to='/settings'>
 									<CogIcon />
-									Settings
-								</Link>
-							</DropdownMenuItem>
-							<DropdownMenuItem asChild>
-								<Link to='/notifications'>
-									<Bell />
-									Notifications
+									Application Settings
 								</Link>
 							</DropdownMenuItem>
 						</DropdownMenuGroup>

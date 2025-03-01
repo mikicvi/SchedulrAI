@@ -1,6 +1,6 @@
 import { Calendar, BotIcon, Home, Mail, UserRoundCogIcon, MessageCircleHeart, LifeBuoy, Info } from 'lucide-react';
 import { SchedulrHeader } from './ui/sched-header';
-import { UserProfile } from './ui/user-profile';
+import { UserProfile } from './UserProfilePopout';
 import { useUser } from '@/contexts/UserContext';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {

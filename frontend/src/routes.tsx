@@ -115,6 +115,17 @@ const AppRoutes = () => {
 						</AuthRoute>
 					}
 				/>
+				{/* catch-all-else route */}
+				<Route
+					path='*'
+					element={
+						<AuthRoute>
+							<PageTransition>
+								<Home />
+							</PageTransition>
+						</AuthRoute>
+					}
+				/>
 			</Routes>
 		</AnimatePresence>
 	);

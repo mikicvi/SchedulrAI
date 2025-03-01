@@ -12,6 +12,7 @@ import { useUser } from '@/contexts/UserContext';
 import { ScrollArea } from './ui/scroll-area';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { getNotificationColorByType } from '@/services/notificationsUtil';
 import '../index.css';
 
 export function NotificationsDropdown() {
@@ -69,6 +70,7 @@ export function NotificationsDropdown() {
 							<DropdownMenuItem
 								key={notification.id}
 								onClick={() => handleNotificationClick(notification)}
+								className={`${getNotificationColorByType(notification.type, notification.importance)}`}
 							>
 								<div className='flex flex-col gap-1 w-full'>
 									<div className='flex justify-between'>

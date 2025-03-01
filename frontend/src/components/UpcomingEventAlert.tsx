@@ -3,15 +3,24 @@ import { Bell } from 'lucide-react';
 import { Button } from './ui/button';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useCallback } from 'react';
+import { getNotificationColorByType } from '@/services/notificationsUtil';
+import { Importance } from '@/types/calendar';
 
 interface UpcomingEventAlertProps {
 	eventId: string;
 	title: string;
 	minutesUntil: number;
 	onDismiss: () => void;
+	importance?: Importance;
 }
 
-export function UpcomingEventAlert({ eventId, title, minutesUntil, onDismiss }: UpcomingEventAlertProps) {
+export function UpcomingEventAlert({
+	eventId,
+	title,
+	minutesUntil,
+	onDismiss,
+	importance,
+}: Readonly<UpcomingEventAlertProps>) {
 	const navigate = useNavigate();
 	const location = useLocation();
 
@@ -29,7 +38,7 @@ export function UpcomingEventAlert({ eventId, title, minutesUntil, onDismiss }: 
 	}, [location.pathname, handleViewEvent, onDismiss]);
 
 	return (
-		<Alert className='mb-4'>
+		<Alert className={`mb-4 ${getNotificationColorByType('event', importance)}`}>
 			<Bell className='h-4 w-4' />
 			<AlertTitle>Upcoming Event</AlertTitle>
 			<AlertDescription className='flex items-center justify-between mt-2'>

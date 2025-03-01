@@ -1,6 +1,6 @@
 import { useUser } from '@/contexts/UserContext';
 import Layout from './Layout';
-import { getNotificationColorByType, getEventNotificationColor } from '@/services/notificationsUtil';
+import { getNotificationColorByType } from '@/services/notificationsUtil';
 import { format } from 'date-fns';
 import { Bell, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -41,16 +41,20 @@ export default function Notifications() {
 						) : (
 							<div className='space-y-4'>
 								{notifications.map((notification) => (
-									<div
+									<button
 										key={notification.id}
-										className={`p-4 rounded-lg border ${
+										className={`w-full text-left p-4 rounded-lg border ${getNotificationColorByType(
+											notification.type,
 											notification.importance
-												? getEventNotificationColor(notification.importance)
-												: getNotificationColorByType(notification.type)
-										} cursor-pointer transition-colors ${
+										)} transition-colors ${
 											!notification.read ? 'opacity-100' : 'opacity-60'
-										}`}
+										} hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary`}
 										onClick={() => handleNotificationClick(notification)}
+										onKeyDown={(e) => {
+											if (e.key === 'Enter' || e.key === ' ') {
+												handleNotificationClick(notification);
+											}
+										}}
 									>
 										<div className='flex justify-between items-start'>
 											<div>
@@ -68,7 +72,7 @@ export default function Notifications() {
 												)}
 											</div>
 										</div>
-									</div>
+									</button>
 								))}
 							</div>
 						)}

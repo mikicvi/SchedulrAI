@@ -1,3 +1,4 @@
+import { Importance } from '@/types/calendar';
 import { useState, useEffect } from 'react';
 
 const ACTIVE_ALERTS_KEY = 'active_event_alerts';
@@ -8,6 +9,7 @@ export interface ActiveAlert {
 	title: string;
 	minutesUntil: number;
 	timestamp: number;
+	importance?: Importance;
 }
 
 export const useActiveAlerts = () => {

@@ -15,7 +15,6 @@ import { useCalendarService } from '@/services/calendarService';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useNotificationToast } from '@/hooks/use-notification-toast';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
-import { createEventNotification } from '@/services/notificationsUtil';
 
 const locales = {
 	'en-IE': enIE,

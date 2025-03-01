@@ -45,9 +45,17 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 	const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 	const [checkingAuth, setCheckingAuth] = useState(true);
 	const [notifications, setNotifications] = useState<Notification[]>(() => {
-		// Initialize from localStorage
+		// Initialize from localStorage, ensuring importance is preserved
 		const stored = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
-		return stored ? JSON.parse(stored) : [];
+		if (stored) {
+			const parsed = JSON.parse(stored);
+			// Ensure existing notifications have their importance carried over from events
+			return parsed.map((notification: Notification) => ({
+				...notification,
+				importance: notification.type === 'event' ? notification.importance : undefined,
+			}));
+		}
+		return [];
 	});
 	const { apiFetch } = useApi();
 

@@ -17,6 +17,7 @@ import { UpcomingEventAlert } from '@/components/UpcomingEventAlert';
 import { useActiveAlerts } from '@/hooks/use-active-alerts';
 import { playNotificationSound } from '@/services/sound';
 import { NotificationsDropdown } from '@/components/NotificationsDropdown';
+import { useLocation } from 'react-router-dom';
 
 interface LayoutProps {
 	children: React.ReactNode;
@@ -66,6 +67,7 @@ export default function Layout({ children, breadcrumbItems }: LayoutProps) {
 								eventId: event.id,
 								title: event.title,
 								minutesUntil: minutesDiff,
+								importance: event.importance,
 							});
 
 							// Play sound
@@ -77,6 +79,7 @@ export default function Layout({ children, breadcrumbItems }: LayoutProps) {
 								message: `${event.title} starts in ${minutesDiff} minutes`,
 								type: 'event',
 								eventId: event.id,
+								importance: event.importance,
 							});
 
 							sessionStorage.setItem(notificationKey, 'true');
@@ -92,6 +95,8 @@ export default function Layout({ children, breadcrumbItems }: LayoutProps) {
 		checkUpcomingEvents(); // Initial check
 		return () => clearInterval(interval);
 	}, [user, addNotification, addAlert]);
+
+	const location = useLocation();
 
 	return (
 		<SidebarProvider open={open} onOpenChange={setOpen}>
@@ -134,16 +139,18 @@ export default function Layout({ children, breadcrumbItems }: LayoutProps) {
 					<Separator className='mt-0 shrink-0' />
 					<div className='flex-1 overflow-y-auto w-full'>
 						<div className='p-4 w-full'>
-							{/* Render upcoming event alerts */}
-							{activeAlerts.map((alert) => (
-								<UpcomingEventAlert
-									key={alert.id}
-									eventId={alert.eventId}
-									title={alert.title}
-									minutesUntil={alert.minutesUntil}
-									onDismiss={() => removeAlert(alert.id)}
-								/>
-							))}
+							{/* Only show alerts if we're not on the notifications page */}
+							{location.pathname !== '/notifications' &&
+								activeAlerts.map((alert) => (
+									<UpcomingEventAlert
+										key={alert.id}
+										eventId={alert.eventId}
+										title={alert.title}
+										minutesUntil={alert.minutesUntil}
+										onDismiss={() => removeAlert(alert.id)}
+										importance={alert.importance}
+									/>
+								))}
 							{children}
 						</div>
 					</div>

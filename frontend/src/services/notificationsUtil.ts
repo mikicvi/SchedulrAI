@@ -1,4 +1,4 @@
-import { Event, Importance } from '@/types/calendar';
+import { Event } from '@/types/calendar';
 import { format } from 'date-fns';
 import { Notification } from '@/contexts/UserContext';
 

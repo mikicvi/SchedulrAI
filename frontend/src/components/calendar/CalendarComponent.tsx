@@ -13,8 +13,9 @@ import { EventForm } from './event-form';
 import { useUser } from '@/contexts/UserContext';
 import { useCalendarService } from '@/services/calendarService';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
+import { useNotificationToast } from '@/hooks/use-notification-toast';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { createEventNotification } from '@/services/notificationsUtil';
 
 const locales = {
 	'en-IE': enIE,
@@ -44,11 +45,11 @@ const getEventStyle = (event: Event) => {
 };
 
 export default function CalendarComponent() {
-	const { user } = useUser();
+	const { user, addNotification } = useUser();
 	const location = useLocation();
 	const navigate = useNavigate();
 	const calendarService = useCalendarService();
-	const { toast } = useToast();
+	const { toast } = useNotificationToast();
 	const [events, setEvents] = useState<Event[]>([]);
 	const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 	const [showEventDialog, setShowEventDialog] = useState(false);
@@ -73,6 +74,8 @@ export default function CalendarComponent() {
 					(event: { start: null; end: null }) => event.start !== null && event.end !== null
 				);
 				setEvents(validEvents);
+				// Store events in localStorage for global access
+				localStorage.setItem(`calendar_events_${user.calendarId}`, JSON.stringify(validEvents));
 			}
 		} catch (error) {
 			console.error('Error fetching events:', error);
@@ -92,12 +95,13 @@ export default function CalendarComponent() {
 			await calendarService.syncGoogleCalendar(user.id);
 			await fetchEvents(); // Refresh events after sync
 			toast({
-				title: 'Calendar synced',
-				description: 'Your calendar has been synced with Google Calendar.',
+				title: 'Success',
+				description: 'Calendar synced with Google Calendar',
+				variant: 'default',
 			});
 		} catch (error) {
 			toast({
-				title: 'Sync failed',
+				title: 'Error',
 				description: error instanceof Error ? error.message : 'Failed to sync with Google Calendar',
 				variant: 'destructive',
 			});
@@ -167,8 +171,9 @@ export default function CalendarComponent() {
 			await fetchEvents();
 			setShowEventForm(false);
 			toast({
-				title: selectedEvent ? 'Event updated' : 'Event created',
-				description: 'Your calendar has been updated successfully.',
+				title: 'Success',
+				description: selectedEvent ? 'Event updated successfully' : 'Event created successfully',
+				variant: 'default',
 			});
 
 			// Set the pending email event with the saved event data
@@ -230,6 +235,37 @@ export default function CalendarComponent() {
 			navigate(location.pathname, { replace: true });
 		}
 	}, [location.state]);
+
+	// Add this effect to handle event viewing from notifications
+	useEffect(() => {
+		const state = location.state as { viewEventId?: string };
+		if (state?.viewEventId) {
+			const event = events.find((e) => e.id === state.viewEventId);
+			if (event) {
+				setSelectedEvent(event);
+				setShowEventDialog(true);
+			}
+			// Clear the state
+			navigate(location.pathname, { replace: true });
+		}
+	}, [location.state, events]);
+
+	// Add new effect to handle URL parameters and state
+	useEffect(() => {
+		const state = location.state as { viewEventId?: string; autoViewEventId?: string };
+		const params = new URLSearchParams(location.search);
+		const eventId = params.get('event') || state?.viewEventId || state?.autoViewEventId;
+
+		if (eventId && events.length > 0) {
+			const event = events.find((e) => e.id === eventId);
+			if (event) {
+				setSelectedEvent(event);
+				setShowEventDialog(true);
+				// Clean up the URL and state
+				window.history.replaceState(null, '', '/calendar');
+			}
+		}
+	}, [location.search, location.state, events]);
 
 	const CustomToolbar: React.FC<ToolbarProps<Event>> = (props) => {
 		const { label, onNavigate, onView } = props;

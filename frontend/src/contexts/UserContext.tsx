@@ -1,6 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useApi } from '@/hooks/use-Api';
 
+// Add new interfaces
+export interface Notification {
+	id: string;
+	title: string;
+	message: string;
+	type: 'info' | 'success' | 'warning' | 'error' | 'event';
+	timestamp: Date;
+	read: boolean;
+	eventId?: string;
+	importance?: string;
+}
+
 interface User {
 	id: number;
 	username: string;
@@ -18,14 +30,25 @@ interface UserContextType {
 	user: User | null;
 	isAuthenticated: boolean | null;
 	checkingAuth: boolean;
+	notifications: Notification[];
+	addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
+	markNotificationAsRead: (id: string) => void;
+	clearNotifications: () => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
+
+const NOTIFICATIONS_STORAGE_KEY = 'user_notifications';
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 	const [user, setUser] = useState<User | null>(null);
 	const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 	const [checkingAuth, setCheckingAuth] = useState(true);
+	const [notifications, setNotifications] = useState<Notification[]>(() => {
+		// Initialize from localStorage
+		const stored = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
+		return stored ? JSON.parse(stored) : [];
+	});
 	const { apiFetch } = useApi();
 
 	useEffect(() => {
@@ -84,13 +107,50 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 		};
 	}, []); // Remove apiFetch from dependencies
 
+	// Save notifications to localStorage whenever they change
+	useEffect(() => {
+		localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(notifications));
+	}, [notifications]);
+
+	const addNotification = (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+		const newNotification: Notification = {
+			...notification,
+			id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+			timestamp: new Date(),
+			read: false,
+		};
+		setNotifications((prev) => {
+			// Check for duplicates (avoid duplicate event notifications)
+			const isDuplicate = prev.some(
+				(n) => n.eventId === notification.eventId && n.type === notification.type && !n.read // Only consider unread notifications
+			);
+			if (isDuplicate) return prev;
+			return [newNotification, ...prev].slice(0, 100); // Keep last 100 notifications
+		});
+	};
+
+	const markNotificationAsRead = (id: string) => {
+		setNotifications((prev) =>
+			prev.map((notification) => (notification.id === id ? { ...notification, read: true } : notification))
+		);
+	};
+
+	const clearNotifications = () => {
+		setNotifications([]);
+		localStorage.removeItem(NOTIFICATIONS_STORAGE_KEY);
+	};
+
 	const contextValue = React.useMemo(
 		() => ({
 			user,
 			isAuthenticated,
 			checkingAuth,
+			notifications,
+			addNotification,
+			markNotificationAsRead,
+			clearNotifications,
 		}),
-		[user, isAuthenticated, checkingAuth]
+		[user, isAuthenticated, checkingAuth, notifications]
 	);
 
 	return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;

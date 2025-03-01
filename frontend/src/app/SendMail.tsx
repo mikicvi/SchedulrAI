@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { z } from 'zod';
 import { useUser } from '@/contexts/UserContext';
-import { toast } from '@/hooks/use-toast';
+import { useNotificationToast } from '@/hooks/use-notification-toast';
 import { ListRestart, Send, RefreshCw } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApi } from '@/hooks/use-Api';
@@ -28,7 +28,7 @@ export default function SendMail() {
 		{ title: 'Send email from your Google Account' },
 	];
 	const [isSending, setIsSending] = useState(false);
-
+	const { toast } = useNotificationToast();
 	const [to, setTo] = useState(searchParams.get('to') || '');
 	const [subject, setSubject] = useState(searchParams.get('subject') || '');
 	const [body, setBody] = useState(searchParams.get('body') || '');

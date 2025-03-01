@@ -11,6 +11,7 @@ import AuthRoute from './components/AuthRoute';
 import Logout from './components/Logout';
 import { AnimatePresence } from 'framer-motion';
 import PageTransition from './components/PageTransition';
+import Notifications from './app/Notifications';
 
 const AppRoutes = () => {
 	const location = useLocation();
@@ -100,6 +101,16 @@ const AppRoutes = () => {
 						<AuthRoute>
 							<PageTransition>
 								<Logout />
+							</PageTransition>
+						</AuthRoute>
+					}
+				/>
+				<Route
+					path='/notifications'
+					element={
+						<AuthRoute>
+							<PageTransition>
+								<Notifications />
 							</PageTransition>
 						</AuthRoute>
 					}

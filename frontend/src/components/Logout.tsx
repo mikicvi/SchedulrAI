@@ -3,10 +3,12 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { useApi } from '@/hooks/use-Api';
+import { useUser } from '@/contexts/UserContext';
 
 const Logout = () => {
 	const navigate = useNavigate();
 	const { apiFetch, isLoading } = useApi();
+	const { clearNotifications } = useUser();
 
 	useEffect(() => {
 		const performLogout = async () => {
@@ -23,6 +25,7 @@ const Logout = () => {
 
 				// Clear any stored tokens/state here
 				sessionStorage.clear();
+				clearNotifications();
 
 				toast({
 					title: 'Success',

@@ -134,6 +134,42 @@ class PipelineController {
 			res.end();
 		});
 	}
+
+	/**
+	 * Streams chat responses using Server-Sent Events (SSE).
+	 * This method handles the streaming of chat responses to the client using SSE protocol,
+	 * allowing real-time updates of chat messages.
+	 *
+	 * @param req - Express Request object containing the chat message in the body
+	 * @param res - Express Response object used to send the streaming response
+	 * @returns Promise<void>
+	 *
+	 * @throws Will throw and handle errors that occur during the streaming process
+	 */
+	public async streamChat(req: Request, res: Response): Promise<void> {
+		try {
+			const userInput = req.body.message;
+
+			// Set headers for SSE
+			res.setHeader('Content-Type', 'text/event-stream');
+			res.setHeader('Cache-Control', 'no-cache');
+			res.setHeader('Connection', 'keep-alive');
+
+			// Stream the response
+			for await (const chunk of this.pipelineService.streamChatResponse(userInput, (status: string) => {
+				res.write(`data: ${JSON.stringify({ type: 'status', content: status })}\n\n`);
+			})) {
+				res.write(`data: ${JSON.stringify({ type: 'content', content: chunk.content })}\n\n`);
+			}
+
+			res.write(`data: ${JSON.stringify({ type: 'done' })}\n\n`);
+		} catch (error) {
+			logger.error('Stream chat error:', error);
+			res.write(`data: ${JSON.stringify({ type: 'error', content: error.message })}\n\n`);
+		} finally {
+			res.end();
+		}
+	}
 }
 
 export default PipelineController;

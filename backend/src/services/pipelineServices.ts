@@ -156,6 +156,66 @@ class RAGPipeline {
 		return result;
 	}
 
+	public async *streamChatResponse(userInput: string, statusCallback?: (status: string) => void) {
+		try {
+			statusCallback?.('Initializing chat pipeline...');
+
+			const streamResponseOllama = (this.chatOllama = new ChatOllama({
+				baseUrl: this.llmSettings.baseUrl,
+				model: this.llmSettings.model,
+				temperature: this.llmSettings.temperature,
+				topP: this.llmSettings.topP,
+				topK: this.llmSettings.topK,
+				streaming: true,
+			}));
+
+			statusCallback?.('Preparing document retrieval...');
+			const retriever = this.chromaVectorStore.asRetriever();
+
+			const prompt = ChatPromptTemplate.fromMessages([
+				[
+					'system',
+					`You are a helpful AI assistant for a scheduling system. 
+					- Provide direct, concise answers
+					- Use the context from documents to inform your responses
+					- If something isn't in the documents, say so clearly, and suggest your own solution
+					- Don't mention "requests" - refer to "documents" instead
+					- Don't start responses with phrases like "Based on your request"
+					- Be friendly but professional
+					- Always focus on scheduling and time-related information
+					- Never ask for a follow up - this is a single-turn conversation`,
+				],
+				['human', 'Context: {context}\nQuestion: {question}'],
+			]);
+
+			statusCallback?.('Setting up response chain...');
+			const chain = RunnableSequence.from([
+				{
+					context: async (input: { question: string }) => {
+						statusCallback?.('Searching relevant documents...');
+						const retrieverAndFormatter = retriever.pipe(formatDocumentsAsString);
+						const context = await retrieverAndFormatter.invoke(input.question);
+						return context;
+					},
+					question: new RunnablePassthrough(),
+				},
+				prompt,
+				streamResponseOllama,
+			]);
+
+			statusCallback?.('Generating response...');
+			const stream = await chain.stream({ question: userInput });
+
+			for await (const chunk of stream) {
+				yield chunk;
+			}
+		} catch (error) {
+			logger.error('Chat stream error:', error);
+			statusCallback?.('Error occurred during chat processing');
+			throw error;
+		}
+	}
+
 	public async isPipelineReady(): Promise<boolean> {
 		try {
 			const [chromaStatusResponse, ollamaEmbedStatus] = await Promise.all([

@@ -1,5 +1,5 @@
-import { ThemeProvider } from '@/components/theme-provider';
-import { ModeToggle } from '@/components/ui/mode-toggle';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { PreferencesDropdownMenuMenu } from '@/components/PreferencesDropdownMenu';
 import LoginForm from '@/components/LoginForm';
 
 import {
@@ -14,7 +14,7 @@ function Login() {
 	return (
 		<ThemeProvider defaultTheme='system' storageKey='vite-ui-theme'>
 			<div className='absolute top-0 right-0 p-4'>
-				<ModeToggle />
+				<PreferencesDropdownMenuMenu />
 			</div>
 			<div className='flex justify-center p-4 items-center'>
 				<Breadcrumb>

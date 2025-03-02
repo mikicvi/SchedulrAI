@@ -1,6 +1,5 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
-import { ModeToggle } from '@/components/ui/mode-toggle';
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -18,6 +17,7 @@ import { useActiveAlerts } from '@/hooks/use-active-alerts';
 import { playNotificationSound } from '@/services/sound';
 import { NotificationsDropdown } from '@/components/NotificationsDropdown';
 import { useLocation } from 'react-router-dom';
+import { PreferencesDropdownMenuMenu } from '@/components/PreferencesDropdownMenu';
 
 interface LayoutProps {
 	children: React.ReactNode;
@@ -131,7 +131,7 @@ export default function Layout({ children, breadcrumbItems }: LayoutProps) {
 						<div className='flex items-center gap-2'>
 							<NotificationsDropdown />
 							<Separator orientation='vertical' className='h-6' />
-							<ModeToggle />
+							<PreferencesDropdownMenuMenu />
 						</div>
 					</div>
 					<Separator className='mt-0 shrink-0' />

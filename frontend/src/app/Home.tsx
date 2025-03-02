@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import usePipeline from '@/hooks/use-pipeline';
 import Layout from './Layout';
 import { DatePickerForm } from '@/components/DatePicker';
-import { TimePickerForm } from '@/components/time-picker';
+import { TimePickerForm } from '@/components/TimePicker';
 import usePipelineStatus from '@/hooks/use-pipeline-status';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';

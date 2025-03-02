@@ -98,3 +98,9 @@
 		@apply bg-background text-foreground;
 	}
 }
+
+:root {
+	--font-scale: 1;
+	--font-base-size: 16px;
+	font-size: calc(var(--font-base-size) * var(--font-scale));
+}

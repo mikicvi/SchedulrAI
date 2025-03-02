@@ -18,9 +18,9 @@ describe('Color Mapping Utils', () => {
 	describe('googleColorToImportance', () => {
 		it.each([
 			['11', Importance.UrgentImportant, 'red'],
-			['6', Importance.UrgentImportant, 'orange'],
+			['4', Importance.UrgentImportant, 'pink'],
+			['6', Importance.UrgentNotImportant, 'orange'],
 			['5', Importance.UrgentNotImportant, 'yellow'],
-			['4', Importance.UrgentNotImportant, 'pink'],
 			['10', Importance.NotUrgentImportant, 'green'],
 			['3', Importance.NotUrgentImportant, 'purple'],
 			['2', Importance.NotUrgentImportant, 'purple'],

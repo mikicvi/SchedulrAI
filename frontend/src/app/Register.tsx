@@ -1,5 +1,5 @@
-import { ThemeProvider } from '@/components/theme-provider';
-import { ModeToggle } from '@/components/ui/mode-toggle';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { AccesibilitySettingsMenu } from '@/components/AccessibilitySettingsMenu';
 import RegisterForm from '@/components/RegisterForm';
 
 import {
@@ -14,7 +14,7 @@ function Register() {
 	return (
 		<ThemeProvider defaultTheme='system' storageKey='vite-ui-theme'>
 			<div className='absolute top-0 right-0 p-4'>
-				<ModeToggle />
+				<AccesibilitySettingsMenu />
 			</div>
 			<div className='flex justify-center p-4 items-center'>
 				<Breadcrumb>

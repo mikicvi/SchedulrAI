@@ -53,10 +53,10 @@ export const importanceToGoogleColor = (importance: Importance): string => {
 export const googleColorToImportance = (colorId: string): Importance => {
 	switch (colorId) {
 		case '11':
-		case '6':
-			return Importance.UrgentImportant;
-		case '5':
 		case '4':
+			return Importance.UrgentImportant;
+		case '6':
+		case '5':
 			return Importance.UrgentNotImportant;
 		case '10':
 		case '3':

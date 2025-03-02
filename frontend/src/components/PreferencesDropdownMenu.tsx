@@ -14,7 +14,7 @@ import {
 import { Settings2, Sun, Moon, Monitor, Type, TextQuote, Heading1, Heading2, Heading3, Check } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 
-export function AccesibilitySettingsMenu() {
+export function PreferencesDropdownMenuMenu() {
 	const { setTheme } = useTheme();
 	const [currentFontSize, setCurrentFontSize] = useState(() => localStorage.getItem('preferred-font-size') || '16px');
 
@@ -44,11 +44,11 @@ export function AccesibilitySettingsMenu() {
 			<DropdownMenuTrigger asChild>
 				<Button variant='outline' size='icon'>
 					<Settings2 className='h-[1.2rem] w-[1.2rem]' />
-					<span className='sr-only'>Settings Menu</span>
+					<span className='sr-only'>Preferences Menu</span>
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align='end'>
-				<DropdownMenuLabel>Settings</DropdownMenuLabel>
+				<DropdownMenuLabel>Preferences</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 
 				{/* Theme Sub-menu */}

@@ -17,7 +17,7 @@ import { useActiveAlerts } from '@/hooks/use-active-alerts';
 import { playNotificationSound } from '@/services/sound';
 import { NotificationsDropdown } from '@/components/NotificationsDropdown';
 import { useLocation } from 'react-router-dom';
-import { AccesibilitySettingsMenu } from '@/components/AccessibilitySettingsMenu';
+import { PreferencesDropdownMenuMenu } from '@/components/PreferencesDropdownMenu';
 
 interface LayoutProps {
 	children: React.ReactNode;
@@ -131,7 +131,7 @@ export default function Layout({ children, breadcrumbItems }: LayoutProps) {
 						<div className='flex items-center gap-2'>
 							<NotificationsDropdown />
 							<Separator orientation='vertical' className='h-6' />
-							<AccesibilitySettingsMenu />
+							<PreferencesDropdownMenuMenu />
 						</div>
 					</div>
 					<Separator className='mt-0 shrink-0' />

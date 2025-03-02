@@ -3,6 +3,7 @@ import { getChromaStatus } from '../../services/chromaServices';
 import { getOllamaStatus } from '../../services/ollamaServices';
 import RAGPipeline from '../../services/pipelineServices';
 import logger from '../../utils/logger';
+import { formatDocumentsAsString } from 'langchain/util/document';
 
 // Mock dependencies
 jest.mock('../../services/chromaServices');
@@ -20,6 +21,9 @@ jest.mock('../../utils/logger', () => ({
 	warn: jest.fn(),
 	debug: jest.fn(),
 	error: jest.fn(),
+}));
+jest.mock('langchain/util/document', () => ({
+	formatDocumentsAsString: jest.fn(),
 }));
 
 describe('RAGPipeline', () => {
@@ -229,6 +233,153 @@ describe('RAGPipeline', () => {
 			expect(result).toEqual(expectedResponse);
 			expect(mockRequestLLM).toHaveBeenCalledWith('test query', undefined);
 			expect(mockShowResults).toHaveBeenCalledWith(JSON.stringify(expectedResponse, null, 2));
+		});
+	});
+
+	describe('streamChatResponse', () => {
+		it('should stream chat response chunks', async () => {
+			const mockChain = RunnableSequence.from as jest.Mock;
+			const mockStream = async function* () {
+				yield { content: 'First chunk' };
+				yield { content: 'Second chunk' };
+				yield { content: 'Final chunk' };
+			};
+			mockChain().stream = jest.fn().mockReturnValue(mockStream());
+
+			const statusCallback = jest.fn();
+			const responses: any[] = [];
+
+			for await (const chunk of ragPipeline.streamChatResponse('test query', statusCallback)) {
+				responses.push(chunk);
+			}
+
+			expect(responses).toEqual([
+				{ content: 'First chunk' },
+				{ content: 'Second chunk' },
+				{ content: 'Final chunk' },
+			]);
+
+			expect(statusCallback).toHaveBeenCalledWith('Initializing chat pipeline...');
+			expect(statusCallback).toHaveBeenCalledWith('Preparing document retrieval...');
+			expect(statusCallback).toHaveBeenCalledWith('Setting up response chain...');
+			expect(logger.debug).toHaveBeenCalledWith('Streaming chat response for query: test query');
+		});
+
+		it('should handle errors during streaming', async () => {
+			const mockChain = RunnableSequence.from as jest.Mock;
+			mockChain().stream = jest.fn().mockRejectedValue(new Error('Stream error'));
+
+			const statusCallback = jest.fn();
+
+			try {
+				const generator = ragPipeline.streamChatResponse('test query', statusCallback);
+				for await (const _ of generator) {
+					// should throw before getting here
+				}
+				fail('Expected method to throw');
+			} catch (error) {
+				expect(error.message).toBe('Stream error');
+				expect(statusCallback).toHaveBeenNthCalledWith(1, 'Initializing chat pipeline...');
+				expect(statusCallback).toHaveBeenNthCalledWith(2, 'Preparing document retrieval...');
+				expect(statusCallback).toHaveBeenNthCalledWith(3, 'Setting up response chain...');
+				expect(logger.error).toHaveBeenCalledWith('Error streaming chat response:', error);
+			}
+		});
+
+		it('should handle empty input', async () => {
+			const mockChain = RunnableSequence.from as jest.Mock;
+			const mockStream = async function* () {
+				yield { content: 'Response for empty input' };
+			};
+			mockChain().stream = jest.fn().mockReturnValue(mockStream());
+
+			const responses: any[] = [];
+			for await (const chunk of ragPipeline.streamChatResponse('')) {
+				responses.push(chunk);
+			}
+
+			expect(responses).toHaveLength(1);
+			expect(responses[0].content).toBe('Response for empty input');
+		});
+
+		it('should work without status callback', async () => {
+			const mockChain = RunnableSequence.from as jest.Mock;
+			const mockStream = async function* () {
+				yield { content: 'Test response' };
+			};
+			mockChain().stream = jest.fn().mockReturnValue(mockStream());
+
+			const responses: any[] = [];
+			for await (const chunk of ragPipeline.streamChatResponse('test query')) {
+				responses.push(chunk);
+			}
+
+			expect(responses).toHaveLength(1);
+			expect(responses[0].content).toBe('Test response');
+			expect(logger.debug).toHaveBeenCalledWith('Streaming chat response for query: test query');
+		});
+
+		it('should handle malformed response chunks', async () => {
+			const mockChain = RunnableSequence.from as jest.Mock;
+			const mockStream = async function* () {
+				yield { malformed: 'chunk' };
+				yield { content: 'valid chunk' };
+			};
+			mockChain().stream = jest.fn().mockReturnValue(mockStream());
+
+			const responses: any[] = [];
+			for await (const chunk of ragPipeline.streamChatResponse('test query')) {
+				responses.push(chunk);
+			}
+
+			expect(responses).toHaveLength(2);
+			expect(responses[0]).toEqual({ malformed: 'chunk' }); // Pass through invalid chunks
+			expect(responses[1]).toEqual({ content: 'valid chunk' });
+		});
+
+		it('should handle document retrieval and context formatting', async () => {
+			const mockChain = RunnableSequence.from as jest.Mock;
+			const mockRetrieverResult = 'formatted context';
+
+			const mockPipe = jest.fn().mockReturnValue({
+				invoke: jest.fn().mockResolvedValue(mockRetrieverResult),
+			});
+
+			(ragPipeline as any).chromaVectorStore.asRetriever = jest.fn().mockReturnValue({
+				pipe: mockPipe,
+			});
+
+			const mockStream = async function* () {
+				yield { content: 'Response with context' };
+			};
+
+			// Setup the chain mock to capture and test the context function
+			mockChain.mockImplementation((config) => {
+				const contextFn = config[0].context;
+				contextFn({ question: 'test query' });
+
+				return {
+					stream: jest.fn().mockReturnValue(mockStream()),
+				};
+			});
+
+			const statusCallback = jest.fn();
+			const responses: any[] = [];
+
+			for await (const chunk of ragPipeline.streamChatResponse('test query', statusCallback)) {
+				responses.push(chunk);
+			}
+
+			// Verify document retrieval flow
+			expect(statusCallback).toHaveBeenCalledWith('Searching relevant documents...');
+			expect(mockPipe).toHaveBeenCalledWith(formatDocumentsAsString);
+			expect(responses).toEqual([{ content: 'Response with context' }]);
+
+			// Verify the full sequence of status callbacks
+			expect(statusCallback).toHaveBeenCalledWith('Initializing chat pipeline...');
+			expect(statusCallback).toHaveBeenCalledWith('Preparing document retrieval...');
+			expect(statusCallback).toHaveBeenCalledWith('Setting up response chain...');
+			expect(statusCallback).toHaveBeenCalledWith('Generating response...');
 		});
 	});
 });

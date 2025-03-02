@@ -158,6 +158,7 @@ class RAGPipeline {
 
 	public async *streamChatResponse(userInput: string, statusCallback?: (status: string) => void) {
 		try {
+			logger.debug(`Streaming chat response for query: ${userInput}`);
 			statusCallback?.('Initializing chat pipeline...');
 
 			const streamResponseOllama = (this.chatOllama = new ChatOllama({
@@ -210,7 +211,7 @@ class RAGPipeline {
 				yield chunk;
 			}
 		} catch (error) {
-			logger.error('Chat stream error:', error);
+			logger.error('Error streaming chat response:', error);
 			statusCallback?.('Error occurred during chat processing');
 			throw error;
 		}

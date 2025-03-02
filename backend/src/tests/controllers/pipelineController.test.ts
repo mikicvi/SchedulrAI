@@ -300,6 +300,96 @@ describe('PipelineController', () => {
 		});
 	});
 
+	describe('streamChat', () => {
+		beforeEach(() => {
+			mockRequest.body = {
+				message: 'test message',
+			};
+		});
+
+		it('should stream chat responses successfully', async () => {
+			const mockStream = async function* () {
+				yield { content: 'First chunk' };
+				yield { content: 'Second chunk' };
+				yield { content: 'Final chunk' };
+			};
+
+			(RAGPipeline.prototype.streamChatResponse as jest.Mock).mockImplementation((message, callback) => {
+				callback('Processing message...');
+				return mockStream();
+			});
+
+			await controller.streamChat(mockRequest as Request, mockResponse as Response);
+
+			// Verify headers
+			expect(mockSetHeader).toHaveBeenCalledWith('Content-Type', 'text/event-stream');
+			expect(mockSetHeader).toHaveBeenCalledWith('Cache-Control', 'no-cache');
+			expect(mockSetHeader).toHaveBeenCalledWith('Connection', 'keep-alive');
+
+			// Verify streaming content
+			const expectedCalls = [
+				{ type: 'status', content: 'Processing message...' },
+				{ type: 'content', content: 'First chunk' },
+				{ type: 'content', content: 'Second chunk' },
+				{ type: 'content', content: 'Final chunk' },
+				{ type: 'done' },
+			];
+
+			expectedCalls.forEach((call, index) => {
+				expect(mockWrite).toHaveBeenNthCalledWith(index + 1, `data: ${JSON.stringify(call)}\n\n`);
+			});
+
+			expect(mockEnd).toHaveBeenCalled();
+		});
+
+		it('should handle errors during streaming', async () => {
+			const mockError = new Error('Streaming error');
+			(RAGPipeline.prototype.streamChatResponse as jest.Mock).mockImplementation(() => {
+				throw mockError;
+			});
+
+			await controller.streamChat(mockRequest as Request, mockResponse as Response);
+
+			expect(mockWrite).toHaveBeenCalledWith(
+				`data: ${JSON.stringify({ type: 'error', content: 'Streaming error' })}\n\n`
+			);
+			expect(logger.error).toHaveBeenCalledWith('Stream chat error:', mockError);
+			expect(mockEnd).toHaveBeenCalled();
+		});
+
+		it('should handle empty message input', async () => {
+			mockRequest.body = { message: '' };
+
+			const mockStream = async function* () {
+				yield { content: 'Response for empty message' };
+			};
+
+			(RAGPipeline.prototype.streamChatResponse as jest.Mock).mockImplementation((message, callback) => {
+				callback('Processing empty message...');
+				return mockStream();
+			});
+
+			await controller.streamChat(mockRequest as Request, mockResponse as Response);
+
+			expect(mockWrite).toHaveBeenCalledWith(
+				`data: ${JSON.stringify({ type: 'status', content: 'Processing empty message...' })}\n\n`
+			);
+			expect(mockEnd).toHaveBeenCalled();
+		});
+		it('should handle missing message in request body', async () => {
+			mockRequest.body = {};
+			jest.clearAllMocks(); // Reset mocks before test
+
+			await controller.streamChat(mockRequest as Request, mockResponse as Response);
+
+			expect(mockWrite).toHaveBeenCalledTimes(1);
+			expect(mockWrite).toHaveBeenCalledWith(
+				`data: ${JSON.stringify({ type: 'error', content: 'No message provided' })}\n\n`
+			);
+			expect(mockEnd).toHaveBeenCalled();
+		});
+	});
+
 	describe('Constructor', () => {
 		it('should initialize with correct configuration', () => {
 			// Assert

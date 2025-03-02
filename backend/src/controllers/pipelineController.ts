@@ -150,6 +150,12 @@ class PipelineController {
 		try {
 			const userInput = req.body.message;
 
+			if (userInput === undefined || userInput === null) {
+				res.write(`data: ${JSON.stringify({ type: 'error', content: 'No message provided' })}\n\n`);
+				res.end();
+				return;
+			}
+
 			// Set headers for SSE
 			res.setHeader('Content-Type', 'text/event-stream');
 			res.setHeader('Cache-Control', 'no-cache');

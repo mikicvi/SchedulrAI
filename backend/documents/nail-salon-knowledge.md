@@ -5,12 +5,12 @@
 
 ## Breakdown
 
--   Full Set of Acrylic Nails: Typically takes about 1.5 to 2 hours.
+-   Full Set of Acrylic Nails: Typically takes about 45-60 minutes.
 -   Coffin Shape: Shaping the nails can add about 15-20 minutes.
 -   French Tip Style with Ombre Pink Base: This design can take an additional 30-45 minutes.
 -   Adding Rhinestones: Adding small rhinestones can take about 10-15 minutes.
--   Pedicure: A basic pedicure usually takes about 30-45 minutes.
--   Time: 4 hours
+-   Pedicure: A basic pedicure usually takes about 10-15 minutes.
+-   Time: 2 hours
 
 ---
 

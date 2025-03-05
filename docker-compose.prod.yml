@@ -25,7 +25,7 @@ services:
         env_file: .env
         volumes:
             - .sqlite_volume:/app/data
-            - documents_volume:/app/documents
+            - .documents_volume:/app/documents
         environment:
             - CHROMA_SERVER_HOST=chroma
             - OLLAMA_API_BASE=host.docker.internal
@@ -47,6 +47,6 @@ networks:
     schedulrai:
         driver: bridge
 volumes:
-    ollama_volume:
+    documents_volume:
     chroma_volume:
     sqlite_volume:

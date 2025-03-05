@@ -14,6 +14,7 @@ async function loadDocuments(docsPath: string): Promise<{ name: string; content:
 			content: fs.readFileSync(path.join(docsPath, file), 'utf-8'),
 		}));
 		logger.info(`Documents loaded from ${docsPath}`);
+		logger.info(`Documents: ${documents.map((doc) => doc.name).join(', ')}`);
 		return documents;
 	} catch (error) {
 		logger.error(`Failed to load documents from ${docsPath}:`, error);

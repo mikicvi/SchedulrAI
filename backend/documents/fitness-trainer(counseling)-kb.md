@@ -18,7 +18,7 @@
 -   Cool-down and habit-building tips: 10 minutes
 -   Discuss scheduling workouts, daily reminders, and reward systems
 
--   **Total Time:** 55 minutes
+-   Time: 55 minutes
 
 ---
 
@@ -40,7 +40,7 @@
 -   Counselling recap and future stress tips: 10 minutes
 -   Suggest journaling, short breaks, or relaxation apps
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -65,7 +65,7 @@
 -   Introduce daily logs or mobile apps
 -   Set up short weekly goals
 
--   **Total Time:** 55 minutes
+-   Time: 55 minutes
 
 ---
 
@@ -87,7 +87,7 @@
 -   Supportive coaching and progression plan: 10 minutes
 -   Discuss mental hurdles and gradual intensity increases
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -110,7 +110,7 @@
 
 -   Recap and next-step planning: 5 minutes
 
--   **Total Time:** 45 minutes
+-   Time: 45 minutes
 
 ---
 
@@ -133,7 +133,7 @@
 -   Lifestyle and self-care tips: 10 minutes
 -   Address sleep, stress, and short “me-time” intervals
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -155,7 +155,7 @@
 -   Cool-down with extended stretching: 10 minutes
 -   Emphasise safe static holds for improved flexibility
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -177,7 +177,7 @@
 -   Goal refresh and small action steps: 10 minutes
 -   Set a feasible weekly target to maintain momentum
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -199,7 +199,7 @@
 -   Evening wind-down techniques: 10 minutes
 -   Stretches, foam rolling, or light yoga poses
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -221,7 +221,7 @@
 -   Wrap-up with next steps: 10 minutes
 -   Plan weekly mindful practice (both eating and exercise)
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -243,7 +243,7 @@
 -   Next-step plan: 10 minutes
 -   Possibly attend a beginner-friendly class, set personal milestones
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -265,7 +265,7 @@
 -   Cool-down and recovery talk: 10 minutes
 -   Hydration, sleep, rest days, foam rolling
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -287,7 +287,7 @@
 -   Motivational check and wrap-up: 5 minutes
 -   Encourage small wins, schedule next checkpoint
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -309,7 +309,7 @@
 -   Post-workout debrief: 15 minutes
 -   Observe mood changes, note improvements, plan next steps
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -331,7 +331,7 @@
 -   Recovery talk: 10 minutes
 -   Stress importance of rest days, foot care, stretching
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -353,7 +353,7 @@
 -   Wrap-up and next-step plan: 10 minutes
 -   Possible food diary or simple meal-prep tasks
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -375,7 +375,7 @@
 -   Accountability strategy: 10 minutes
 -   Weekly weigh-ins or shared progress logs
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -397,7 +397,7 @@
 -   Mental preparation and tracking advice: 10 minutes
 -   Journaling progress, visualisation, stress management
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -419,4 +419,4 @@
 -   Strategies for consistent energy: 10 minutes
 -   Suggest bedtime routines, stress reduction, short movement breaks
 
--   **Total Time:** 50 minutes
+-   Time: 50 minutes

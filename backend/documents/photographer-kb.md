@@ -10,7 +10,7 @@
 -   Studio lighting setup and test shots: 10 minutes
 -   Headshot photography session: 30 minutes
 -   Basic on-screen review and selection: 10 minutes
--   **Total Time:** 1 hour
+-   Time: 1 hour
 
 ---
 
@@ -24,7 +24,7 @@
 -   Lighting setup or scouting the best spot: 15 minutes
 -   Family group shots and individual portraits: 45 minutes
 -   Quick review of key photos on-site: 10 minutes
--   **Total Time:** 1 hour 25 minutes
+-   Time: 1 hour 25 minutes
 
 ---
 
@@ -38,7 +38,7 @@
 -   Lighting and backdrop arrangement or scouting: 20 minutes
 -   Photo session (candid + posed): 1 hour
 -   On-site review of select images: 15 minutes
--   **Total Time:** 1 hour 50 minutes
+-   Time: 1 hour 50 minutes
 
 ---
 
@@ -53,7 +53,7 @@
 -   Ceremony coverage and couple portraits: 2 hours
 -   Reception and group photos: 3 hours
 -   Evening highlights (first dance, candids): 1 hour
--   **Total Time:** 7 hours 15 minutes  
+-   Time: 7 hours 15 minutes  
     _(Times can vary based on event schedule.)_
 
 ---
@@ -68,7 +68,7 @@
 -   Studio lighting and backdrop setup: 20 minutes
 -   Individual product shots (multiple angles): 40 minutes
 -   Lifestyle context images: 30 minutes
--   **Total Time:** 1 hour 45 minutes  
+-   Time: 1 hour 45 minutes  
     _(Varies with number of products.)_
 
 ---
@@ -83,7 +83,7 @@
 -   Wardrobe and styling collaboration: 20 minutes
 -   On-location photography with multiple outfits: 1 hour
 -   Quick review of top shots: 10 minutes
--   **Total Time:** 1 hour 50 minutes
+-   Time: 1 hour 50 minutes
 
 ---
 
@@ -97,7 +97,7 @@
 -   Equipment check and lighting assessment at venue: 15 minutes
 -   Coverage of speaker sessions, candids, and demonstrations: 2 hours
 -   Quick wrap-up and partial review: 15 minutes
--   **Total Time:** 2 hours 45 minutes
+-   Time: 2 hours 45 minutes
 
 ---
 
@@ -111,7 +111,7 @@
 -   Studio or home setup (soft lighting, safe posing area): 15 minutes
 -   Gentle posing and photography with breaks: 1 hour
 -   Brief review of main shots: 15 minutes
--   **Total Time:** 1 hour 45 minutes
+-   Time: 1 hour 45 minutes
 
 ---
 
@@ -125,7 +125,7 @@
 -   Location scouting or setup: 15 minutes
 -   Photography session (posed + candid images): 45 minutes
 -   Image review or quick on-site selection: 10 minutes
--   **Total Time:** 1 hour 20 minutes
+-   Time: 1 hour 20 minutes
 
 ---
 
@@ -139,7 +139,7 @@
 -   Indoor setup or location arrangement: 15 minutes
 -   Portrait session (indoor + outdoor): 45 minutes
 -   Quick image selection for brand consistency: 10 minutes
--   **Total Time:** 1 hour 20 minutes
+-   Time: 1 hour 20 minutes
 
 ---
 
@@ -153,7 +153,7 @@
 -   Setup for group photos (checking lighting, backdrop if needed): 10 minutes
 -   Event coverage (candids, group shots, cake ceremony): 2 hours
 -   Quick wrap-up with host: 10 minutes
--   **Total Time:** 2 hours 30 minutes
+-   Time: 2 hours 30 minutes
 
 ---
 
@@ -167,7 +167,7 @@
 -   Simple set or outdoor location prep: 10 minutes
 -   Pet photography session (candid + posed): 40 minutes
 -   On-site image check to confirm variety: 10 minutes
--   **Total Time:** 1 hour 10 minutes
+-   Time: 1 hour 10 minutes
 
 ---
 
@@ -181,7 +181,7 @@
 -   Check lighting and vantage points around the room: 10 minutes
 -   Candid coverage of activities, plus any posed group shots: 1 hour
 -   End-of-session wrap-up (final images, departure shots): 10 minutes
--   **Total Time:** 1 hour 35 minutes
+-   Time: 1 hour 35 minutes
 
 ---
 
@@ -195,7 +195,7 @@
 -   Lighting and backdrop arrangement for dishes: 20 minutes
 -   Photo session for 5 signature dishes: 50 minutes
 -   Quick ambience shots of restaurant: 15 minutes
--   **Total Time:** 1 hour 40 minutes
+-   Time: 1 hour 40 minutes
 
 ---
 
@@ -209,7 +209,7 @@
 -   Short setup or location check: 15 minutes
 -   Formal cap-and-gown portraits: 20 minutes
 -   Fun shots with props (balloons/confetti): 30 minutes
--   **Total Time:** 1 hour 15 minutes
+-   Time: 1 hour 15 minutes
 
 ---
 
@@ -223,7 +223,7 @@
 -   Location setup or arrangement for multiple groups: 20 minutes
 -   Formal group shots + smaller family sets: 1 hour
 -   Candid capture of interactions: 15 minutes
--   **Total Time:** 1 hour 50 minutes
+-   Time: 1 hour 50 minutes
 
 ---
 
@@ -237,7 +237,7 @@
 -   Room-by-room lighting setup and staging: 30 minutes
 -   Interior shots (various angles) + exterior/garden photos: 1 hour
 -   Brief review of highlights: 10 minutes
--   **Total Time:** 1 hour 55 minutes
+-   Time: 1 hour 55 minutes
 
 ---
 
@@ -251,7 +251,7 @@
 -   Equipment prep (low-light lenses, fast shutter settings): 15 minutes
 -   Live coverage (stage, audience, backstage): 1 hour 30 minutes
 -   Quick final pass for closing act or encore: 15 minutes
--   **Total Time:** 2 hours 15 minutes
+-   Time: 2 hours 15 minutes
 
 ---
 
@@ -265,7 +265,7 @@
 -   Field or venue check for angles and lighting: 10 minutes
 -   In-game action shots (multiple vantage points): 1 hour
 -   Post-match group photos with sponsors: 15 minutes
--   **Total Time:** 1 hour 40 minutes
+-   Time: 1 hour 40 minutes
 
 ---
 
@@ -279,4 +279,4 @@
 -   Lighting assessment and vantage point planning: 15 minutes
 -   Interior shots (lobby, conference rooms, hallways): 1 hour
 -   Exterior facade and final overview: 20 minutes
--   **Total Time:** 1 hour 50 minutes
+-   Time: 1 hour 50 minutes

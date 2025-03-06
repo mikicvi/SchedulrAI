@@ -9,7 +9,7 @@
 -   Consultation and wash: 10 minutes
 -   Trim (shoulder-length hair): 15 minutes
 -   Blow-dry and styling: 20 minutes
--   **Total Time:** 45 minutes
+-   Time: 45 minutes
 
 ---
 
@@ -22,7 +22,7 @@
 -   Colour consultation and strand test: 15 minutes
 -   Full hair dye application: 45 minutes
 -   Rinse, condition, and quick style: 20 minutes
--   **Total Time:** 1 hour 20 minutes
+-   Time: 1 hour 20 minutes
 
 ---
 
@@ -35,7 +35,7 @@
 -   Root analysis and sectioning: 10 minutes
 -   Lightening application on regrowth: 30 minutes
 -   Toning and rinse: 20 minutes
--   **Total Time:** 1 hour
+-   Time: 1 hour
 
 ---
 
@@ -49,7 +49,7 @@
 -   Foil application (long hair): 1 hour
 -   Processing and rinse: 30 minutes
 -   Blowout and styling: 20 minutes
--   **Total Time:** 2 hours 5 minutes
+-   Time: 2 hours 5 minutes
 
 ---
 
@@ -63,7 +63,7 @@
 -   Foil and colour application: 30 minutes
 -   Processing, rinse, and tone: 25 minutes
 -   Quick dry and style: 15 minutes
--   **Total Time:** 1 hour 20 minutes
+-   Time: 1 hour 20 minutes
 
 ---
 
@@ -76,7 +76,7 @@
 -   Hair wash and prep: 10 minutes
 -   Keratin treatment application: 40 minutes
 -   Heat sealing and styling: 30 minutes
--   **Total Time:** 1 hour 20 minutes
+-   Time: 1 hour 20 minutes
 
 ---
 
@@ -90,7 +90,7 @@
 -   Perm rod setting: 30 minutes
 -   Processing and neutralising: 30 minutes
 -   Styling and aftercare advice: 15 minutes
--   **Total Time:** 1 hour 25 minutes
+-   Time: 1 hour 25 minutes
 
 ---
 
@@ -103,7 +103,7 @@
 -   Updo consultation: 5 minutes
 -   Wash and blow-dry (if needed): 15 minutes
 -   Formal updo styling: 40 minutes
--   **Total Time:** 1 hour
+-   Time: 1 hour
 
 ---
 
@@ -117,7 +117,7 @@
 -   Shampoo and massage: 10 minutes
 -   Haircut (medium length): 20 minutes
 -   Quick blow-dry: 15 minutes
--   **Total Time:** 1 hour
+-   Time: 1 hour
 
 ---
 
@@ -131,7 +131,7 @@
 -   Freehand paint application: 45 minutes
 -   Processing and rinse: 30 minutes
 -   Toner application and style: 20 minutes
--   **Total Time:** 1 hour 45 minutes
+-   Time: 1 hour 45 minutes
 
 ---
 
@@ -144,7 +144,7 @@
 -   Clarifying wash: 10 minutes
 -   Brazilian blowout application: 40 minutes
 -   Heat sealing and finishing style: 30 minutes
--   **Total Time:** 1 hour 20 minutes
+-   Time: 1 hour 20 minutes
 
 ---
 
@@ -157,7 +157,7 @@
 -   Hair extension consultation and colour match: 15 minutes
 -   Option discussion (clip-ins vs. tape-ins): 15 minutes
 -   Test application (if necessary): 10 minutes
--   **Total Time:** 40 minutes
+-   Time: 40 minutes
 
 ---
 
@@ -170,7 +170,7 @@
 -   Assessment of current hair colour: 15 minutes
 -   Colour stripping/adjusting application: 40 minutes
 -   Reapplication of target colour and toning: 40 minutes
--   **Total Time:** 1 hour 35 minutes
+-   Time: 1 hour 35 minutes
 
 ---
 
@@ -183,7 +183,7 @@
 -   Treatment application: 15 minutes
 -   Processing time under heat: 20 minutes
 -   Trim (ends only): 15 minutes
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -196,7 +196,7 @@
 -   Wash and conditioning: 10 minutes
 -   Blow-dry and curling: 30 minutes
 -   Finishing with hairspray and styling details: 10 minutes
--   **Total Time:** 50 minutes
+-   Time: 50 minutes
 
 ---
 
@@ -211,7 +211,7 @@
 -   Consultation and quick wash: 5 minutes
 -   Haircut (short-back-and-sides): 20 minutes
 -   Styling with product: 5 minutes
--   **Total Time:** 30 minutes
+-   Time: 30 minutes
 
 ---
 
@@ -224,7 +224,7 @@
 -   Fade consultation and sectioning: 5 minutes
 -   Skin fade cut: 20 minutes
 -   Beard line-up and trim: 10 minutes
--   **Total Time:** 35 minutes
+-   Time: 35 minutes
 
 ---
 
@@ -237,7 +237,7 @@
 -   Facial and pre-shave prep: 5 minutes
 -   Hot towel shave and razor work: 15 minutes
 -   Post-shave balm and skincare tips: 5 minutes
--   **Total Time:** 25 minutes
+-   Time: 25 minutes
 
 ---
 
@@ -250,7 +250,7 @@
 -   Haircut consultation: 5 minutes
 -   Standard cut and trim: 15 minutes
 -   Scalp massage with conditioning: 10 minutes
--   **Total Time:** 30 minutes
+-   Time: 30 minutes
 
 ---
 
@@ -263,7 +263,7 @@
 -   Beard consultation (length and shape): 5 minutes
 -   Beard trimming and sculpting: 15 minutes
 -   Moustache shaping: 5 minutes
--   **Total Time:** 25 minutes
+-   Time: 25 minutes
 
 ---
 
@@ -276,7 +276,7 @@
 -   Quick consultation: 5 minutes
 -   Crew cut execution: 15 minutes
 -   Shape-up around edges and hairline: 5 minutes
--   **Total Time:** 25 minutes
+-   Time: 25 minutes
 
 ---
 
@@ -289,7 +289,7 @@
 -   Haircut consultation: 5 minutes
 -   Side-part cut and style: 15 minutes
 -   Product selection and styling advice: 5 minutes
--   **Total Time:** 25 minutes
+-   Time: 25 minutes
 
 ---
 
@@ -302,7 +302,7 @@
 -   Fade consultation: 5 minutes
 -   Skin fade cut (sides) + top styling: 20 minutes
 -   Sideburn clean-up: 5 minutes
--   **Total Time:** 30 minutes
+-   Time: 30 minutes
 
 ---
 
@@ -315,7 +315,7 @@
 -   Head shave (clipper then razor): 20 minutes
 -   Beard grooming and trim: 10 minutes
 -   Aftercare product application: 5 minutes
--   **Total Time:** 35 minutes
+-   Time: 35 minutes
 
 ---
 
@@ -328,7 +328,7 @@
 -   Kid’s haircut consultation: 5 minutes
 -   Gentle trim and shape: 15 minutes
 -   Quick styling or gel (if desired): 5 minutes
--   **Total Time:** 25 minutes
+-   Time: 25 minutes
 
 ---
 
@@ -341,7 +341,7 @@
 -   Senior consultation and discount inquiry: 5 minutes
 -   Low-maintenance cut (taper): 15 minutes
 -   Styling or product application: 5 minutes
--   **Total Time:** 25 minutes
+-   Time: 25 minutes
 
 ---
 
@@ -355,7 +355,7 @@
 -   Clipper work on sides: 10 minutes
 -   Trimming and shaping the mohawk: 10 minutes
 -   Styling product advice: 5 minutes
--   **Total Time:** 30 minutes
+-   Time: 30 minutes
 
 ---
 
@@ -368,7 +368,7 @@
 -   Consultation for pompadour shape: 5 minutes
 -   Tapered sides and pompadour top cut: 15 minutes
 -   Blow-dry and styling demonstration: 10 minutes
--   **Total Time:** 30 minutes
+-   Time: 30 minutes
 
 ---
 
@@ -381,7 +381,7 @@
 -   Undercut sectioning: 5 minutes
 -   Clipper work for undercut: 10 minutes
 -   Simple design shaving: 10 minutes
--   **Total Time:** 25 minutes
+-   Time: 25 minutes
 
 ---
 
@@ -395,4 +395,4 @@
 -   Wash and scalp massage: 5 minutes
 -   New haircut execution: 20 minutes
 -   Product recommendation and styling tips: 5 minutes
--   **Total Time:** 40 minutes
+-   Time: 40 minutes

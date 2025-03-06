@@ -9,7 +9,7 @@
 -   Leak inspection and detection: 30 minutes
 -   Repair to affected pipes or seals: 45 minutes
 -   Tile re-sealing around shower area: 30 minutes
--   **Total Time:** 1 hour 45 minutes
+-   Time: 1 hour 45 minutes
 
 ---
 
@@ -22,7 +22,7 @@
 -   Initial water pressure and faucet inspection: 20 minutes
 -   Cleaning or replacing the faucet aerator: 15 minutes
 -   Pipe flush or partial replacement if needed: 30 minutes
--   **Total Time:** 1 hour 5 minutes
+-   Time: 1 hour 5 minutes
 
 ---
 
@@ -35,7 +35,7 @@
 -   Boiler inspection: 20 minutes
 -   Radiator check and bleed: 25 minutes
 -   Parts replacement/repair as needed: 30 minutes
--   **Total Time:** 1 hour 15 minutes
+-   Time: 1 hour 15 minutes
 
 ---
 
@@ -48,7 +48,7 @@
 -   Sump pump inspection: 15 minutes
 -   Possible sump pump repair or upgrade: 45 minutes
 -   Sealing or waterproofing consultation: 20 minutes
--   **Total Time:** 1 hour 20 minutes
+-   Time: 1 hour 20 minutes
 
 ---
 
@@ -61,7 +61,7 @@
 -   Drain line assessment: 15 minutes
 -   Clearing blockage with auger or snake: 30 minutes
 -   Testing and cleanup: 15 minutes
--   **Total Time:** 1 hour
+-   Time: 1 hour
 
 ---
 
@@ -74,7 +74,7 @@
 -   Odour source investigation: 20 minutes
 -   Vent system and drain check: 20 minutes
 -   Clearing vent or drain blockage: 25 minutes
--   **Total Time:** 1 hour 5 minutes
+-   Time: 1 hour 5 minutes
 
 ---
 
@@ -87,7 +87,7 @@
 -   On-site consultation and measurement: 30 minutes
 -   Removal of old fixtures: 30 minutes
 -   Installation of new piping and fixtures: 1 hour 30 minutes
--   **Total Time:** 2 hours 30 minutes
+-   Time: 2 hours 30 minutes
 
 ---
 
@@ -100,7 +100,7 @@
 -   Old toilet removal: 20 minutes
 -   Installation of new toilet: 40 minutes
 -   Line inspection for leaks or damage: 15 minutes
--   **Total Time:** 1 hour 15 minutes
+-   Time: 1 hour 15 minutes
 
 ---
 
@@ -113,7 +113,7 @@
 -   Disposal unit inspection: 15 minutes
 -   Attempted unjamming: 20 minutes
 -   Replacement if required: 30 minutes
--   **Total Time:** 1 hour 5 minutes
+-   Time: 1 hour 5 minutes
 
 ---
 
@@ -126,7 +126,7 @@
 -   Outdoor tap replacement: 30 minutes
 -   Leak detection in underground line: 40 minutes
 -   General outdoor plumbing check: 15 minutes
--   **Total Time:** 1 hour 25 minutes
+-   Time: 1 hour 25 minutes
 
 ---
 
@@ -141,7 +141,7 @@
 -   On-site inspection for outlet placement: 15 minutes
 -   Outlet installation (2–3 outlets): 45 minutes
 -   Breaker panel load check: 15 minutes
--   **Total Time:** 1 hour 15 minutes
+-   Time: 1 hour 15 minutes
 
 ---
 
@@ -154,7 +154,7 @@
 -   Fixture inspection and testing: 20 minutes
 -   Wiring check and repair: 30 minutes
 -   Fixture replacement if needed: 20 minutes
--   **Total Time:** 1 hour 10 minutes
+-   Time: 1 hour 10 minutes
 
 ---
 
@@ -167,7 +167,7 @@
 -   Smart switch/dimmer consultation: 15 minutes
 -   Device installation (multiple rooms): 1 hour 15 minutes
 -   System testing and user tutorial: 20 minutes
--   **Total Time:** 1 hour 50 minutes
+-   Time: 1 hour 50 minutes
 
 ---
 
@@ -180,7 +180,7 @@
 -   Existing fuse box removal: 30 minutes
 -   Breaker panel installation and wiring: 1 hour 15 minutes
 -   System testing and code compliance check: 30 minutes
--   **Total Time:** 2 hours 15 minutes
+-   Time: 2 hours 15 minutes
 
 ---
 
@@ -193,7 +193,7 @@
 -   Socket and wiring inspection: 25 minutes
 -   Fault identification and repair: 30 minutes
 -   Replacement of socket if damaged: 15 minutes
--   **Total Time:** 1 hour 10 minutes
+-   Time: 1 hour 10 minutes
 
 ---
 
@@ -206,7 +206,7 @@
 -   Outdoor fixture examination: 15 minutes
 -   Removal of old security light: 10 minutes
 -   Installation and calibration of new unit: 30 minutes
--   **Total Time:** 55 minutes
+-   Time: 55 minutes
 
 ---
 
@@ -219,7 +219,7 @@
 -   Circuit capacity assessment: 20 minutes
 -   New circuit installation: 50 minutes
 -   Testing and final inspection: 15 minutes
--   **Total Time:** 1 hour 25 minutes
+-   Time: 1 hour 25 minutes
 
 ---
 
@@ -232,7 +232,7 @@
 -   Baseline wiring check: 15 minutes
 -   Installing recessed light fixtures (4–6 units): 1 hour
 -   Concealing wiring and patching: 30 minutes
--   **Total Time:** 1 hour 45 minutes
+-   Time: 1 hour 45 minutes
 
 ---
 
@@ -245,7 +245,7 @@
 -   Inspection of ceiling and support structure: 15 minutes
 -   New wiring from switch to ceiling: 30 minutes
 -   Fan assembly and installation: 30 minutes
--   **Total Time:** 1 hour 15 minutes
+-   Time: 1 hour 15 minutes
 
 ---
 
@@ -259,7 +259,7 @@
 -   LED strip installation: 30 minutes
 -   Additional overhead lighting setup: 30 minutes
 -   Safety and code compliance check: 15 minutes
--   **Total Time:** 1 hour 30 minutes
+-   Time: 1 hour 30 minutes
 
 ---
 
@@ -274,7 +274,7 @@
 -   On-site measurement and consultation: 20 minutes
 -   Cutting and finishing shelves (off-site or on-site): 1 hour
 -   Mounting and levelling: 30 minutes
--   **Total Time:** 1 hour 50 minutes
+-   Time: 1 hour 50 minutes
 
 ---
 
@@ -287,7 +287,7 @@
 -   Cabinet door measurement and style consultation: 25 minutes
 -   Removal of old doors: 30 minutes
 -   Installation of new doors: 1 hour
--   **Total Time:** 1 hour 55 minutes
+-   Time: 1 hour 55 minutes
 
 ---
 
@@ -300,7 +300,7 @@
 -   Staircase inspection: 15 minutes
 -   Repairs to loose spindles and treads: 40 minutes
 -   Sanding and re-staining: 1 hour
--   **Total Time:** 1 hour 55 minutes
+-   Time: 1 hour 55 minutes
 
 ---
 
@@ -313,7 +313,7 @@
 -   Design consultation and measurements: 30 minutes
 -   Desk construction (wood cutting, assembly): 1 hour 30 minutes
 -   Drawer installation and finishing: 40 minutes
--   **Total Time:** 2 hours 40 minutes
+-   Time: 2 hours 40 minutes
 
 ---
 
@@ -326,7 +326,7 @@
 -   Removal of old skirting boards: 20 minutes
 -   Measuring and cutting new boards: 30 minutes
 -   Installation and finishing touches: 40 minutes
--   **Total Time:** 1 hour 30 minutes
+-   Time: 1 hour 30 minutes
 
 ---
 
@@ -339,7 +339,7 @@
 -   Floor damage assessment: 15 minutes
 -   Sanding or replacing damaged plank: 30 minutes
 -   Colour matching and finish: 25 minutes
--   **Total Time:** 1 hour 10 minutes
+-   Time: 1 hour 10 minutes
 
 ---
 
@@ -352,7 +352,7 @@
 -   Decking inspection: 15 minutes
 -   Board replacement and securing: 40 minutes
 -   Protective sealant application: 20 minutes
--   **Total Time:** 1 hour 15 minutes
+-   Time: 1 hour 15 minutes
 
 ---
 
@@ -365,7 +365,7 @@
 -   On-site inspection and measurement: 15 minutes
 -   Removal of old fence panels and posts: 45 minutes
 -   Installation of new posts and panels: 1 hour
--   **Total Time:** 2 hours
+-   Time: 2 hours
 
 ---
 
@@ -378,7 +378,7 @@
 -   Under-stairs inspection and design consultation: 20 minutes
 -   Framework and shelving construction: 45 minutes
 -   Door installation and final touches: 30 minutes
--   **Total Time:** 1 hour 35 minutes
+-   Time: 1 hour 35 minutes
 
 ---
 
@@ -391,7 +391,7 @@
 -   Door measurements: 15 minutes
 -   Removal of old doors and hardware: 20 minutes
 -   New door fitting and hardware installation (3 doors): 1 hour
--   **Total Time:** 1 hour 35 minutes
+-   Time: 1 hour 35 minutes
 
 ---
 
@@ -406,7 +406,7 @@
 -   Surface preparation and minor patching: 30 minutes
 -   Primer application: 20 minutes
 -   Final paint coat on railings and posts: 30 minutes
--   **Total Time:** 1 hour 20 minutes
+-   Time: 1 hour 20 minutes
 
 ---
 
@@ -419,7 +419,7 @@
 -   Wallpaper removal: 30 minutes
 -   Wall and ceiling preparation (filling/sanding): 30 minutes
 -   Painting (walls and ceiling): 1 hour
--   **Total Time:** 2 hours
+-   Time: 2 hours
 
 ---
 
@@ -433,7 +433,7 @@
 -   Surface prep and priming for high ceilings: 45 minutes
 -   Painting walls and trim: 1 hour
 -   Protective coatings discussion: 10 minutes
--   **Total Time:** 2 hours 10 minutes
+-   Time: 2 hours 10 minutes
 
 ---
 
@@ -446,7 +446,7 @@
 -   Wall preparation and priming: 30 minutes
 -   Chalkboard paint application on accent wall: 30 minutes
 -   Standard paint application on remaining walls: 1 hour
--   **Total Time:** 2 hours
+-   Time: 2 hours
 
 ---
 
@@ -459,7 +459,7 @@
 -   Cabinet door removal and prep: 30 minutes
 -   Primer and first coat application: 1 hour
 -   Second coat and finishing details: 1 hour
--   **Total Time:** 2 hours 30 minutes
+-   Time: 2 hours 30 minutes
 
 ---
 
@@ -472,7 +472,7 @@
 -   Fence cleaning and prep: 30 minutes
 -   Consultation on paint vs. stain: 15 minutes
 -   Application of selected finish: 1 hour
--   **Total Time:** 1 hour 45 minutes
+-   Time: 1 hour 45 minutes
 
 ---
 
@@ -485,7 +485,7 @@
 -   Crack filling and surface preparation: 20 minutes
 -   Primer application on repaired areas: 15 minutes
 -   Full room paint job: 45 minutes
--   **Total Time:** 1 hour 20 minutes
+-   Time: 1 hour 20 minutes
 
 ---
 
@@ -498,7 +498,7 @@
 -   Stairwell preparation (covering floors/banister): 15 minutes
 -   Painting high walls (ladder or scaffold usage): 1 hour
 -   Bannister touch-up: 20 minutes
--   **Total Time:** 1 hour 35 minutes
+-   Time: 1 hour 35 minutes
 
 ---
 
@@ -511,7 +511,7 @@
 -   Surface cleaning and light sanding: 15 minutes
 -   Primer or base coat for bright wall: 30 minutes
 -   Final neutral paint application: 30 minutes
--   **Total Time:** 1 hour 15 minutes
+-   Time: 1 hour 15 minutes
 
 ---
 
@@ -525,6 +525,6 @@
 -   Marking and taping the pattern: 30 minutes
 -   Painting stripes/pattern: 45 minutes
 -   Painting remaining walls in solid colour: 1 hour
--   **Total Time:** 2 hours 35 minutes
+-   Time: 2 hours 35 minutes
 
 ---

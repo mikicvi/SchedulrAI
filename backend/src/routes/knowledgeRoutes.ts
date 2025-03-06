@@ -3,6 +3,7 @@ import { createDocument, deleteDocument, indexDocuments, listDocuments } from '.
 import { ensureAuthenticated } from '../middlewares/auth';
 import { getUserById, updateUser } from '../services/dbServices';
 import { resetChromaCollection } from '../services/chromaServices';
+import logger from '../utils/logger';
 
 const router = Router();
 
@@ -32,11 +33,23 @@ router.post('/kb/knowledge/update', ensureAuthenticated, async (req, res) => {
 				await createDocument(doc.title, doc.content);
 			}
 
+			// Get existing documents or initialize empty array
+			const existingDocs = user.userSettings?.userSettingsKB || [];
+
+			// Map new documents
+			const newDocs = knowledgeBase.map((doc) => ({
+				title: `${doc.title.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}.md`,
+				content: doc.content,
+			}));
+
+			// Combine existing and new documents
+			const userSettingsKB = [...existingDocs, ...newDocs];
+
 			// Update user settings
 			await updateUser(user.id, {
 				userSettings: {
 					...user.userSettings,
-					knowledgeBase,
+					userSettingsKB,
 				},
 			});
 
@@ -70,7 +83,7 @@ router.post('/kb/knowledge/reset', ensureAuthenticated, async (req, res) => {
 			await updateUser(user.id, {
 				userSettings: {
 					...user.userSettings,
-					knowledgeBase: [],
+					userSettingsKB: [],
 				},
 			});
 
@@ -99,11 +112,29 @@ router.get('/kb/listDocuments', ensureAuthenticated, async (req, res) => {
 				message: 'User not found',
 			});
 		} else {
-			const documents = await listDocuments();
+			const availableDocuments = await listDocuments();
+
+			// Convert file documents to a consistent format and mark as default
+			const defaultDocs = availableDocuments.map((doc) => ({
+				title: doc.name,
+				content: doc.content,
+				type: 'default', // Mark as default document
+			}));
+
+			// Get user-specific documents and mark them, with null check
+			const userDocs = (user.userSettings?.userSettingsKB || []).map((doc) => ({
+				title: doc.title,
+				content: doc.content,
+				type: 'user',
+			}));
+
+			logger.info(`userDocs: ${JSON.stringify(userDocs)}`);
+			// Combine both lists, with user docs potentially overriding defaults
+			const allDocuments = [...defaultDocs, ...userDocs];
+
 			res.json({
 				success: true,
-				documents: user.userSettings.knowledgeBase,
-				availableDocuments: documents,
+				documents: allDocuments,
 			});
 		}
 	} catch (error) {
@@ -129,16 +160,18 @@ router.delete('/kb/document/:filename', ensureAuthenticated, async (req, res) =>
 			// Delete the file
 			await deleteDocument(filename);
 
-			// Update user settings to remove the document
+			// Update user settings to remove the document, with null check
 			const updatedKnowledgeBase =
-				user.userSettings?.knowledgeBase?.filter((doc) => doc.title !== filename) || [];
+				user.userSettings?.userSettingsKB?.filter((doc) => doc.title !== filename) || [];
 
 			await updateUser(user.id, {
 				userSettings: {
 					...user.userSettings,
-					knowledgeBase: updatedKnowledgeBase,
+					userSettingsKB: updatedKnowledgeBase,
 				},
 			});
+
+			await indexDocuments();
 
 			res.json({
 				success: true,

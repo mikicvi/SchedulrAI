@@ -47,6 +47,8 @@ test('Main Application Flow: Register, Login, Estimate, Create event, Delete eve
 	await page.getByRole('textbox', { name: 'Email' }).press('Tab');
 	await page.getByRole('textbox', { name: 'Password', exact: true }).fill('test');
 	await page.getByRole('textbox', { name: 'Password', exact: true }).press('Tab');
+	await page.getByRole('button').filter({ hasText: /^$/ }).click();
+
 	await page.getByRole('button').filter({ hasText: /^$/ }).press('Tab');
 	await page.getByRole('textbox', { name: 'Confirm Password' }).fill('test');
 	await page.getByRole('button', { name: 'Register' }).click();
@@ -73,6 +75,10 @@ test('Main Application Flow: Register, Login, Estimate, Create event, Delete eve
 	console.log('Logged in');
 
 	// Home page
+	await page.getByRole('button', { name: 'Schedule a Working Day' }).click();
+	await page.getByRole('button', { name: 'Schedule a Working Day' }).click();
+	await page.getByRole('combobox').click();
+	await page.getByRole('option', { name: '12:00' }).click();
 	await page.getByText('Ready: All systems').waitFor();
 	console.log('Ready: All systems');
 	await page
@@ -111,7 +117,10 @@ test('Main Application Flow: Register, Login, Estimate, Create event, Delete eve
 	// back to month
 	await page.getByRole('button', { name: 'Month' }).click();
 	// check out event, then exit
-	await page.getByText('[Theresa] Full set of acrylic').nth(-1).click();
+	await page
+		.getByText(/(?:\[\w+\] )?Full set of acrylic/)
+		.nth(-1)
+		.click();
 	await page.waitForTimeout(2000);
 	await page.getByRole('button', { name: 'Delete' }).click();
 	//---
@@ -142,8 +151,8 @@ test('Main Application Flow: Register, Login, Estimate, Create event, Delete eve
 	await page.getByRole('button', { name: 'TT test test test@test.com' }).click();
 	await page.getByRole('menuitem', { name: 'Profile' }).click();
 
-	// too fast, wait one second
-	await page.waitForTimeout(1000);
+	// too fast, wait
+	await page.waitForTimeout(2000);
 	await page.getByRole('button', { name: 'TT test test test@test.com' }).click();
 
 	// Application settings

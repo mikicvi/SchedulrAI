@@ -109,6 +109,7 @@ test('Main Application Flow: Register, Login, Estimate, Create event, Delete eve
 
 	// Calendar section
 	await page.getByRole('button', { name: 'Week' }).click();
+	await page.waitForTimeout(500);
 	await page.getByRole('button', { name: 'Day', exact: true }).click();
 	await page.getByRole('button', { name: 'Today' }).click();
 	//forward and backward buttons
@@ -116,12 +117,13 @@ test('Main Application Flow: Register, Login, Estimate, Create event, Delete eve
 	await page.getByRole('button').filter({ hasText: /^$/ }).nth(2).click();
 	// back to month
 	await page.getByRole('button', { name: 'Month' }).click();
+	await page.waitForTimeout(1500);
 	// check out event, then exit
 	await page
 		.getByText(/(?:\[\w+\] )?Full set of acrylic/)
 		.nth(-1)
 		.click();
-	await page.waitForTimeout(2000);
+	await page.waitForTimeout(1000);
 	await page.getByRole('button', { name: 'Delete' }).click();
 	//---
 	//notifications section ---

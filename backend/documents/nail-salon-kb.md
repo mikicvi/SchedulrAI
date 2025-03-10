@@ -53,7 +53,7 @@
 -   Pedicure with color: 1 hour
 -   Nail art consultation: 15 minutes
 -   Aftercare consultation: 10 minutes
--   Total Time: 1.25 hours
+-   Total Time: 2.40 hours
 
 ---
 

@@ -38,14 +38,29 @@ const settingsFromSchema = z.object({
 
 type SettingsFormValues = z.infer<typeof settingsFromSchema>;
 
+type Document = {
+	title: string;
+	content: string;
+	type: 'default' | 'user';
+};
+
+const groupDocumentsByType = (documents: Document[]) => {
+	const groups = {
+		default: documents.filter((doc) => doc.type === 'default'),
+		user: documents.filter((doc) => doc.type === 'user'),
+	};
+	return groups;
+};
+
 export function SettingsForm() {
 	const { user } = useUser();
 	const { apiFetch } = useApi();
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [hasDocuments, setHasDocuments] = useState(false);
-	const [availableDocuments, setAvailableDocuments] = useState<Array<{ name: string; content: string }>>([]);
+	const [availableDocuments, setAvailableDocuments] = useState<Document[]>([]);
 	const [showResetAlert, setShowResetAlert] = useState(false);
 	const [showIndexAlert, setShowIndexAlert] = useState(false);
+	const [openSections, setOpenSections] = useState<string[]>(['user-category']);
 	const form = useForm<SettingsFormValues>({
 		resolver: zodResolver(settingsFromSchema),
 		defaultValues: {
@@ -60,7 +75,7 @@ export function SettingsForm() {
 			const response = await apiFetch('/kb/listDocuments');
 			if (response.ok) {
 				const data = await response.json();
-				setAvailableDocuments(data.availableDocuments);
+				setAvailableDocuments(data.documents);
 			}
 		} catch (error) {
 			console.error('Failed to fetch documents:', error);
@@ -99,9 +114,13 @@ export function SettingsForm() {
 	const onSubmit = async (data: SettingsFormValues) => {
 		try {
 			setIsProcessing(true);
+
+			// Ensure we have a valid array of documents
+			const knowledgeBase = data.userSettings?.knowledgeBase || [];
+
 			const response = await apiFetch('/kb/knowledge/update', {
 				method: 'POST',
-				body: JSON.stringify(data.userSettings.knowledgeBase),
+				body: JSON.stringify(knowledgeBase),
 			});
 
 			if (!response.ok) {
@@ -238,61 +257,105 @@ export function SettingsForm() {
 				<CardContent>
 					<SampleFormat />
 					<div className='mt-6 mb-4'>
-						<h3 className='text-sm font-medium mb-2'>Available Documents</h3>
-						<motion.div
-							className='bg-muted p-4 rounded-md'
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ duration: 0.2 }}
+						<Accordion
+							type='multiple'
+							value={openSections}
+							onValueChange={setOpenSections}
+							className='w-full space-y-4'
 						>
-							{availableDocuments.length > 0 ? (
-								<Accordion type='single' collapsible className='w-full'>
-									<AnimatePresence mode='wait'>
-										{availableDocuments.map((doc, index) => (
-											<motion.div
-												key={doc.name}
-												initial={{ opacity: 0, height: 0 }}
-												animate={{ opacity: 1, height: 'auto' }}
-												exit={{ opacity: 0, height: 0 }}
-												transition={{ duration: 0.2 }}
-											>
-												<AccordionItem value={`item-${index}`}>
-													<AccordionTrigger className='text-sm hover:no-underline'>
-														{doc.name}
-													</AccordionTrigger>
-													<AccordionContent>
-														<div className='pl-4 pt-2'>
-															<div className='bg-secondary p-4 rounded-md'>
-																<pre className='text-xs overflow-auto max-h-[200px]'>
-																	{doc.content}
-																</pre>
-															</div>
-															<div className='mt-2 flex justify-end'>
-																<Button
-																	type='button'
-																	variant='destructive'
-																	size='sm'
-																	onClick={(e) => {
-																		e.preventDefault(); // Prevent accordion from toggling
-																		deleteDocument(doc.name);
-																	}}
-																	disabled={isProcessing}
-																>
-																	<Trash className='h-4 w-4 mr-2' />
-																	Delete Document
-																</Button>
-															</div>
-														</div>
-													</AccordionContent>
-												</AccordionItem>
-											</motion.div>
-										))}
-									</AnimatePresence>
-								</Accordion>
-							) : (
-								<p className='text-sm text-muted-foreground'>No documents available</p>
+							{/* Default Documents Category */}
+							<AccordionItem value='default-category'>
+								<AccordionTrigger className='text-lg font-semibold'>Default Documents</AccordionTrigger>
+								<AccordionContent>
+									<div className='bg-muted p-4 rounded-md'>
+										<Accordion type='multiple' className='w-full'>
+											<AnimatePresence mode='wait'>
+												{groupDocumentsByType(availableDocuments).default.map((doc, index) => (
+													<motion.div
+														key={`default-${doc.title}`}
+														initial={{ opacity: 0, height: 0 }}
+														animate={{ opacity: 1, height: 'auto' }}
+														exit={{ opacity: 0, height: 0 }}
+														transition={{ duration: 0.2 }}
+													>
+														<AccordionItem value={`default-${index}`}>
+															<AccordionTrigger className='text-sm hover:no-underline'>
+																{doc.title}
+															</AccordionTrigger>
+															<AccordionContent>
+																<div className='pl-4 pt-2'>
+																	<div className='bg-secondary p-4 rounded-md'>
+																		<pre className='text-xs overflow-auto max-h-[200px] whitespace-pre-wrap break-words'>
+																			{doc.content}
+																		</pre>
+																	</div>
+																</div>
+															</AccordionContent>
+														</AccordionItem>
+													</motion.div>
+												))}
+											</AnimatePresence>
+										</Accordion>
+									</div>
+								</AccordionContent>
+							</AccordionItem>
+
+							{/* User Documents Category */}
+							{groupDocumentsByType(availableDocuments).user.length > 0 && (
+								<AccordionItem value='user-category'>
+									<AccordionTrigger className='text-lg font-semibold'>
+										Your Documents
+									</AccordionTrigger>
+									<AccordionContent>
+										<div className='bg-muted p-4 rounded-md'>
+											<Accordion type='multiple' className='w-full'>
+												<AnimatePresence mode='wait'>
+													{groupDocumentsByType(availableDocuments).user.map((doc, index) => (
+														<motion.div
+															key={`user-${doc.title}`}
+															initial={{ opacity: 0, height: 0 }}
+															animate={{ opacity: 1, height: 'auto' }}
+															exit={{ opacity: 0, height: 0 }}
+															transition={{ duration: 0.2 }}
+														>
+															<AccordionItem value={`user-${index}`}>
+																<AccordionTrigger className='text-sm hover:no-underline'>
+																	{doc.title}
+																</AccordionTrigger>
+																<AccordionContent>
+																	<div className='pl-4 pt-2'>
+																		<div className='bg-secondary p-4 rounded-md'>
+																			<pre className='text-xs overflow-auto max-h-[200px] whitespace-pre-wrap break-words'>
+																				{doc.content}
+																			</pre>
+																		</div>
+																		<div className='mt-2 flex justify-end'>
+																			<Button
+																				type='button'
+																				variant='destructive'
+																				size='sm'
+																				onClick={(e) => {
+																					e.preventDefault();
+																					deleteDocument(doc.title);
+																				}}
+																				disabled={isProcessing}
+																			>
+																				<Trash className='h-4 w-4 mr-2' />
+																				Delete Document
+																			</Button>
+																		</div>
+																	</div>
+																</AccordionContent>
+															</AccordionItem>
+														</motion.div>
+													))}
+												</AnimatePresence>
+											</Accordion>
+										</div>
+									</AccordionContent>
+								</AccordionItem>
 							)}
-						</motion.div>
+						</Accordion>
 					</div>
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>

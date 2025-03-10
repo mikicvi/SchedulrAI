@@ -27,8 +27,8 @@ dist-ssr
 # Backend
 .chroma_volume
 .chroma_volume/*
-.ollama_volume
-.ollama_volume/*
+.documents_volume
+.documents_volume/*
 .sqlite_volume
 .sqlite_volume/*
 *.sqlite3

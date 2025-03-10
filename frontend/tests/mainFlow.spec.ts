@@ -5,8 +5,33 @@ test('Main Application Flow: Register, Login, Estimate, Create event, Delete eve
 }) => {
 	await page.goto('http://localhost:5173');
 
-	// Basic assertions
 	await expect(page).toHaveTitle(/SchedulrAI/);
+
+	//user preferences menu
+	// theme
+	await page.getByRole('button', { name: 'Preferences Menu' }).click();
+	await page.getByRole('menuitem', { name: 'Theme' }).hover();
+	await page.getByRole('menuitem', { name: 'Dark' }).click();
+	await page.getByRole('button', { name: 'Preferences Menu' }).click();
+	await page.getByRole('menuitem', { name: 'Theme' }).hover();
+	await page.getByRole('menuitem', { name: 'Light' }).click();
+	await page.getByRole('button', { name: 'Preferences Menu' }).click();
+	await page.getByRole('menuitem', { name: 'Theme' }).hover();
+	await page.getByRole('menuitem', { name: 'System' }).click();
+	// Font size
+	await page.getByRole('button', { name: 'Preferences Menu' }).click();
+	await page.getByRole('menuitem', { name: 'Font Size' }).hover();
+	await page.getByRole('menuitem', { name: 'Large', exact: true }).locator('div').first().click();
+	await page.getByRole('button', { name: 'Preferences Menu' }).click();
+	await page.getByRole('menuitem', { name: 'Font Size' }).hover();
+	await page.getByText('X-Large', { exact: true }).click();
+	await page.getByRole('button', { name: 'Preferences Menu' }).click();
+	await page.getByRole('menuitem', { name: 'Font Size' }).hover();
+	await page.getByText('XX-Large').click();
+	await page.getByRole('button', { name: 'Preferences Menu' }).click();
+	await page.getByRole('menuitem', { name: 'Font Size' }).hover();
+	await page.getByText('Default').click();
+	// ---
 
 	await page.goto('http://localhost:5173/login');
 	// register
@@ -64,8 +89,15 @@ test('Main Application Flow: Register, Login, Estimate, Create event, Delete eve
 	// waiting for the response to come back
 	// create event section
 	await page.getByRole('alertdialog', { name: 'Confirm Scheduling Details' }).click();
+	await expect(page.getByRole('textbox', { name: 'Title' })).toHaveValue(/(?:\[\w+\] )?Full set of acrylic nails/); // name might not be present
+	await expect(page.getByRole('textbox', { name: 'Duration (H.MM)' })).toHaveValue(/.+/);
+	await expect(page.getByRole('textbox', { name: 'Customer Email' })).toHaveValue(/\S+@\S+\.\S+/);
+
 	await page.getByRole('button', { name: 'Create Event' }).click();
+
+	await page.getByRole('dialog', { name: 'Create New Event' }).click();
 	await page.getByRole('combobox').click();
+	await page.getByRole('option', { name: 'Urgent & Important', exact: true }).click();
 
 	await page.getByRole('button', { name: 'Save Event' }).click();
 
@@ -86,7 +118,7 @@ test('Main Application Flow: Register, Login, Estimate, Create event, Delete eve
 	//notifications section ---
 	await page.getByRole('button', { name: '1', exact: true }).click();
 	await page.getByRole('menuitem', { name: 'View all notifications' }).click();
-	await page.getByRole('button', { name: 'Event deleted The event has' }).click();
+	await page.getByRole('button', { name: 'Success Event created' }).click();
 	await page.getByRole('button', { name: 'Clear All' }).click();
 	//---
 
@@ -103,15 +135,19 @@ test('Main Application Flow: Register, Login, Estimate, Create event, Delete eve
 	// delay for 5 seconds to allow the chatbot to respond
 	await page.waitForTimeout(5000);
 
-	// support - opens external mail client with the support email
-	await page.getByRole('link', { name: 'Support' }).click();
+	// support - opens external mail client with the support email - not working in headless mode
+	//await page.getByRole('link', { name: 'Support' }).click();
 
 	// Profile section
 	await page.getByRole('button', { name: 'TT test test test@test.com' }).click();
 	await page.getByRole('menuitem', { name: 'Profile' }).click();
+
+	// too fast, wait one second
+	await page.waitForTimeout(1000);
 	await page.getByRole('button', { name: 'TT test test test@test.com' }).click();
 
 	// Application settings
+
 	await page.getByRole('menuitem', { name: 'Application Settings' }).click();
 	await page.getByRole('button', { name: 'Example for your custom' }).click();
 	await page.getByRole('button', { name: 'Default Documents' }).click();

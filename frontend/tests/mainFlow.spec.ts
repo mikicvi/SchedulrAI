@@ -33,7 +33,6 @@ test('Main Application Flow: Register, Login, Estimate, Create event, Delete eve
 	await page.getByText('Default').click();
 	// ---
 
-	await page.goto('http://localhost:5173/login');
 	// register
 	await page.getByRole('link', { name: "Don't have an account? Sign up" }).click();
 	await page.getByRole('textbox', { name: 'First Name' }).click();

@@ -1,4 +1,7 @@
 import { defineConfig } from '@playwright/test';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export default defineConfig({
 	testDir: './tests',
@@ -34,9 +37,14 @@ export default defineConfig({
 			use: {
 				browserName: 'chromium',
 				deviceScaleFactor: undefined,
-				launchOptions: { slowMo: 100, headless: false, args: ['--start-maximized'] },
+				launchOptions: {
+					slowMo: 100,
+					headless: false,
+					args: ['--start-maximized', '--disable-blink-features=AutomationControlled', '--no-sandbox'],
+				},
 				viewport: null,
 			},
+			fullyParallel: true,
 		},
 	],
 });

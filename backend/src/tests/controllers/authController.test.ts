@@ -172,7 +172,7 @@ describe('Auth Controller', () => {
 
 			expect(mockResponse.status).toHaveBeenCalledWith(500);
 			expect(mockResponse.json).toHaveBeenCalledWith({
-				message: 'Registration failed',
+				message: 'Failed to create the user',
 			});
 		});
 

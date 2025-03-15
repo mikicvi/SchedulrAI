@@ -21,6 +21,8 @@ import {
 } from '../../services/dbServices';
 import logger from '../../utils/logger';
 import { syncEventToGoogle, deleteGoogleEvent, syncGoogleCalendarEvents } from '../../services/googleCalendarServices';
+import { getChromaCollection } from '../../services/chromaServices';
+import { indexDocuments } from '../../services/documentServices';
 
 import * as dbServices from '../../services/dbServices';
 import Event from '../../models/event.model';
@@ -33,6 +35,16 @@ jest.mock('../../services/googleCalendarServices', () => ({
 	syncEventToGoogle: jest.fn(),
 	deleteGoogleEvent: jest.fn(),
 	syncGoogleCalendarEvents: jest.fn(),
+}));
+
+// Mock chromaServices
+jest.mock('../../services/chromaServices', () => ({
+	getChromaCollection: jest.fn(),
+}));
+
+// Mock documentServices
+jest.mock('../../services/documentServices', () => ({
+	indexDocuments: jest.fn(),
 }));
 
 const mockUserObj = {
@@ -54,12 +66,50 @@ describe('Database Services', () => {
 	describe('User Services', () => {
 		let user;
 
+		beforeEach(() => {
+			// Reset mocks before each test
+			jest.clearAllMocks();
+		});
+
 		beforeAll(async () => {
 			user = await createUser(mockUserObj);
 		});
 		it('should create a user', async () => {
 			expect(user).toBeDefined();
 			expect(user.username).toBe('testuser');
+		});
+
+		it('should create a user successfully with vector collection available', async () => {
+			// Mock successful vector collection retrieval
+			(getChromaCollection as jest.Mock).mockResolvedValueOnce({ name: 'test-collection' });
+
+			const newUser = await createUser({
+				username: 'vectoruser',
+				password: 'password123',
+				email: 'vector@email.com',
+			});
+
+			expect(newUser).toBeDefined();
+			expect(getChromaCollection).toHaveBeenCalled();
+			expect(indexDocuments).not.toHaveBeenCalled();
+			expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Vector collection:'));
+		});
+
+		it('should create a user and handle missing vector collection', async () => {
+			// Mock failed vector collection retrieval
+			(getChromaCollection as jest.Mock).mockRejectedValueOnce(new Error('Collection not found'));
+
+			const newUser = await createUser({
+				username: 'novectoruser',
+				password: 'password123',
+				email: 'novector@email.com',
+			});
+
+			expect(newUser).toBeDefined();
+			expect(getChromaCollection).toHaveBeenCalled();
+			expect(indexDocuments).toHaveBeenCalled();
+			expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Error getting vector collection'));
+			expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('indexing in background'));
 		});
 
 		it('should retrieve a user by username', async () => {

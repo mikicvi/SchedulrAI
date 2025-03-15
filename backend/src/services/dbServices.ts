@@ -4,6 +4,10 @@ import Event, { EventAttributes } from '../models/event.model';
 import { syncEventToGoogle, deleteGoogleEvent, syncGoogleCalendarEvents } from './googleCalendarServices';
 import logger from '../utils/logger';
 import sequelize from 'sequelize';
+import { indexDocuments } from './documentServices';
+import { getChromaCollection } from './chromaServices';
+import { vectorCollectionName } from '../config/constants';
+
 export interface CreateUserParams {
 	username: string;
 	password: string;
@@ -37,6 +41,15 @@ export async function createUser(createUserParams: CreateUserParams): Promise<Us
 		calendarId,
 	} = createUserParams;
 
+	// Try to get vector collection, but don't let it block user creation
+	try {
+		const vectorCollection = await getChromaCollection(vectorCollectionName);
+		logger.debug(`Vector collection: ${JSON.stringify(vectorCollection)}`);
+	} catch (collectionError) {
+		logger.error(`Error getting vector collection: ${collectionError.message}`);
+		indexDocuments();
+		logger.info(`Handling unexistent vector collection - indexing in background`);
+	}
 	return await User.create({
 		username,
 		password,

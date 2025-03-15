@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { EventEmitter } from 'events';
 import logger from '../utils/logger';
 import RAGPipeline from '../services/pipelineServices';
+import { vectorCollectionName } from '../config/constants';
 
 const pipelineEmitter = new EventEmitter();
 
@@ -11,7 +12,7 @@ class PipelineController {
 	private readonly chromaUrl = `${process.env.PROTOCOL}://${process.env.CHROMA_SERVER_HOST}:${process.env.CHROMA_SERVER_PORT}`;
 	private readonly model = process.env.LLM_MODEL;
 	private readonly embeddingLLM = process.env.LLM_EMBED_MODEL;
-	private readonly collectionName = 'SchedulrAI-KB';
+	private readonly collectionName = vectorCollectionName;
 	private readonly vectorStoreProvider = 'basic';
 	private readonly vectorStoreCredentials = process.env.CHROMA_CLIENT_AUTH_CREDENTIALS;
 

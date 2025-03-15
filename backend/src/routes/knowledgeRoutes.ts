@@ -4,6 +4,7 @@ import { ensureAuthenticated } from '../middlewares/auth';
 import { getUserById, updateUser } from '../services/dbServices';
 import { resetChromaCollection } from '../services/chromaServices';
 import logger from '../utils/logger';
+import { vectorCollectionName } from '../config/constants';
 
 const router = Router();
 
@@ -88,7 +89,7 @@ router.post('/kb/knowledge/reset', ensureAuthenticated, async (req, res) => {
 			});
 
 			// Reset Chroma collection
-			await resetChromaCollection('SchedulrAI-KB');
+			await resetChromaCollection(vectorCollectionName);
 
 			res.json({
 				success: true,

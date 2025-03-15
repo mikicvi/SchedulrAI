@@ -3,6 +3,7 @@ import path from 'path';
 import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
 import { MarkdownTextSplitter, CharacterTextSplitter } from 'langchain/text_splitter';
 import logger from '../utils/logger';
+import { vectorCollectionName } from '../config/constants';
 
 const documentsPath = process.env.DOCUMENTS_PATH || path.resolve(process.cwd(), 'documents');
 
@@ -57,12 +58,12 @@ async function storeEmbeddings(documents: { name: string; chunks: string[] }[]):
 
 	try {
 		// delete existing collection
-		if (await chromaClient.getOrCreateCollection({ name: 'SchedulrAI-KB' })) {
-			await chromaClient.deleteCollection({ name: 'SchedulrAI-KB' });
+		if (await chromaClient.getOrCreateCollection({ name: vectorCollectionName })) {
+			await chromaClient.deleteCollection({ name: vectorCollectionName });
 		}
 
 		const collection = await chromaClient.createCollection({
-			name: 'SchedulrAI-KB',
+			name: vectorCollectionName,
 			embeddingFunction: embedder,
 		});
 

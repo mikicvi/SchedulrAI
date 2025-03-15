@@ -6,8 +6,10 @@ services:
         env_file: .env
         environment:
             - IS_PERSISTENT=TRUE
+            - ANONYMIZED_TELEMETRY=False
         networks:
             - schedulrai
+        restart: unless-stopped
         container_name: chroma
         volumes:
             - .chroma_volume:/chroma/chroma
@@ -19,7 +21,7 @@ services:
         container_name: backend
         pull_policy: always
         tty: true
-        restart: always
+        restart: unless-stopped
         networks:
             - schedulrai
         env_file: .env
@@ -37,6 +39,7 @@ services:
         ports:
             - '80:80'
         container_name: frontend
+        restart: unless-stopped
         networks:
             - schedulrai
         depends_on:

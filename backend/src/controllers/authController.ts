@@ -59,7 +59,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 		const userToCreate = { username, password, email, firstName, lastName };
 		const user = await createUser(userToCreate);
 		if (!user) {
-			res.status(500).json({ message: 'Registration failed' });
+			res.status(500).json({ message: 'Failed to create the user' });
 			return;
 		}
 

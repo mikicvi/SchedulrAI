@@ -3,6 +3,7 @@ import PipelineController from '../../controllers/pipelineController';
 import RAGPipeline from '../../services/pipelineServices';
 import logger from '../../utils/logger';
 import { EventEmitter } from 'events';
+import { vectorCollectionName } from '../../config/constants';
 
 // Mock the dependencies
 jest.mock('../../services/pipelineServices');
@@ -409,7 +410,7 @@ describe('PipelineController', () => {
 					topP: 0.9,
 				},
 				{
-					collectionName: 'SchedulrAI-KB',
+					collectionName: vectorCollectionName,
 					url: expectedChromaUrl,
 					clientParams: {
 						auth: {

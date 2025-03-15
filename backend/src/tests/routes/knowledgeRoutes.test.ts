@@ -1,10 +1,10 @@
 import request from 'supertest';
 import express from 'express';
 import knowledgeRoutes from '../../routes/knowledgeRoutes';
-import { indexDocuments } from '../../services/documentServices';
 import { getUserById, updateUser } from '../../services/dbServices';
-import { createDocument, deleteDocument, listDocuments } from '../../services/documentServices';
+import { createDocument, deleteDocument, listDocuments, indexDocuments } from '../../services/documentServices';
 import { resetChromaCollection } from '../../services/chromaServices';
+import { vectorCollectionName } from '../../config/constants';
 
 jest.mock('../../services/documentServices');
 jest.mock('../../services/dbServices');
@@ -106,7 +106,7 @@ describe('Knowledge Base Routes', () => {
 			expect(updateUser).toHaveBeenCalledWith('user1', {
 				userSettings: { userSettingsKB: [] },
 			});
-			expect(resetChromaCollection).toHaveBeenCalledWith('SchedulrAI-KB');
+			expect(resetChromaCollection).toHaveBeenCalledWith(vectorCollectionName);
 		});
 
 		it('should return 404 when user is not found', async () => {

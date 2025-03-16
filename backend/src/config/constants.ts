@@ -5,7 +5,6 @@ Your task is to take in customer preferences and specifications for the job and 
 Time format rules:
 - Express time as decimal hours
 - Use format "H.MM" where H is hours and MM is the decimal part
-- Examples: "1.50" for 1 hour 30 mins, "2.25" for 2 hours 15 mins, "0.75" for 45 mins
 - Do not include words like "hours" or "minutes"
 - Always use numbers only
 Only provide the requested information in exact JSON format specified.`;
@@ -16,7 +15,7 @@ export const vectorCollectionName = 'SchedulrAI-KB';
 
 const JSON_SCHEMA =
 	`{{\n` +
-	`  "suggestedTime": "decimal hours (e.g. 1.30 for 1h30m)",\n` +
+	`  "suggestedTime": "decimal hours",\n` +
 	`  "taskSummary": "Brief description of the task/event",\n` +
 	`  "customerName": "Any mentioned customer name",\n` +
 	`  "customerEmail": "Any mentioned email address",\n` +

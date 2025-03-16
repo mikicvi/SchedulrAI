@@ -4,6 +4,7 @@ import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
 import { MarkdownTextSplitter, CharacterTextSplitter } from 'langchain/text_splitter';
 import logger from '../utils/logger';
 import { vectorCollectionName } from '../config/constants';
+import { getChromaCollection } from './chromaServices';
 
 const documentsPath = process.env.DOCUMENTS_PATH || path.resolve(process.cwd(), 'documents');
 
@@ -43,41 +44,33 @@ async function splitDocuments(
 }
 
 async function storeEmbeddings(documents: { name: string; chunks: string[] }[]): Promise<void> {
-	const chromaClient = new ChromaClient({
-		path: `${process.env.PROTOCOL}://${process.env.CHROMA_SERVER_HOST}:8000`,
-		auth: {
-			provider: 'basic',
-			credentials: process.env.CHROMA_CLIENT_AUTH_CREDENTIALS,
-		},
-	});
-
-	const embedder = new OllamaEmbeddingFunction({
-		url: `${process.env.PROTOCOL}://${process.env.OLLAMA_API_BASE}:${process.env.OLLAMA_PORT}/api/embeddings`,
-		model: process.env.LLM_EMBED_MODEL,
-	});
-
 	try {
-		// delete existing collection
-		if (await chromaClient.getOrCreateCollection({ name: vectorCollectionName })) {
-			await chromaClient.deleteCollection({ name: vectorCollectionName });
+		// Get or create collection using the shared service
+		const collection = await getChromaCollection(vectorCollectionName);
+
+		// Get all existing IDs
+		const existingIDs = (await collection.get()).ids;
+
+		// Delete existing items if there are any
+		if (existingIDs.length > 0) {
+			await collection.delete({
+				ids: existingIDs,
+			});
 		}
 
-		const collection = await chromaClient.createCollection({
-			name: vectorCollectionName,
-			embeddingFunction: embedder,
-		});
-
+		// Add new documents
 		for (const document of documents) {
 			await collection.add({
 				documents: document.chunks,
 				ids: document.chunks.map((_, index) => `${document.name}-${index}`),
 			});
 		}
+
+		logger.info('Embeddings stored successfully');
 	} catch (error) {
 		logger.error('Failed to store embeddings:', error);
 		throw error;
 	}
-	logger.info('Embeddings stored successfully');
 }
 
 export async function indexDocuments(): Promise<void> {

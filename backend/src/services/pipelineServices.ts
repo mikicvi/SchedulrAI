@@ -29,7 +29,7 @@ class RAGPipeline {
 	private readonly embeddings: OllamaEmbeddings;
 	private chatOllama: ChatOllama;
 	private readonly vectorStoreParams: ChromaLibArgs;
-	private readonly chromaVectorStore: Chroma;
+	private chromaVectorStore: Chroma;
 	private readonly timeParser: TimeParser;
 
 	constructor(llmSettings: PipelineService, vectorStoreParams: ChromaLibArgs) {
@@ -52,8 +52,16 @@ class RAGPipeline {
 		});
 
 		this.vectorStoreParams = vectorStoreParams;
-		this.chromaVectorStore = new Chroma(this.embeddings, this.vectorStoreParams);
+		this.initChromaVectorStore();
 		this.timeParser = new TimeParser(MAX_TASK_HOURS, MIN_TASK_MINUTES);
+	}
+
+	private initChromaVectorStore() {
+		this.chromaVectorStore = new Chroma(this.embeddings, this.vectorStoreParams);
+	}
+
+	public refreshVectorStore() {
+		this.initChromaVectorStore();
 	}
 
 	private filterEmptyFields<T extends object>(obj: T, requiredFields: (keyof T)[] = []): Partial<T> {

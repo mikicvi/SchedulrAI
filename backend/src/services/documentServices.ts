@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
 import { MarkdownTextSplitter, CharacterTextSplitter } from 'langchain/text_splitter';
 import logger from '../utils/logger';
 import { vectorCollectionName } from '../config/constants';

@@ -5,12 +5,15 @@ import { getUserById, updateUser } from '../services/dbServices';
 import { resetChromaCollection } from '../services/chromaServices';
 import logger from '../utils/logger';
 import { vectorCollectionName } from '../config/constants';
+import { pipelineInstance } from '../controllers/pipelineController';
 
 const router = Router();
 
 router.post('/kb/indexDocuments', ensureAuthenticated, async (req, res) => {
 	try {
 		await indexDocuments();
+
+		await pipelineInstance.reInitialisePipeline(); // Rebuild with fresh collection
 		res.status(200).json({ status: 'Indexing completed' });
 	} catch (error) {
 		res.status(500).json({ status: 'Indexing failed', error: error.message });

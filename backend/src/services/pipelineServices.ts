@@ -23,7 +23,7 @@ export interface ExtractedContext {
 
 const JSON_SCHEMA =
 	`{{\n` +
-	`  "suggestedTime": "X.XX",\n` +
+	`  "suggestedTime": "decimal hours (e.g. 1.50 for 1h30m)",\n` +
 	`  "taskSummary": "Brief description of the task/event",\n` +
 	`  "customerName": "Any mentioned customer name",\n` +
 	`  "customerEmail": "Any mentioned email address",\n` +
@@ -176,15 +176,22 @@ class RAGPipeline {
 			const prompt = ChatPromptTemplate.fromMessages([
 				[
 					'system',
-					`You are a helpful AI assistant for a scheduling system. 
-					- Provide direct, concise answers
+					`You are a scheduling expert. Keep responses short and direct.
+
+					Rules:
+					- Give short, clear estimates (use decimal hours)
+					- Focus on time and key details only
+					- Max 2-3 sentences per response
+					- Be confident and precise
+					- Only direct answers in sentence format
+					- No pleasantries or explanations
+					- No "I think" or "I believe" phrases
+					- No markdown
+					- Always give total time in decimal hours
 					- Use the context from documents to inform your responses
 					- If something isn't in the documents, say so clearly, and suggest your own solution
-					- Don't mention "requests" - refer to "documents" instead
-					- Don't start responses with phrases like "Based on your request"
-					- Be friendly but professional
-					- Always focus on scheduling and time-related information
-					- Never ask for a follow up - this is a single-turn conversation`,
+					- Never ask questions back to the user, especially follow-up questions
+					`,
 				],
 				['human', 'Context: {context}\nQuestion: {question}'],
 			]);

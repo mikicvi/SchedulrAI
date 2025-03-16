@@ -109,19 +109,59 @@ class RAGPipeline {
 				statusCallback?.('Processing LLM response...');
 				const timeStr = parsedResult.suggestedTime.toString().toLowerCase();
 
-				// Updated regex to handle more formats with flexible spacing
-				const timeMatch = timeStr.match(/^(?:(?:\d*\.\d+)|(?:\d+\.?\d*))\s*(?:hours?)?$/i);
+				// Helper function to convert time to decimal hours using "clock-based" decimal notation
+				const convertToDecimalHours = (timeString: string): number | null => {
+					// Any leading/trailing whitespace
+					timeString = timeString.trim();
+					// Case 1: Decimal hours with optional units (e.g. "1.75" -> "2.15" if leftover > 59)
+					const decimalHoursMatch = timeString.match(/^(\d*\.?\d+)\s*(?:hour|hr)?s?$/i);
+					if (decimalHoursMatch) {
+						// e.g. "1.75" => hours = 1, leftoverDec = 0.75 => leftoverMins = 75 => totalMins = 1*60 + 75 => 135 => "2.15"
+						const rawFloat = parseFloat(decimalHoursMatch[1]); // e.g. 1.75
+						const wholeHours = Math.floor(rawFloat); // e.g. 1
+						const leftoverDec = rawFloat - wholeHours; // e.g. 0.75
+						const leftoverMins = Math.round(leftoverDec * 100); // e.g. 75
 
-				if (timeMatch) {
-					// Remove 'hour(s)' from the extracted time, returning only the number
-					const extractedTime = timeMatch[0].replace(/\s*hours?/i, '');
-					const time = parseFloat(extractedTime);
+						const totalMinutes = wholeHours * 60 + leftoverMins;
+						return toSchedulingDecimal(totalMinutes);
+					}
+
+					// A small formatter function: total minutes -> "H.MM" with leftover minutes
+					// e.g. 90 => "1.30", 75 => "1.15", 135 => "2.15"
+					function toSchedulingDecimal(totalMins: number): number {
+						const hours = Math.floor(totalMins / 60);
+						const leftover = totalMins % 60;
+						const leftoverStr = leftover < 10 ? `0${leftover}` : `${leftover}`;
+						return parseFloat(`${hours}.${leftoverStr}`);
+					}
+
+					// Case 2: Hours and minutes format (e.g., "2 hours 50 minutes")
+					const hourMinuteMatch = timeString.match(
+						/(?:(\d+)\s*(?:hour|hr)s?)?\s*(?:(?:,|and)?\s*)?(?:(\d+)\s*(?:minute|min)s?)?/i
+					);
+					if (hourMinuteMatch && (hourMinuteMatch[1] || hourMinuteMatch[2])) {
+						const hours = parseInt(hourMinuteMatch[1]) || 0;
+						const minutes = parseInt(hourMinuteMatch[2]) || 0;
+						const totalMins = hours * 60 + minutes;
+						return toSchedulingDecimal(totalMins);
+					}
+
+					// Fallback
+					return null;
+				};
+
+				const time = convertToDecimalHours(timeStr);
+
+				if (time !== null) {
 					parsedResult.suggestedTime = time.toFixed(2);
 					statusCallback?.('Success!');
 					return {
 						...parsedResult,
 						originalPrompt: userInput,
 					};
+				} else {
+					logger.warn(`Unable to parse time format: ${timeStr}`);
+					continue;
 				}
 			} catch (error) {
 				logger.error(`Attempt ${attempt + 1} failed:`, error);

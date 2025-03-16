@@ -1,15 +1,15 @@
 import { getOllamaStatus } from './ollamaServices';
 import { getChromaStatus } from './chromaServices';
 import logger from '../utils/logger';
-import { systemPromptMessage } from '../config/constants';
+import { extractionPrompt, streamingPrompt } from '../config/constants';
 
 import { ChatOllama, OllamaEmbeddings } from '@langchain/ollama';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { RunnablePassthrough, RunnableSequence } from '@langchain/core/runnables';
 import { formatDocumentsAsString } from 'langchain/util/document';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { Chroma, ChromaLibArgs } from '@langchain/community/vectorstores/chroma';
 import { PipelineService } from '../types/pipeline';
+import { TimeParser } from '../utils/timeParser';
 
 export interface ExtractedContext {
 	suggestedTime: string;
@@ -21,15 +21,8 @@ export interface ExtractedContext {
 	originalPrompt?: string;
 }
 
-const JSON_SCHEMA =
-	`{{\n` +
-	`  "suggestedTime": "decimal hours (e.g. 1.50 for 1h30m)",\n` +
-	`  "taskSummary": "Brief description of the task/event",\n` +
-	`  "customerName": "Any mentioned customer name",\n` +
-	`  "customerEmail": "Any mentioned email address",\n` +
-	`  "preferredTimeOfDay": "Any mentioned time of day",\n` +
-	`  "preferredDay": "Day"\n` +
-	`}}`;
+const MAX_TASK_HOURS = 10;
+const MIN_TASK_MINUTES = 15;
 
 class RAGPipeline {
 	private readonly llmSettings: PipelineService;
@@ -37,6 +30,7 @@ class RAGPipeline {
 	private chatOllama: ChatOllama;
 	private readonly vectorStoreParams: ChromaLibArgs;
 	private readonly chromaVectorStore: Chroma;
+	private readonly timeParser: TimeParser;
 
 	constructor(llmSettings: PipelineService, vectorStoreParams: ChromaLibArgs) {
 		if (!llmSettings.baseUrl || !llmSettings.model) {
@@ -59,6 +53,16 @@ class RAGPipeline {
 
 		this.vectorStoreParams = vectorStoreParams;
 		this.chromaVectorStore = new Chroma(this.embeddings, this.vectorStoreParams);
+		this.timeParser = new TimeParser(MAX_TASK_HOURS, MIN_TASK_MINUTES);
+	}
+
+	private filterEmptyFields<T extends object>(obj: T, requiredFields: (keyof T)[] = []): Partial<T> {
+		const filtered = Object.fromEntries(
+			Object.entries(obj).filter(
+				([key, value]) => (value !== '' && value !== null) || requiredFields.includes(key as keyof T)
+			)
+		) as Partial<T>;
+		return filtered;
 	}
 
 	private async _requestLLM(
@@ -69,15 +73,7 @@ class RAGPipeline {
 		statusCallback?.('Setting up the retrieval pipeline...');
 		const retriever = this.chromaVectorStore.asRetriever();
 
-		const prompt = ChatPromptTemplate.fromMessages([
-			['system', systemPromptMessage],
-			[
-				'human',
-				`Context: {context}\nQuestion: {question}\n\n` +
-					`Please analyze the question carefully and extract scheduling information. Provide a response as valid JSON:\n` +
-					JSON_SCHEMA,
-			],
-		]);
+		const prompt = extractionPrompt;
 
 		statusCallback?.('Running the retrieval pipeline...');
 		const qaChain = RunnableSequence.from([
@@ -109,60 +105,25 @@ class RAGPipeline {
 				statusCallback?.('Processing LLM response...');
 				const timeStr = parsedResult.suggestedTime.toString().toLowerCase();
 
-				// Helper function to convert time to decimal hours using "clock-based" decimal notation
-				const convertToDecimalHours = (timeString: string): number | null => {
-					// Any leading/trailing whitespace
-					timeString = timeString.trim();
-					// Case 1: Decimal hours with optional units (e.g. "1.75" -> "2.15" if leftover > 59)
-					const decimalHoursMatch = timeString.match(/^(\d*\.?\d+)\s*(?:hour|hr)?s?$/i);
-					if (decimalHoursMatch) {
-						// e.g. "1.75" => hours = 1, leftoverDec = 0.75 => leftoverMins = 75 => totalMins = 1*60 + 75 => 135 => "2.15"
-						const rawFloat = parseFloat(decimalHoursMatch[1]); // e.g. 1.75
-						const wholeHours = Math.floor(rawFloat); // e.g. 1
-						const leftoverDec = rawFloat - wholeHours; // e.g. 0.75
-						const leftoverMins = Math.round(leftoverDec * 100); // e.g. 75
+				const time = this.timeParser.parse(timeStr);
 
-						const totalMinutes = wholeHours * 60 + leftoverMins;
-						return toSchedulingDecimal(totalMinutes);
-					}
-
-					// A small formatter function: total minutes -> "H.MM" with leftover minutes
-					// e.g. 90 => "1.30", 75 => "1.15", 135 => "2.15"
-					function toSchedulingDecimal(totalMins: number): number {
-						const hours = Math.floor(totalMins / 60);
-						const leftover = totalMins % 60;
-						const leftoverStr = leftover < 10 ? `0${leftover}` : `${leftover}`;
-						return parseFloat(`${hours}.${leftoverStr}`);
-					}
-
-					// Case 2: Hours and minutes format (e.g., "2 hours 50 minutes")
-					const hourMinuteMatch = timeString.match(
-						/(?:(\d+)\s*(?:hour|hr)s?)?\s*(?:(?:,|and)?\s*)?(?:(\d+)\s*(?:minute|min)s?)?/i
+				if (time === null) {
+					logger.warn(
+						`Invalid time: must be between ${MIN_TASK_MINUTES} minutes and ${MAX_TASK_HOURS} hours. Got: ${timeStr}`
 					);
-					if (hourMinuteMatch && (hourMinuteMatch[1] || hourMinuteMatch[2])) {
-						const hours = parseInt(hourMinuteMatch[1]) || 0;
-						const minutes = parseInt(hourMinuteMatch[2]) || 0;
-						const totalMins = hours * 60 + minutes;
-						return toSchedulingDecimal(totalMins);
-					}
-
-					// Fallback
-					return null;
-				};
-
-				const time = convertToDecimalHours(timeStr);
-
-				if (time !== null) {
-					parsedResult.suggestedTime = time.toFixed(2);
-					statusCallback?.('Success!');
-					return {
-						...parsedResult,
-						originalPrompt: userInput,
-					};
-				} else {
-					logger.warn(`Unable to parse time format: ${timeStr}`);
 					continue;
 				}
+
+				parsedResult.suggestedTime = time.toFixed(2);
+				statusCallback?.('Success!');
+
+				return this.filterEmptyFields(
+					{
+						...parsedResult,
+						originalPrompt: userInput,
+					},
+					['suggestedTime']
+				) as ExtractedContext;
 			} catch (error) {
 				logger.error(`Attempt ${attempt + 1} failed:`, error);
 				statusCallback?.(
@@ -213,28 +174,7 @@ class RAGPipeline {
 			statusCallback?.('Preparing document retrieval...');
 			const retriever = this.chromaVectorStore.asRetriever();
 
-			const prompt = ChatPromptTemplate.fromMessages([
-				[
-					'system',
-					`You are a scheduling expert. Keep responses short and direct.
-
-					Rules:
-					- Give short, clear estimates (use decimal hours)
-					- Focus on time and key details only
-					- Max 2-3 sentences per response
-					- Be confident and precise
-					- Only direct answers in sentence format
-					- No pleasantries or explanations
-					- No "I think" or "I believe" phrases
-					- No markdown
-					- Always give total time in decimal hours
-					- Use the context from documents to inform your responses
-					- If something isn't in the documents, say so clearly, and suggest your own solution
-					- Never ask questions back to the user, especially follow-up questions
-					`,
-				],
-				['human', 'Context: {context}\nQuestion: {question}'],
-			]);
+			const prompt = streamingPrompt;
 
 			statusCallback?.('Setting up response chain...');
 			const chain = RunnableSequence.from([

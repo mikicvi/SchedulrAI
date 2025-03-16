@@ -137,14 +137,13 @@ describe('RAGPipeline', () => {
 				// Standard hours format
 				{ input: '{"suggestedTime": "2 hours", "taskSummary": "Test"}', expected: '2.00' },
 				{ input: '{"suggestedTime": "1 hr", "taskSummary": "Test"}', expected: '1.00' },
-				{ input: '{"suggestedTime": "0 hours", "taskSummary": "Test"}', expected: '0.00' },
 
 				// Decimal hours
 				{ input: '{"suggestedTime": "1.5", "taskSummary": "Test"}', expected: '1.50' },
 				{ input: '{"suggestedTime": "0.75 hours", "taskSummary": "Test"}', expected: '1.15' },
 				{ input: '{"suggestedTime": ".5", "taskSummary": "Test"}', expected: '0.50' },
 				{ input: '{"suggestedTime": "2.50 hours", "taskSummary": "Test"}', expected: '2.50' },
-				{ input: '{"suggestedTime": "0.08333", "taskSummary": "Test"}', expected: '0.08' },
+				{ input: '{"suggestedTime": "0.1533", "taskSummary": "Test"}', expected: '0.15' },
 
 				// Hours and minutes combinations
 				{ input: '{"suggestedTime": "2 hours 50 minutes", "taskSummary": "Test"}', expected: '2.50' },
@@ -160,7 +159,6 @@ describe('RAGPipeline', () => {
 				{ input: '{"suggestedTime": "45 minutes", "taskSummary": "Test"}', expected: '0.45' },
 				{ input: '{"suggestedTime": "30 mins", "taskSummary": "Test"}', expected: '0.30' },
 				{ input: '{"suggestedTime": "15 mins", "taskSummary": "Test"}', expected: '0.15' },
-				{ input: '{"suggestedTime": "5 minutes", "taskSummary": "Test"}', expected: '0.05' },
 
 				// // Edge cases with spacing and formatting
 				{ input: '{"suggestedTime": "2.50  hours", "taskSummary": "Test"}', expected: '2.50' },

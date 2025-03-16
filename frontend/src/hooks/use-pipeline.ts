@@ -12,6 +12,10 @@ const usePipeline = () => {
 		setUserInput(event.target.value);
 	};
 
+	const clearResponse = () => {
+		setResponse(null);
+	};
+
 	const handleSubmit = async () => {
 		setLoading(true);
 		try {
@@ -41,6 +45,7 @@ const usePipeline = () => {
 		handleInputChange,
 		handleSubmit,
 		resetPipeline,
+		clearResponse,
 	};
 };
 

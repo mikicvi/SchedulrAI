@@ -19,3 +19,4 @@ process.env.GOOGLE_CLIENT_SECRET = 'test-client';
 process.env.GOOGLE_CALLBACK_URL = 'http://localhost:3000/auth/google/callback';
 process.env.ALLOWED_ORIGINS =
 	'http://localhost,http://localhost:80,http://localhost:3000,http://frontend,http://localhost:5173';
+process.env.LLM_MODEL = 'LLM_MODEL=llama3.2:3b-instruct-q5_K_M';

@@ -6,6 +6,11 @@ import { createDocument, deleteDocument, listDocuments, indexDocuments } from '.
 import { resetChromaCollection } from '../../services/chromaServices';
 import { vectorCollectionName } from '../../config/constants';
 
+jest.mock('../../controllers/pipelineController', () => ({
+	pipelineInstance: {
+		reInitialisePipeline: jest.fn().mockResolvedValue(undefined),
+	},
+}));
 jest.mock('../../services/documentServices');
 jest.mock('../../services/dbServices');
 jest.mock('../../services/chromaServices');

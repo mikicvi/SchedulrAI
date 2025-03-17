@@ -1,15 +1,15 @@
 import { getOllamaStatus } from './ollamaServices';
 import { getChromaStatus } from './chromaServices';
 import logger from '../utils/logger';
-import { systemPromptMessage } from '../config/constants';
+import { extractionPrompt, streamingPrompt } from '../config/constants';
 
 import { ChatOllama, OllamaEmbeddings } from '@langchain/ollama';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { RunnablePassthrough, RunnableSequence } from '@langchain/core/runnables';
 import { formatDocumentsAsString } from 'langchain/util/document';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { Chroma, ChromaLibArgs } from '@langchain/community/vectorstores/chroma';
 import { PipelineService } from '../types/pipeline';
+import { TimeParser } from '../utils/timeParser';
 
 export interface ExtractedContext {
 	suggestedTime: string;
@@ -21,22 +21,16 @@ export interface ExtractedContext {
 	originalPrompt?: string;
 }
 
-const JSON_SCHEMA =
-	`{{\n` +
-	`  "suggestedTime": "X.XX",\n` +
-	`  "taskSummary": "Brief description of the task/event",\n` +
-	`  "customerName": "Any mentioned customer name",\n` +
-	`  "customerEmail": "Any mentioned email address",\n` +
-	`  "preferredTimeOfDay": "Any mentioned time of day",\n` +
-	`  "preferredDay": "Day"\n` +
-	`}}`;
+const MAX_TASK_HOURS = 10;
+const MIN_TASK_MINUTES = 15;
 
 class RAGPipeline {
 	private readonly llmSettings: PipelineService;
 	private readonly embeddings: OllamaEmbeddings;
 	private chatOllama: ChatOllama;
 	private readonly vectorStoreParams: ChromaLibArgs;
-	private readonly chromaVectorStore: Chroma;
+	private chromaVectorStore: Chroma;
+	private readonly timeParser: TimeParser;
 
 	constructor(llmSettings: PipelineService, vectorStoreParams: ChromaLibArgs) {
 		if (!llmSettings.baseUrl || !llmSettings.model) {
@@ -58,7 +52,25 @@ class RAGPipeline {
 		});
 
 		this.vectorStoreParams = vectorStoreParams;
+		this.initChromaVectorStore();
+		this.timeParser = new TimeParser(MAX_TASK_HOURS, MIN_TASK_MINUTES);
+	}
+
+	private initChromaVectorStore() {
 		this.chromaVectorStore = new Chroma(this.embeddings, this.vectorStoreParams);
+	}
+
+	public refreshVectorStore() {
+		this.initChromaVectorStore();
+	}
+
+	private filterEmptyFields<T extends object>(obj: T, requiredFields: (keyof T)[] = []): Partial<T> {
+		const filtered = Object.fromEntries(
+			Object.entries(obj).filter(
+				([key, value]) => (value !== '' && value !== null) || requiredFields.includes(key as keyof T)
+			)
+		) as Partial<T>;
+		return filtered;
 	}
 
 	private async _requestLLM(
@@ -69,15 +81,7 @@ class RAGPipeline {
 		statusCallback?.('Setting up the retrieval pipeline...');
 		const retriever = this.chromaVectorStore.asRetriever();
 
-		const prompt = ChatPromptTemplate.fromMessages([
-			['system', systemPromptMessage],
-			[
-				'human',
-				`Context: {context}\nQuestion: {question}\n\n` +
-					`Please analyze the question carefully and extract scheduling information. Provide a response as valid JSON:\n` +
-					JSON_SCHEMA,
-			],
-		]);
+		const prompt = extractionPrompt;
 
 		statusCallback?.('Running the retrieval pipeline...');
 		const qaChain = RunnableSequence.from([
@@ -109,20 +113,25 @@ class RAGPipeline {
 				statusCallback?.('Processing LLM response...');
 				const timeStr = parsedResult.suggestedTime.toString().toLowerCase();
 
-				// Updated regex to handle more formats with flexible spacing
-				const timeMatch = timeStr.match(/^(?:(?:\d*\.\d+)|(?:\d+\.?\d*))\s*(?:hours?)?$/i);
+				const time = this.timeParser.parse(timeStr);
 
-				if (timeMatch) {
-					// Remove 'hour(s)' from the extracted time, returning only the number
-					const extractedTime = timeMatch[0].replace(/\s*hours?/i, '');
-					const time = parseFloat(extractedTime);
-					parsedResult.suggestedTime = time.toFixed(2);
-					statusCallback?.('Success!');
-					return {
+				if (time === null) {
+					logger.warn(
+						`Invalid time: must be between ${MIN_TASK_MINUTES} minutes and ${MAX_TASK_HOURS} hours. Got: ${timeStr}`
+					);
+					continue;
+				}
+
+				parsedResult.suggestedTime = time.toFixed(2);
+				statusCallback?.('Success!');
+
+				return this.filterEmptyFields(
+					{
 						...parsedResult,
 						originalPrompt: userInput,
-					};
-				}
+					},
+					['suggestedTime']
+				) as ExtractedContext;
 			} catch (error) {
 				logger.error(`Attempt ${attempt + 1} failed:`, error);
 				statusCallback?.(
@@ -173,21 +182,7 @@ class RAGPipeline {
 			statusCallback?.('Preparing document retrieval...');
 			const retriever = this.chromaVectorStore.asRetriever();
 
-			const prompt = ChatPromptTemplate.fromMessages([
-				[
-					'system',
-					`You are a helpful AI assistant for a scheduling system. 
-					- Provide direct, concise answers
-					- Use the context from documents to inform your responses
-					- If something isn't in the documents, say so clearly, and suggest your own solution
-					- Don't mention "requests" - refer to "documents" instead
-					- Don't start responses with phrases like "Based on your request"
-					- Be friendly but professional
-					- Always focus on scheduling and time-related information
-					- Never ask for a follow up - this is a single-turn conversation`,
-				],
-				['human', 'Context: {context}\nQuestion: {question}'],
-			]);
+			const prompt = streamingPrompt;
 
 			statusCallback?.('Setting up response chain...');
 			const chain = RunnableSequence.from([

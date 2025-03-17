@@ -4,24 +4,31 @@ import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
 jest.mock('chromadb', () => ({
 	ChromaClient: jest.fn().mockImplementation(() => ({
 		heartbeat: jest.fn(),
-		getCollection: jest.fn(),
+		getOrCreateCollection: jest.fn(),
+		deleteCollection: jest.fn(),
 	})),
 	OllamaEmbeddingFunction: jest.fn(),
 }));
 
 describe('chromaServices', () => {
 	const mockHeartbeat = jest.fn();
-	const mockGetCollection = jest.fn();
+	const mockGetOrCreateCollection = jest.fn();
+	const mockDeleteCollection = jest.fn();
 
 	beforeEach(() => {
+		jest.clearAllMocks();
+		process.env.PROTOCOL = 'http';
+		process.env.CHROMA_SERVER_HOST = 'localhost';
+		process.env.CHROMA_CLIENT_AUTH_CREDENTIALS = 'test-credentials';
+		process.env.OLLAMA_API_BASE = 'localhost';
+		process.env.OLLAMA_PORT = '11434';
+		process.env.LLM_EMBED_MODEL = 'test-model';
+
 		(ChromaClient as jest.Mock).mockReturnValue({
 			heartbeat: mockHeartbeat,
-			getCollection: mockGetCollection,
+			getOrCreateCollection: mockGetOrCreateCollection,
+			deleteCollection: mockDeleteCollection,
 		});
-	});
-
-	afterEach(() => {
-		jest.clearAllMocks();
 	});
 
 	describe('getChromaStatus', () => {
@@ -32,67 +39,74 @@ describe('chromaServices', () => {
 			const result = await getChromaStatus();
 
 			expect(ChromaClient).toHaveBeenCalledWith({
-				path: `${process.env.PROTOCOL}://${process.env.CHROMA_SERVER_HOST}:8000`,
+				path: 'http://localhost:8000',
 				auth: {
 					provider: 'basic',
-					credentials: process.env.CHROMA_SERVER_AUTHN_CREDENTIALS,
+					credentials: 'test-credentials',
 				},
 			});
 			expect(mockHeartbeat).toHaveBeenCalled();
 			expect(result).toEqual(mockResponse);
 		});
+
+		it('should handle heartbeat errors', async () => {
+			mockHeartbeat.mockRejectedValue(new Error('Connection failed'));
+			await expect(getChromaStatus()).rejects.toThrow('Connection failed');
+		});
 	});
 
 	describe('getChromaCollection', () => {
-		it('should call ChromaClient.getCollection with the correct parameters and return the result', async () => {
+		it('should call ChromaClient.getOrCreateCollection with correct parameters', async () => {
 			const collectionName = 'testCollection';
 			const mockResponse = { name: collectionName };
-			mockGetCollection.mockResolvedValue(mockResponse);
+			mockGetOrCreateCollection.mockResolvedValue(mockResponse);
 
 			const result = await getChromaCollection(collectionName);
 
 			expect(ChromaClient).toHaveBeenCalledWith({
-				path: `${process.env.PROTOCOL}://${process.env.CHROMA_SERVER_HOST}:8000`,
+				path: 'http://localhost:8000',
 				auth: {
 					provider: 'basic',
-					credentials: process.env.CHROMA_CLIENT_AUTH_CREDENTIALS,
+					credentials: 'test-credentials',
 				},
 			});
 			expect(OllamaEmbeddingFunction).toHaveBeenCalledWith({
-				url: `${process.env.PROTOCOL}://${process.env.OLLAMA_API_BASE}:${process.env.OLLAMA_PORT}/api/embeddings`,
-				model: process.env.LLM_EMBED_MODEL,
+				url: 'http://localhost:11434/api/embeddings',
+				model: 'test-model',
 			});
-			expect(mockGetCollection).toHaveBeenCalledWith({
+			expect(mockGetOrCreateCollection).toHaveBeenCalledWith({
 				name: collectionName,
 				embeddingFunction: expect.any(OllamaEmbeddingFunction),
 			});
 			expect(result).toEqual(mockResponse);
 		});
+
+		it('should handle collection creation errors', async () => {
+			mockGetOrCreateCollection.mockRejectedValue(new Error('Collection creation failed'));
+			await expect(getChromaCollection('test')).rejects.toThrow('Collection creation failed');
+		});
 	});
+
 	describe('resetChromaCollection', () => {
-		it('should call ChromaClient.deleteCollection with the correct parameters', async () => {
-			const mockDeleteCollection = jest.fn();
-			(ChromaClient as jest.Mock).mockReturnValue({
-				deleteCollection: mockDeleteCollection,
-			});
-
+		it('should call ChromaClient.deleteCollection with correct parameters', async () => {
 			const collectionName = 'testCollection';
-			const mockResponse = { success: true };
-			mockDeleteCollection.mockResolvedValue(mockResponse);
+			mockDeleteCollection.mockResolvedValue({ success: true });
 
-			const result = await resetChromaCollection(collectionName);
+			await resetChromaCollection(collectionName);
 
 			expect(ChromaClient).toHaveBeenCalledWith({
-				path: `${process.env.PROTOCOL}://${process.env.CHROMA_SERVER_HOST}:8000`,
+				path: 'http://localhost:8000',
 				auth: {
 					provider: 'basic',
-					credentials: process.env.CHROMA_CLIENT_AUTH_CREDENTIALS,
+					credentials: 'test-credentials',
 				},
 			});
-			expect(mockDeleteCollection).toHaveBeenCalledWith({
-				name: collectionName,
-			});
-			expect(result).toEqual(mockResponse);
+			expect(mockDeleteCollection).toHaveBeenCalledWith({ name: collectionName });
+		});
+
+		it('should handle deletion errors', async () => {
+			mockDeleteCollection.mockRejectedValue(new Error('Deletion failed'));
+			await expect(resetChromaCollection('test')).rejects.toThrow('Deletion failed');
 		});
 	});
 });

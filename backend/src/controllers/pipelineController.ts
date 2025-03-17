@@ -7,7 +7,7 @@ import { vectorCollectionName } from '../config/constants';
 const pipelineEmitter = new EventEmitter();
 
 class PipelineController {
-	private readonly pipelineService: RAGPipeline;
+	private pipelineService: RAGPipeline;
 	private readonly baseUrl = `${process.env.PROTOCOL}://${process.env.OLLAMA_API_BASE}:${process.env.OLLAMA_PORT}`;
 	private readonly chromaUrl = `${process.env.PROTOCOL}://${process.env.CHROMA_SERVER_HOST}:${process.env.CHROMA_SERVER_PORT}`;
 	private readonly model = process.env.LLM_MODEL;
@@ -17,6 +17,10 @@ class PipelineController {
 	private readonly vectorStoreCredentials = process.env.CHROMA_CLIENT_AUTH_CREDENTIALS;
 
 	constructor() {
+		this.buildPipeline();
+	}
+
+	private buildPipeline() {
 		this.pipelineService = new RAGPipeline(
 			{
 				baseUrl: this.baseUrl,
@@ -36,6 +40,11 @@ class PipelineController {
 				},
 			}
 		);
+	}
+
+	public async reInitialisePipeline() {
+		this.buildPipeline();
+		this.pipelineService.refreshVectorStore();
 	}
 
 	/**
@@ -178,5 +187,7 @@ class PipelineController {
 		}
 	}
 }
+
+export const pipelineInstance = new PipelineController();
 
 export default PipelineController;

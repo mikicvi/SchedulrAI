@@ -49,19 +49,24 @@ describe('Document Indexing Workflow', () => {
 
 	it('should complete full document indexing process', async () => {
 		// Mock Chroma client interactions
+		const mockGetMethod = jest.fn().mockResolvedValue({ ids: [] });
 		const mockAddMethod = jest.fn().mockResolvedValue(void 0);
-		const mockCreateCollection = jest.fn().mockResolvedValue({
+		const mockDeleteMethod = jest.fn().mockResolvedValue(void 0);
+		const mockCollection = {
+			get: mockGetMethod,
 			add: mockAddMethod,
-		});
+			delete: mockDeleteMethod,
+		};
 
 		(ChromaClient as jest.Mock).mockImplementation(() => ({
-			getOrCreateCollection: jest.fn().mockResolvedValue(true),
-			deleteCollection: jest.fn().mockResolvedValue(void 0),
-			createCollection: mockCreateCollection,
+			getOrCreateCollection: jest.fn().mockResolvedValue(mockCollection),
 		}));
 
 		await indexDocuments();
 
+		// Verify collection operations
+		expect(mockGetMethod).toHaveBeenCalled();
+		expect(mockAddMethod).toHaveBeenCalledTimes(mockFiles.length);
 		// Verify document loading
 		//expect(fs.readdirSync).toHaveBeenCalledWith(mockDocumentsPath); //investigate if time allows
 		expect(fs.readFileSync).toHaveBeenCalledTimes(mockFiles.length);
@@ -100,10 +105,15 @@ describe('Document Indexing Workflow', () => {
 	});
 
 	it('should handle embedding storage errors', async () => {
+		const mockGetMethod = jest.fn().mockResolvedValue({ ids: [] });
+		const mockCollection = {
+			get: mockGetMethod,
+			add: jest.fn().mockRejectedValue(new Error('Storage failed')),
+			delete: jest.fn().mockResolvedValue(void 0),
+		};
+
 		(ChromaClient as jest.Mock).mockImplementation(() => ({
-			getOrCreateCollection: jest.fn().mockResolvedValue(true),
-			deleteCollection: jest.fn().mockResolvedValue(void 0),
-			createCollection: jest.fn().mockRejectedValue(new Error('Storage failed')),
+			getOrCreateCollection: jest.fn().mockResolvedValue(mockCollection),
 		}));
 
 		await expect(indexDocuments()).rejects.toThrow('Storage failed');

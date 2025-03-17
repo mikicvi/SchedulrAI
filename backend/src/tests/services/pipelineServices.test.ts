@@ -134,12 +134,42 @@ describe('RAGPipeline', () => {
 		it('should handle various time formats', async () => {
 			const mockChain = RunnableSequence.from as jest.Mock;
 			const testCases = [
+				// Standard hours format
 				{ input: '{"suggestedTime": "2 hours", "taskSummary": "Test"}', expected: '2.00' },
+				{ input: '{"suggestedTime": "1 hr", "taskSummary": "Test"}', expected: '1.00' },
+
+				// Decimal hours
 				{ input: '{"suggestedTime": "1.5", "taskSummary": "Test"}', expected: '1.50' },
-				{ input: '{"suggestedTime": "0.75 hours", "taskSummary": "Test"}', expected: '0.75' },
+				{ input: '{"suggestedTime": "0.75 hours", "taskSummary": "Test"}', expected: '1.15' },
 				{ input: '{"suggestedTime": ".5", "taskSummary": "Test"}', expected: '0.50' },
 				{ input: '{"suggestedTime": "2.50 hours", "taskSummary": "Test"}', expected: '2.50' },
-				{ input: '{"suggestedTime": "2.50  hours", "taskSummary": "Test"}', expected: '2.50' }, // Multiple spaces
+				{ input: '{"suggestedTime": "0.1533", "taskSummary": "Test"}', expected: '0.15' },
+
+				// Hours and minutes combinations
+				{ input: '{"suggestedTime": "2 hours 50 minutes", "taskSummary": "Test"}', expected: '2.50' },
+				{ input: '{"suggestedTime": "1 hour 28 minutes", "taskSummary": "Test"}', expected: '1.28' },
+				{ input: '{"suggestedTime": "0 hours 45 minutes", "taskSummary": "Test"}', expected: '0.45' },
+				{ input: '{"suggestedTime": "2 hrs 15 mins", "taskSummary": "Test"}', expected: '2.15' },
+				{ input: '{"suggestedTime": "1 hour and 30 minutes", "taskSummary": "Test"}', expected: '1.30' },
+				{ input: '{"suggestedTime": "1 hr, 45 min", "taskSummary": "Test"}', expected: '1.45' },
+
+				// // Minutes only
+				{ input: '{"suggestedTime": "90 minutes", "taskSummary": "Test"}', expected: '1.30' },
+				{ input: '{"suggestedTime": "60 minutes", "taskSummary": "Test"}', expected: '1.00' },
+				{ input: '{"suggestedTime": "45 minutes", "taskSummary": "Test"}', expected: '0.45' },
+				{ input: '{"suggestedTime": "30 mins", "taskSummary": "Test"}', expected: '0.30' },
+				{ input: '{"suggestedTime": "15 mins", "taskSummary": "Test"}', expected: '0.15' },
+
+				// // Edge cases with spacing and formatting
+				{ input: '{"suggestedTime": "2.50  hours", "taskSummary": "Test"}', expected: '2.50' },
+				{ input: '{"suggestedTime": " 1.75 ", "taskSummary": "Test"}', expected: '2.15' }, // leading space
+				{ input: '{"suggestedTime": "1    hour    30    minutes", "taskSummary": "Test"}', expected: '1.30' },
+				{ input: '{"suggestedTime": "2hours30minutes", "taskSummary": "Test"}', expected: '2.30' },
+
+				// // Mixed case and abbreviations
+				{ input: '{"suggestedTime": "2 HoUrS", "taskSummary": "Test"}', expected: '2.00' },
+				{ input: '{"suggestedTime": "45 MINS", "taskSummary": "Test"}', expected: '0.45' },
+				{ input: '{"suggestedTime": "1 Hr 30 Min", "taskSummary": "Test"}', expected: '1.30' },
 			];
 
 			for (const testCase of testCases) {

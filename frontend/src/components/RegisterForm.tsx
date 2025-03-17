@@ -86,7 +86,7 @@ const Register = () => {
 	};
 
 	return (
-		<Card className='max-w-lg w-full h-auto mx-auto mt-10 p-6'>
+		<Card className='max-w-lg w-full h-auto mx-auto mt-10 p-6 max-h-[85vh] overflow-y-auto'>
 			<CardTitle className='text-2xl font-bold mb-5 justify-center text-center'>
 				Create Your SchedulrAI Account
 			</CardTitle>

@@ -21,7 +21,8 @@ import { Separator } from '@/components/ui/separator';
 
 const Home = () => {
 	const breadcrumbItems = [{ title: 'Task Time Estimation' }];
-	const { userInput, loading, response, handleInputChange, handleSubmit, resetPipeline } = usePipeline();
+	const { userInput, loading, response, handleInputChange, handleSubmit, resetPipeline, clearResponse } =
+		usePipeline();
 	const { toast } = useNotificationToast();
 	const backendStatus = useBackendStatus();
 	const pipelineStatus = usePipelineStatus();
@@ -48,6 +49,7 @@ const Home = () => {
 	const cleanupPreviousResponse = () => {
 		setEstimatedData(null);
 		setShowConfirmation(false);
+		clearResponse();
 	};
 
 	const onSubmit = (e: React.FormEvent) => {

@@ -157,7 +157,9 @@ describe('RAGPipeline', () => {
 				{ input: '{"suggestedTime": "90 minutes", "taskSummary": "Test"}', expected: '1.30' },
 				{ input: '{"suggestedTime": "60 minutes", "taskSummary": "Test"}', expected: '1.00' },
 				{ input: '{"suggestedTime": "45 minutes", "taskSummary": "Test"}', expected: '0.45' },
+				{ input: '{"suggestedTime": "0.45", "taskSummary": "Test"}', expected: '0.45' },
 				{ input: '{"suggestedTime": "30 mins", "taskSummary": "Test"}', expected: '0.30' },
+				{ input: '{"suggestedTime": "0.30 mins", "taskSummary": "Test"}', expected: '0.30' },
 				{ input: '{"suggestedTime": "15 mins", "taskSummary": "Test"}', expected: '0.15' },
 
 				// // Edge cases with spacing and formatting

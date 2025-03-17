@@ -4,7 +4,7 @@
 
 SchedulrAI is a booking/scheduling management system for small business owners that aims to improve and speed up the organization of operations while reducing costs.
 
-## Quick Start for non-technical users
+## Semi-Automated Quick Start
 
 🚀 Automated Docker & Ollama Installer - SchedulrAI
 

@@ -135,11 +135,16 @@ describe('RAGPipeline', () => {
 			const mockChain = RunnableSequence.from as jest.Mock;
 			const testCases = [
 				// Standard hours format
+				// Standard hours format
 				{ input: '{"suggestedTime": "2 hours", "taskSummary": "Test"}', expected: '2.00' },
 				{ input: '{"suggestedTime": "1 hr", "taskSummary": "Test"}', expected: '1.00' },
 
 				// Decimal hours
+				{ input: '{"suggestedTime": "1 hr", "taskSummary": "Test"}', expected: '1.00' },
+
+				// Decimal hours
 				{ input: '{"suggestedTime": "1.5", "taskSummary": "Test"}', expected: '1.50' },
+				{ input: '{"suggestedTime": "0.75 hours", "taskSummary": "Test"}', expected: '1.15' },
 				{ input: '{"suggestedTime": "0.75 hours", "taskSummary": "Test"}', expected: '1.15' },
 				{ input: '{"suggestedTime": ".5", "taskSummary": "Test"}', expected: '0.50' },
 				{ input: '{"suggestedTime": "2.50 hours", "taskSummary": "Test"}', expected: '2.50' },

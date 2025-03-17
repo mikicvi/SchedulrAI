@@ -11,32 +11,74 @@ export class TimeParser {
 		return minutes >= this.minMinutes && minutes <= this.maxHours * 60;
 	}
 
+	/**
+	 * Converts a total number of minutes to scheduling decimal format.
+	 * For example, 90 minutes becomes 1.30 (1 hour and 30 minutes).
+	 */
 	private toSchedulingDecimal(totalMins: number): number | null {
 		if (!this.validateTime(totalMins)) {
 			return null;
 		}
 		const hours = Math.floor(totalMins / 60);
-		const leftover = totalMins % 60;
-		const leftoverStr = leftover < 10 ? `0${leftover}` : `${leftover}`;
-		return parseFloat(`${hours}.${leftoverStr}`);
+		const minutes = totalMins % 60;
+		return Number((hours + minutes / 100).toFixed(2));
 	}
 
+	/**
+	 * Normalises a decimal time value by assuming that the digits after the decimal
+	 * point represent minutes (e.g. 1.75 is 1 hour and 75 minutes, which normalises to 2.15).
+	 */
+	private normaliseDecimalTime(decimalTime: number): number {
+		const wholeHours = Math.floor(decimalTime);
+		const decimalPart = Number((decimalTime % 1).toFixed(2));
+		const minutes = Math.round(decimalPart * 100);
+
+		if (minutes >= 60) {
+			const extraHours = Math.floor(minutes / 60);
+			const remainingMinutes = minutes % 60;
+			return Number((wholeHours + extraHours + remainingMinutes / 100).toFixed(2));
+		}
+
+		return Number(decimalTime.toFixed(2));
+	}
+
+	/**
+	 * Attempts to parse the input as a decimal time.
+	 * Handles cases like "1.5", "0.75 hours", ".5", "2.50 hours" etc.
+	 */
 	private parseDecimalHours(timeString: string): number | null {
-		const regex = new RegExp(/^(\d*\.?\d+)\s*(?:hour|hr)?s?$/i);
+		// Check for an exact decimal with two digits.
+		const exactDecimalRegex = /^(\d+\.\d{2})$/;
+		const exactMatch = exactDecimalRegex.exec(timeString);
+		if (exactMatch) {
+			const value = parseFloat(exactMatch[1]);
+			const normalised = this.normaliseDecimalTime(value);
+			const hours = Math.floor(normalised);
+			const minutes = Math.round((normalised - hours) * 100);
+			const totalMinutes = hours * 60 + minutes;
+			return this.validateTime(totalMinutes) ? normalised : null;
+		}
+
+		// Then match numbers with an optional "hour" or "hr" suffix.
+		const regex = /^(\d*\.?\d+)\s*(?:hour|hr)?s?$/i;
 		const match = regex.exec(timeString);
 		if (!match) return null;
 
-		const rawFloat = parseFloat(match[1]);
-		const wholeHours = Math.floor(rawFloat);
-		const leftoverDec = rawFloat - wholeHours;
-		const leftoverMins = Math.round(leftoverDec * 100);
-
-		return this.toSchedulingDecimal(wholeHours * 60 + leftoverMins);
+		const rawValue = parseFloat(match[1]);
+		const normalised = this.normaliseDecimalTime(rawValue);
+		const hours = Math.floor(normalised);
+		const minutes = Math.round((normalised - hours) * 100);
+		const totalMinutes = hours * 60 + minutes;
+		return this.validateTime(totalMinutes) ? normalised : null;
 	}
 
+	/**
+	 * Parses input strings that explicitly specify hours and minutes.
+	 * Examples: "2 hours 50 minutes", "1 hr, 45 min", "2hours30minutes", etc.
+	 */
 	private parseHoursAndMinutes(timeString: string): number | null {
-		const hoursRegex = new RegExp(/(\d+)\s*(?:hour|hr)s?/i);
-		const minutesRegex = new RegExp(/(\d+)\s*(?:minute|min)s?/i);
+		const hoursRegex = /(\d+)\s*(?:hour|hr)s?/i;
+		const minutesRegex = /(\d+)\s*(?:minute|min)s?/i;
 
 		const hoursMatch = hoursRegex.exec(timeString);
 		const minutesMatch = minutesRegex.exec(timeString);
@@ -48,8 +90,32 @@ export class TimeParser {
 		return this.toSchedulingDecimal(hours * 60 + minutes);
 	}
 
+	/**
+	 * Fallback method: attempts to interpret the raw input as minutes.
+	 * For example, if the input is "30.00" (likely intended as 30 minutes),
+	 * then convert it to scheduling decimal (0.30).
+	 */
+	private parseAsMinutes(timeString: string): number | null {
+		const value = parseFloat(timeString);
+		if (!isNaN(value)) {
+			// Check if the value, when treated as minutes, falls within the allowed range.
+			return this.toSchedulingDecimal(value);
+		}
+		return null;
+	}
+
+	/**
+	 * Public parse method.
+	 * Returns a string in scheduling decimal format (e.g. "1.30") or null if invalid.
+	 */
 	public parse(timeString: string): number | null {
 		timeString = timeString.trim();
-		return this.parseDecimalHours(timeString) ?? this.parseHoursAndMinutes(timeString);
+		// First try the standard parsing methods.
+		let result = this.parseDecimalHours(timeString) ?? this.parseHoursAndMinutes(timeString);
+		// If no valid result is found, fall back to treating the input as minutes.
+		if (result === null) {
+			result = this.parseAsMinutes(timeString);
+		}
+		return result ?? null;
 	}
 }

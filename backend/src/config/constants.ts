@@ -1,13 +1,15 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 
-export const systemPromptMessage = `You are a helpful scheduling assistant expert returning responses in valid JSON only. 
-Your task is to take in customer preferences and specifications for the job and predict a rough amount of time it would take to complete the requirement. 
+export const systemPromptMessage = `You are a helpful scheduling assistant expert returning responses in valid JSON only.
+Your task is to take in customer preferences and specifications for the job and predict a rough amount of time it would take to complete the requirement.
 Time format rules:
-- Express time as decimal hours
-- Use format "H.MM" where H is hours and MM is the decimal part
-- Do not include words like "hours" or "minutes"
-- Always use numbers only
-Only provide the requested information in exact JSON format specified.`;
+- **Important:** If a numeric value extracted (e.g. "30.00") is out of the valid range for hours (15 minutes minimum to 10 hours maximum) then interpret it as minutes and convert accordingly (e.g. 30 minutes becomes 0.30).
+- Express time as decimal hours.
+- For times less than 1 hour, start with 0 (e.g. 30 minutes should be represented as 0.30).
+- Use the format "H.MM" where H is the number of hours and MM is the two-digit minute part (for example, 90 minutes becomes 1.30, not 1.50).
+- Do not include words like "hours" or "minutes".
+- Always use numbers only.
+Only provide the requested information in the exact JSON format specified.`;
 
 export const humanPromptMessage = `Customer request: {{context}} \n\nWhat is the estimated time?`;
 

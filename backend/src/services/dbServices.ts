@@ -41,15 +41,18 @@ export async function createUser(createUserParams: CreateUserParams): Promise<Us
 		calendarId,
 	} = createUserParams;
 
-	// Try to get vector collection, but don't let it block user creation
-	try {
-		const vectorCollection = await getChromaCollection(vectorCollectionName);
-		logger.debug(`Vector collection: ${JSON.stringify(vectorCollection)}`);
-	} catch (collectionError) {
-		logger.error(`Error getting vector collection: ${collectionError.message}`);
-		indexDocuments();
-		logger.info(`Handling unexistent vector collection - indexing in background`);
-	}
+	// Move vector collection check to background - fire and forget
+	setImmediate(async () => {
+		try {
+			const vectorCollection = await getChromaCollection(vectorCollectionName);
+			logger.debug(`Vector collection: ${JSON.stringify(vectorCollection)}`);
+		} catch (collectionError) {
+			logger.error(`Error getting vector collection: ${collectionError.message}`);
+			await indexDocuments().catch((err) => logger.error(`Background indexing failed: ${err.message}`));
+			logger.info('Handling unexistent vector collection - indexing in background');
+		}
+	});
+
 	return await User.create({
 		username,
 		password,

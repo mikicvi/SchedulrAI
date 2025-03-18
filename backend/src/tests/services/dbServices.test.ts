@@ -67,8 +67,12 @@ describe('Database Services', () => {
 		let user;
 
 		beforeEach(() => {
-			// Reset mocks before each test
+			jest.useFakeTimers();
 			jest.clearAllMocks();
+		});
+
+		afterEach(() => {
+			jest.useRealTimers();
 		});
 
 		beforeAll(async () => {
@@ -90,6 +94,10 @@ describe('Database Services', () => {
 			});
 
 			expect(newUser).toBeDefined();
+
+			// Run all pending timers and promises
+			await jest.runAllTimersAsync();
+
 			expect(getChromaCollection).toHaveBeenCalled();
 			expect(indexDocuments).not.toHaveBeenCalled();
 			expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Vector collection:'));
@@ -98,6 +106,7 @@ describe('Database Services', () => {
 		it('should create a user and handle missing vector collection', async () => {
 			// Mock failed vector collection retrieval
 			(getChromaCollection as jest.Mock).mockRejectedValueOnce(new Error('Collection not found'));
+			(indexDocuments as jest.Mock).mockResolvedValueOnce(true);
 
 			const newUser = await createUser({
 				username: 'novectoruser',
@@ -106,6 +115,10 @@ describe('Database Services', () => {
 			});
 
 			expect(newUser).toBeDefined();
+
+			// Run all pending timers and promises
+			await jest.runAllTimersAsync();
+
 			expect(getChromaCollection).toHaveBeenCalled();
 			expect(indexDocuments).toHaveBeenCalled();
 			expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Error getting vector collection'));

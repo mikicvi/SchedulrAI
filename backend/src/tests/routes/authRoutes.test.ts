@@ -352,6 +352,40 @@ describe('Authentication Routes', () => {
 			});
 		});
 
+		it('should handle Google User creation when family name or given name is missing', async () => {
+			const mockGoogleProfile = {
+				id: 'google123',
+				emails: [{ value: 'noNames@gmail.com' }],
+				name: {
+					givenName: null,
+					familyName: null,
+				},
+			};
+
+			const newUser = {
+				...mockUser,
+				googleId: mockGoogleProfile.id,
+				googleAccessToken: mockGoogleTokens.accessToken,
+				googleRefreshToken: mockGoogleTokens.refreshToken,
+			};
+
+			(getUserByGoogleIdOrEmail as jest.Mock).mockResolvedValue(null);
+			(createUser as jest.Mock).mockResolvedValue(newUser);
+
+			await new Promise<void>((resolve) => {
+				(passport as any)._strategies.google._verify(
+					mockGoogleTokens.accessToken,
+					mockGoogleTokens.refreshToken,
+					mockGoogleProfile,
+					(err: Error, user: any) => {
+						expect(err).toBeNull();
+						expect(user).toEqual(newUser);
+						resolve();
+					}
+				);
+			});
+		});
+
 		it('should handle successful Google authentication for existing user', async () => {
 			const existingUser = {
 				...mockUser,

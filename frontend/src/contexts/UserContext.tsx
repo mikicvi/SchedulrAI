@@ -24,6 +24,7 @@ interface User {
 	googleUser: boolean;
 	calendarId: any;
 	initials: string;
+	googleId?: string;
 }
 interface UserContextType {
 	user: User | null;
@@ -72,25 +73,21 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 				if (!mounted) return;
 
 				if (response.ok) {
-					const data = await response.json();
-					const isGoogleUser = !!data.user.googleId;
+					const { user: userData } = (await response.json()) as {
+						user: Omit<User, 'googleUser' | 'initials'>;
+					};
+					const firstName = userData.firstName ?? 'Not set';
+					const lastName = userData.lastName ?? 'Not set';
+					const initials = `${firstName[0]}${lastName[0]}`.toUpperCase() || 'U';
 
 					setIsAuthenticated(true);
-					if (data.user) {
-						setUser({
-							id: data.user.id,
-							username: data.user.username,
-							email: data.user.email,
-							firstName: data.user.firstName,
-							lastName: data.user.lastName,
-							createdAt: data.user.createdAt,
-							updatedAt: data.user.updatedAt,
-							userSettings: data.user.userSettings,
-							googleUser: isGoogleUser,
-							calendarId: data.user.calendarId,
-							initials: data.user.firstName[0] + data.user.lastName[0],
-						});
-					}
+					setUser({
+						...userData,
+						firstName,
+						lastName,
+						googleUser: !!userData.googleId,
+						initials,
+					});
 				} else {
 					setIsAuthenticated(false);
 					setUser(null);

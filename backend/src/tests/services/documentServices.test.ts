@@ -57,7 +57,7 @@ describe('Document Indexing Workflow', () => {
 			heartbeat: jest.fn(),
 			getCollection: jest.fn().mockResolvedValue(mockCollection),
 			createCollection: jest.fn().mockResolvedValue(mockCollection),
-			deleteCollection: jest.fn(),
+			deleteCollection: jest.fn().mockResolvedValue(void 0),
 		}));
 	});
 
@@ -71,6 +71,7 @@ describe('Document Indexing Workflow', () => {
 		(ChromaClient as jest.Mock).mockImplementation(() => ({
 			getCollection: jest.fn().mockResolvedValue(mockCollection),
 			createCollection: jest.fn().mockResolvedValue(mockCollection),
+			deleteCollection: jest.fn().mockResolvedValue(void 0),
 		}));
 
 		await indexDocuments();
@@ -92,6 +93,7 @@ describe('Document Indexing Workflow', () => {
 
 		(ChromaClient as jest.Mock).mockImplementation(() => ({
 			createCollection: jest.fn().mockResolvedValue(mockCollection),
+			deleteCollection: jest.fn().mockResolvedValue(void 0),
 		}));
 
 		await expect(indexDocuments()).rejects.toThrow('Directory read failed');
@@ -107,6 +109,7 @@ describe('Document Indexing Workflow', () => {
 		(ChromaClient as jest.Mock).mockImplementation(() => ({
 			getCollection: jest.fn().mockResolvedValue(mockCollection),
 			createCollection: jest.fn().mockResolvedValue(mockCollection),
+			deleteCollection: jest.fn().mockResolvedValue(void 0),
 		}));
 
 		await expect(indexDocuments()).rejects.toThrow('Storage failed');

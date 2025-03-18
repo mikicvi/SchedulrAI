@@ -39,9 +39,12 @@ export async function getChromaCollection(collectionName: string) {
 }
 
 export async function createChromaCollection(collectionName: string) {
+	const chromaClient = getChromaClient();
+	const embeddingFunction = getEmbeddingFunction();
+
 	try {
-		const chromaClient = getChromaClient();
-		const embeddingFunction = getEmbeddingFunction();
+		// Will silently continue if collection doesn't exist
+		await resetChromaCollection(collectionName);
 
 		return await chromaClient.createCollection({
 			name: collectionName,
@@ -59,7 +62,12 @@ export async function resetChromaCollection(collectionName: string) {
 		await chromaClient.deleteCollection({ name: collectionName });
 		logger.info(`Collection ${collectionName} deleted successfully`);
 		return { success: true };
-	} catch (error) {
+	} catch (error: any) {
+		// Ignore if collection doesn't exist
+		if (error.message?.includes('does not exist')) {
+			logger.info(`Collection ${collectionName} does not exist, skipping deletion`);
+			return { success: true };
+		}
 		logger.error('Error resetting Chroma collection:', error);
 		throw error;
 	}

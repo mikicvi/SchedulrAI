@@ -24,17 +24,31 @@ export async function getChromaStatus() {
 }
 
 export async function getChromaCollection(collectionName: string) {
-	try {
-		const chromaClient = getChromaClient();
-		const embeddingFunction = getEmbeddingFunction();
+	const chromaClient = getChromaClient();
+	const embeddingFunction = getEmbeddingFunction();
 
-		// Always try to get or create collection
-		return await chromaClient.getOrCreateCollection({
+	try {
+		return await chromaClient.getCollection({
 			name: collectionName,
 			embeddingFunction: embeddingFunction,
 		});
 	} catch (error) {
 		logger.error('Error getting Chroma collection:', error);
+		throw error;
+	}
+}
+
+export async function createChromaCollection(collectionName: string) {
+	try {
+		const chromaClient = getChromaClient();
+		const embeddingFunction = getEmbeddingFunction();
+
+		return await chromaClient.createCollection({
+			name: collectionName,
+			embeddingFunction: embeddingFunction,
+		});
+	} catch (error) {
+		logger.error('Error creating Chroma collection:', error);
 		throw error;
 	}
 }

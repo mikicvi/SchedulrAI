@@ -140,5 +140,23 @@ describe('chromaServices', () => {
 			mockDeleteCollection.mockRejectedValue(new Error('Deletion failed'));
 			await expect(resetChromaCollection('test')).rejects.toThrow('Deletion failed');
 		});
+
+		it('should handle non-existent collection gracefully', async () => {
+			const collectionName = 'nonExistentCollection';
+			const nonExistentError = new Error('Collection nonExistentCollection does not exist');
+			mockDeleteCollection.mockRejectedValue(nonExistentError);
+
+			const result = await resetChromaCollection(collectionName);
+
+			expect(ChromaClient).toHaveBeenCalledWith({
+				path: 'http://localhost:8000',
+				auth: {
+					provider: 'basic',
+					credentials: 'test-credentials',
+				},
+			});
+			expect(mockDeleteCollection).toHaveBeenCalledWith({ name: collectionName });
+			expect(result).toEqual({ success: true });
+		});
 	});
 });

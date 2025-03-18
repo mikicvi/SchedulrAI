@@ -71,9 +71,16 @@ passport.use(
 					return done(null, updatedUsers[0]);
 				}
 
-				const constructedUsername = `${profile.name.givenName.toLowerCase()}${profile.name.familyName
-					.charAt(0)
-					.toLowerCase()}${profile.id.slice(-2)}`;
+				/**
+				 * Constructs a unique username by combining:
+				 * - User's given name (lowercase) or 'user' if not available
+				 * - First character of family name (lowercase) or 'x' if not available
+				 * - Last 2 characters of the profile ID
+				 */
+				const constructedUsername = `${profile.name?.givenName?.toLowerCase() || 'user'}${
+					profile.name?.familyName?.charAt(0)?.toLowerCase() || 'x'
+				}${profile.id.slice(-2)}`;
+
 				// Create new user
 				const newUserObj = {
 					username: constructedUsername,

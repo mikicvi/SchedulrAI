@@ -1,10 +1,16 @@
-import { getChromaStatus, getChromaCollection, resetChromaCollection } from '../../services/chromaServices';
+import {
+	getChromaStatus,
+	getChromaCollection,
+	resetChromaCollection,
+	createChromaCollection,
+} from '../../services/chromaServices';
 import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
 
 jest.mock('chromadb', () => ({
 	ChromaClient: jest.fn().mockImplementation(() => ({
 		heartbeat: jest.fn(),
-		getOrCreateCollection: jest.fn(),
+		getCollection: jest.fn(),
+		createCollection: jest.fn(),
 		deleteCollection: jest.fn(),
 	})),
 	OllamaEmbeddingFunction: jest.fn(),
@@ -12,7 +18,8 @@ jest.mock('chromadb', () => ({
 
 describe('chromaServices', () => {
 	const mockHeartbeat = jest.fn();
-	const mockGetOrCreateCollection = jest.fn();
+	const mockGetCollection = jest.fn();
+	const mockCreateCollection = jest.fn();
 	const mockDeleteCollection = jest.fn();
 
 	beforeEach(() => {
@@ -26,7 +33,8 @@ describe('chromaServices', () => {
 
 		(ChromaClient as jest.Mock).mockReturnValue({
 			heartbeat: mockHeartbeat,
-			getOrCreateCollection: mockGetOrCreateCollection,
+			getCollection: mockGetCollection,
+			createCollection: mockCreateCollection,
 			deleteCollection: mockDeleteCollection,
 		});
 	});
@@ -56,10 +64,10 @@ describe('chromaServices', () => {
 	});
 
 	describe('getChromaCollection', () => {
-		it('should call ChromaClient.getOrCreateCollection with correct parameters', async () => {
+		it('should get existing collection', async () => {
 			const collectionName = 'testCollection';
 			const mockResponse = { name: collectionName };
-			mockGetOrCreateCollection.mockResolvedValue(mockResponse);
+			mockGetCollection.mockResolvedValue(mockResponse);
 
 			const result = await getChromaCollection(collectionName);
 
@@ -70,20 +78,44 @@ describe('chromaServices', () => {
 					credentials: 'test-credentials',
 				},
 			});
-			expect(OllamaEmbeddingFunction).toHaveBeenCalledWith({
-				url: 'http://localhost:11434/api/embeddings',
-				model: 'test-model',
-			});
-			expect(mockGetOrCreateCollection).toHaveBeenCalledWith({
+			expect(mockGetCollection).toHaveBeenCalledWith({
 				name: collectionName,
 				embeddingFunction: expect.any(OllamaEmbeddingFunction),
 			});
 			expect(result).toEqual(mockResponse);
 		});
 
-		it('should handle collection creation errors', async () => {
-			mockGetOrCreateCollection.mockRejectedValue(new Error('Collection creation failed'));
-			await expect(getChromaCollection('test')).rejects.toThrow('Collection creation failed');
+		it('should handle collection errors', async () => {
+			mockGetCollection.mockRejectedValue(new Error('Collection error'));
+			await expect(getChromaCollection('test')).rejects.toThrow('Collection error');
+		});
+	});
+
+	describe('createChromaCollection', () => {
+		it('should create a new collection', async () => {
+			const collectionName = 'testCollection';
+			const mockResponse = { name: collectionName };
+			mockCreateCollection.mockResolvedValue(mockResponse);
+
+			const result = await createChromaCollection(collectionName);
+
+			expect(ChromaClient).toHaveBeenCalledWith({
+				path: 'http://localhost:8000',
+				auth: {
+					provider: 'basic',
+					credentials: 'test-credentials',
+				},
+			});
+			expect(mockCreateCollection).toHaveBeenCalledWith({
+				name: collectionName,
+				embeddingFunction: expect.any(OllamaEmbeddingFunction),
+			});
+			expect(result).toEqual(mockResponse);
+		});
+
+		it('should handle creation errors', async () => {
+			mockCreateCollection.mockRejectedValue(new Error('Creation failed'));
+			await expect(createChromaCollection('test')).rejects.toThrow('Creation failed');
 		});
 	});
 

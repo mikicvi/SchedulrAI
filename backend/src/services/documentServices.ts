@@ -3,7 +3,7 @@ import path from 'path';
 import { MarkdownTextSplitter, CharacterTextSplitter } from 'langchain/text_splitter';
 import logger from '../utils/logger';
 import { vectorCollectionName } from '../config/constants';
-import { getChromaCollection } from './chromaServices';
+import { createChromaCollection, getChromaCollection } from './chromaServices';
 
 const documentsPath = process.env.DOCUMENTS_PATH || path.resolve(process.cwd(), 'documents');
 
@@ -44,7 +44,7 @@ async function splitDocuments(
 
 async function storeEmbeddings(documents: { name: string; chunks: string[] }[]): Promise<void> {
 	try {
-		// Get or create collection using the shared service
+		// Get collection using the shared service
 		const collection = await getChromaCollection(vectorCollectionName);
 
 		// Get all existing IDs
@@ -74,6 +74,8 @@ async function storeEmbeddings(documents: { name: string; chunks: string[] }[]):
 
 export async function indexDocuments(): Promise<void> {
 	try {
+		// Create collection if it doesn't exist
+		await createChromaCollection(vectorCollectionName);
 		const documents = await loadDocuments(documentsPath);
 		const chunks = await splitDocuments(documents);
 		await storeEmbeddings(chunks);

@@ -11,8 +11,6 @@ COPY frontend/tailwind.config.js ./
 COPY frontend/postcss.config.js ./
 COPY frontend/vite.config.ts ./
 
-
-
 # Copy source code
 COPY frontend/src ./src
 COPY frontend/public ./public
@@ -32,13 +30,14 @@ WORKDIR /usr/share/nginx/html
 # Copy built app
 COPY --from=build /app/dist .
 
-# This script will create env.js dynamically at container startup
-COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
 # Serve using nginx
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
+# Create a shell script to generate env.js
+RUN echo '#!/bin/sh' > /docker-entrypoint.sh
+RUN echo 'echo "window.env = { VITE_API_URL: \"$VITE_API_URL\" };" > /usr/share/nginx/html/env.js' >> /docker-entrypoint.sh
+RUN echo 'exec nginx -g "daemon off;"' >> /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 EXPOSE 80
-# Inline shell command to inject env.js before starting nginx
-CMD sh -c 'echo "window.env = { VITE_API_URL: \"${VITE_API_URL}\" };" > /usr/share/nginx/html/env.js && exec nginx -g "daemon off;"'
+CMD ["/docker-entrypoint.sh"]

@@ -8,6 +8,7 @@ import { GoogleGLogo } from './ui/google-g-logo';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '@/hooks/use-Api';
+import { API_BASE_URL } from '@/config/config';
 
 const Register = () => {
 	const [firstName, setFirstName] = useState('');
@@ -82,7 +83,8 @@ const Register = () => {
 	};
 
 	const handleGoogleAuth = () => {
-		window.location.href = 'http://localhost:3000/api/google'; // Will always prompt for consent
+		const googleAuthUrl = API_BASE_URL + '/google';
+		window.location.href = googleAuthUrl;
 	};
 
 	return (

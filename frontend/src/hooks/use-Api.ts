@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/config/config';
 import { useState, useCallback, useRef } from 'react';
 
 export const useApi = () => {
@@ -17,7 +18,9 @@ export const useApi = () => {
 		}
 
 		// Create new request
-		csrfPromiseRef.current = fetch('http://localhost:3000/api/csrfToken', {
+		const csrfUrl = API_BASE_URL + '/csrfToken';
+
+		csrfPromiseRef.current = fetch(csrfUrl, {
 			credentials: 'include',
 		})
 			.then((response) => response.json())

@@ -42,6 +42,8 @@ services:
             dockerfile: Dockerfile.frontend
         ports:
             - '80:80'
+        environment:
+            - VITE_API_URL=${VITE_API_URL}
         restart: unless-stopped
         container_name: frontend
         networks:

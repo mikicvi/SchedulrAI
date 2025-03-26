@@ -1,9 +1,10 @@
 import { Event } from '@/types/calendar';
 import { useApi } from '@/hooks/use-Api';
+import { API_BASE_URL } from '@/config/config';
 
 export const useCalendarService = () => {
 	const { apiFetch } = useApi();
-	const baseUrl = 'http://localhost:3000/api';
+	const baseUrl = API_BASE_URL;
 
 	const formatEventForBackend = (event: Omit<Event, 'id'>) => ({
 		...event,

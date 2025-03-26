@@ -45,6 +45,9 @@ const initializeApp = async () => {
 
 	const baseApiRoute = '/api';
 
+	// Add before other middleware configurations
+	app.set('trust proxy', 1);
+
 	// Rate limiting middleware
 	const rateLimiter = rateLimit({
 		windowMs: 10 * 60 * 1000, // 10 minutes

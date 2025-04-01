@@ -25,17 +25,23 @@ export function UpcomingEventAlert({
 	const location = useLocation();
 
 	const handleViewEvent = useCallback(() => {
-		navigate('/calendar', { state: { autoViewEventId: eventId } });
+		// Use state object instead of search params to avoid URL changes
+		navigate('/calendar', { state: { viewEventId: eventId }, replace: true });
 	}, [navigate, eventId]);
 
-	// Auto-view if we're on the calendar page
+	// Only auto-view if we're on the calendar page and this is the first render
 	useEffect(() => {
-		if (location.pathname === '/calendar') {
+		let mounted = true;
+		if (location.pathname === '/calendar' && mounted) {
 			handleViewEvent();
 			// Dismiss after a delay to ensure the event is shown
-			setTimeout(onDismiss, 1000);
+			const timer = setTimeout(onDismiss, 1000);
+			return () => {
+				mounted = false;
+				clearTimeout(timer);
+			};
 		}
-	}, [location.pathname, handleViewEvent, onDismiss]);
+	}, []);
 
 	return (
 		<Alert className={`mb-4 ${getNotificationColorByType('event', importance)}`}>

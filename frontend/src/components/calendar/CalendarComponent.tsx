@@ -256,18 +256,29 @@ export default function CalendarComponent() {
 			if (event) {
 				setSelectedEvent(event);
 				setShowEventDialog(true);
-				// Clean up the URL and state
-				window.history.replaceState(null, '', '/calendar');
+				// Clean up by replacing the current history entry
+				navigate('/calendar', { replace: true });
 			}
 		}
-	}, [location.search, location.state, events]);
+	}, [events]); // Only depend on events array to prevent loops
 
+	// Separate effect for initial data fetch
 	useEffect(() => {
-		fetchEvents();
-		// If user has Google account, sync on initial load
-		if (user?.googleUser) {
-			handleSyncCalendar();
-		}
+		let mounted = true;
+
+		const init = async () => {
+			await fetchEvents();
+			// If user has Google account, sync on initial load
+			if (mounted && user?.googleUser) {
+				await handleSyncCalendar();
+			}
+		};
+
+		init();
+
+		return () => {
+			mounted = false;
+		};
 	}, [user?.calendarId]);
 
 	const CustomToolbar: React.FC<ToolbarProps<Event>> = (props) => {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/config/config';
 
 const usePipelineStatus = () => {
 	const [status, setStatus] = useState<string>('');
@@ -9,7 +10,8 @@ const usePipelineStatus = () => {
 		const maxRetries = 3;
 
 		const connectSSE = () => {
-			eventSource = new EventSource('http://localhost:3000/api/status', { withCredentials: true });
+			const eventSourceUrl = API_BASE_URL + '/status';
+			eventSource = new EventSource(eventSourceUrl, { withCredentials: true });
 
 			eventSource.onmessage = (event) => {
 				try {

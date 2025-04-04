@@ -7,6 +7,7 @@ import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { GoogleGLogo } from './ui/google-g-logo';
 import { toast } from '@/hooks/use-toast';
 import { useApi } from '@/hooks/use-Api';
+import { API_BASE_URL } from '@/config/config';
 
 const LoginForm = () => {
 	const [username, setUsername] = useState('');
@@ -56,7 +57,8 @@ const LoginForm = () => {
 	};
 
 	const handleGoogleAuth = () => {
-		window.location.href = 'http://localhost:3000/api/google/callback';
+		const googleAuthUrl = API_BASE_URL + '/google/callback';
+		window.location.href = googleAuthUrl;
 	};
 
 	return (

@@ -187,3 +187,20 @@ To update all dependencies:
 ```sh
 npm run update:deps
 ```
+
+
+## 📸 Dev Preview
+<img width="1369" alt="Screenshot 2025-04-04 at 21 06 40" src="https://github.com/user-attachments/assets/fdffe5a2-97c9-424e-8017-e9649111108d" />
+<img width="1369" alt="Screenshot 2025-04-04 at 21 07 34" src="https://github.com/user-attachments/assets/d7980820-6c2d-446c-8514-106ba6a9eb12" />
+<img width="1369" alt="Screenshot 2025-04-04 at 21 16 25" src="https://github.com/user-attachments/assets/05ec5181-81a0-4620-be14-94ebbc1f9318" />
+<img width="1369" alt="Screenshot 2025-04-04 at 21 17 35" src="https://github.com/user-attachments/assets/0e8f2f57-6222-4b60-8a23-3a494389dfee" />
+<img width="1369" alt="Screenshot 2025-04-04 at 21 07 52" src="https://github.com/user-attachments/assets/39c7f7a7-3a90-4b0d-acc6-2cc94499ad8d" />
+<img width="1369" alt="Screenshot 2025-04-04 at 21 12 29" src="https://github.com/user-attachments/assets/b16dde00-333e-43d3-9697-96570e7ba3b4" />
+<img width="1369" alt="Screenshot 2025-04-04 at 21 12 37" src="https://github.com/user-attachments/assets/ce6ffa35-0b81-478c-9670-65b7671ca002" />
+<img width="1369" alt="Screenshot 2025-04-04 at 21 18 40" src="https://github.com/user-attachments/assets/a0f78842-6015-4fcf-8b4b-1ed82595d2a1" />
+<img width="1369" alt="Screenshot 2025-04-04 at 21 18 46" src="https://github.com/user-attachments/assets/4f9daca3-b5b0-47dc-85cd-277b7502d9ae" />
+<img width="1369" alt="Screenshot 2025-04-04 at 21 08 06" src="https://github.com/user-attachments/assets/f1ca38d5-e5d3-4011-aa1b-74ddbf18a7bb" />
+<img width="1369" alt="Screenshot 2025-04-04 at 21 08 16" src="https://github.com/user-attachments/assets/d6ee5c43-8b3b-408b-9e7d-d362aab6b4db" />
+<img width="1369" alt="Screenshot 2025-04-04 at 21 08 27" src="https://github.com/user-attachments/assets/2a0caecf-7ad0-4d6c-bd0d-bba4cec01a25" />
+
+

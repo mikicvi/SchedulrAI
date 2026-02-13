@@ -152,7 +152,7 @@ router.get('/kb/listDocuments', ensureAuthenticated, async (req, res) => {
 // Add new route for document deletion
 router.delete('/kb/document/:filename', ensureAuthenticated, async (req, res) => {
 	try {
-		const { filename } = req.params;
+		const { filename } = req.params as { filename: string };
 		const user = await getUserById(req.user.id);
 
 		if (!user) {

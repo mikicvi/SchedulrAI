@@ -1,4 +1,5 @@
-import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
+import { ChromaClient } from 'chromadb';
+import { OllamaEmbeddingFunction } from '@chroma-core/ollama';
 import logger from '../utils/logger';
 
 // Create a singleton ChromaClient

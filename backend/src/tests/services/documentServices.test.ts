@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
+import { ChromaClient } from 'chromadb';
 import { CharacterTextSplitter } from 'langchain/text_splitter';
 import logger from '../../utils/logger';
 import { createDocument, deleteDocument, indexDocuments, listDocuments } from '../../services/documentServices';
@@ -159,7 +159,7 @@ describe('Document Indexing Workflow', () => {
 			expect(fs.writeFileSync).toHaveBeenCalledWith(
 				expect.stringContaining('test-title.md'),
 				'test content',
-				'utf-8'
+				'utf-8',
 			);
 		});
 

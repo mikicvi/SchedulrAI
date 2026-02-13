@@ -19,6 +19,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@chroma-core/ollama": "^0.1.8",
     "@googleapis/calendar": "^9.8.0",
     "@googleapis/gmail": "^12.0.0",
     "@langchain/community": "^0.3.35",
@@ -27,7 +28,7 @@
     "@xenova/transformers": "^2.17.2",
     "axios": "^1.13.2",
     "bcrypt": "^5.1.1",
-    "chromadb": "^2.0.1",
+    "chromadb": "^3.3.0",
     "chromadb-default-embed": "^2.14.0",
     "connect-sqlite3": "^0.9.15",
     "cors": "^2.8.5",
@@ -44,6 +45,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
+    "qs": "^6.14.2",
     "sequelize": "^6.37.6",
     "sqlite3": "^5.1.7",
     "winston": "^3.17.0"

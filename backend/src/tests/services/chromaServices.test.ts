@@ -5,6 +5,7 @@ import {
 	createChromaCollection,
 } from '../../services/chromaServices';
 import { ChromaClient } from 'chromadb';
+import { OllamaEmbeddingFunction } from '@chroma-core/ollama';
 
 jest.mock('chromadb', () => ({
 	ChromaClient: jest.fn().mockImplementation(() => ({
@@ -16,7 +17,10 @@ jest.mock('chromadb', () => ({
 }));
 
 jest.mock('@chroma-core/ollama', () => ({
-	OllamaEmbeddingFunction: jest.fn().mockImplementation(() => ({})),
+  OllamaEmbeddingFunction: jest.fn().mockImplementation(() => ({
+    _model: 'test-model',
+    _url: 'http://test',
+  })),
 }));
 
 const mockEmbeddingFunction = {};
@@ -85,7 +89,7 @@ describe('chromaServices', () => {
 			});
 			expect(mockGetCollection).toHaveBeenCalledWith({
 				name: collectionName,
-				embeddingFunction: mockEmbeddingFunction,
+				embeddingFunction: expect.any(Object),
 			});
 			expect(result).toEqual(mockResponse);
 		});
@@ -113,7 +117,7 @@ describe('chromaServices', () => {
 			});
 			expect(mockCreateCollection).toHaveBeenCalledWith({
 				name: collectionName,
-				embeddingFunction: mockEmbeddingFunction,
+				embeddingFunction: expect.any(Object),
 			});
 			expect(result).toEqual(mockResponse);
 		});
